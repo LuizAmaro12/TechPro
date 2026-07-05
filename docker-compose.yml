@@ -29,5 +29,20 @@ services:
     ports:
       - "5080:8080"
 
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./frontend:/app
+      # node_modules fica num volume próprio: binários nativos de Linux não
+      # podem se misturar com os instalados no host Windows.
+      - techpro-node-modules:/app/node_modules
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5080
+    ports:
+      - "3000:3000"
+
 volumes:
   techpro-pgdata:
+  techpro-node-modules:
