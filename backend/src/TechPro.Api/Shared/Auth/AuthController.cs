@@ -1,0 +1,126 @@
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+
+namespace TechPro.Api.Shared.Auth;
+
+[ApiController]
+[Route("api/auth")]
+[EnableRateLimiting("auth")]
+public class AuthController(
+    AuthService authService,
+    IValidator<RegistrarRequest> validadorRegistrar,
+    IValidator<LoginRequest> validadorLogin) : ControllerBase
+{
+    private const string NomeCookieRefresh = "techpro_refresh";
+
+    [HttpPost("registrar")]
+    public async Task<IActionResult> Registrar(RegistrarRequest requisicao)
+    {
+        var validacao = await validadorRegistrar.ValidateAsync(requisicao);
+        if (!validacao.IsValid)
+        {
+            return ProblemaDeValidacao(validacao.Errors.Select(e => (e.PropertyName, e.ErrorMessage)));
+        }
+
+        var resultado = await authService.RegistrarAsync(requisicao, TipoCliente.Web);
+        if (resultado.EmailJaCadastrado)
+        {
+            return Problem(
+                title: "Este e-mail já está cadastrado.",
+                statusCode: StatusCodes.Status409Conflict);
+        }
+
+        if (resultado.Tokens is null)
+        {
+            return ProblemaDeValidacao(resultado.Erros.Select(erro => (nameof(requisicao.Senha), erro)));
+        }
+
+        GravarCookieRefresh(resultado.Tokens);
+        return Created("/api/auth/me", resultado.Tokens.Resposta);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequest requisicao)
+    {
+        var validacao = await validadorLogin.ValidateAsync(requisicao);
+        if (!validacao.IsValid)
+        {
+            return ProblemaDeValidacao(validacao.Errors.Select(e => (e.PropertyName, e.ErrorMessage)));
+        }
+
+        var tokens = await authService.LoginAsync(requisicao, TipoCliente.Web);
+        if (tokens is null)
+        {
+            // Mensagem única para e-mail inexistente, senha errada e lockout:
+            // a resposta não pode servir de oráculo de e-mails cadastrados.
+            return Problem(
+                title: "E-mail ou senha inválidos.",
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        GravarCookieRefresh(tokens);
+        return Ok(tokens.Resposta);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh()
+    {
+        var cookie = Request.Cookies[NomeCookieRefresh];
+        var tokens = string.IsNullOrEmpty(cookie) ? null : await authService.RefreshAsync(cookie);
+        if (tokens is null)
+        {
+            RemoverCookieRefresh();
+            return Problem(
+                title: "Sessão expirada. Entre novamente.",
+                statusCode: StatusCodes.Status401Unauthorized);
+        }
+
+        GravarCookieRefresh(tokens);
+        return Ok(tokens.Resposta);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await authService.LogoutAsync(Request.Cookies[NomeCookieRefresh]);
+        RemoverCookieRefresh();
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var perfil = await authService.MeAsync(User);
+        return perfil is null ? NotFound() : Ok(perfil);
+    }
+
+    private IActionResult ProblemaDeValidacao(IEnumerable<(string Campo, string Mensagem)> erros)
+    {
+        foreach (var (campo, mensagem) in erros)
+        {
+            ModelState.AddModelError(campo, mensagem);
+        }
+
+        return ValidationProblem(ModelState);
+    }
+
+    private void GravarCookieRefresh(TokensEmitidos tokens) =>
+        Response.Cookies.Append(NomeCookieRefresh, tokens.RefreshTokenPuro, OpcoesCookie(tokens.RefreshExpiraEm));
+
+    private void RemoverCookieRefresh() =>
+        Response.Cookies.Delete(NomeCookieRefresh, OpcoesCookie(expiraEm: null));
+
+    // Path restrito a /api/auth: o cookie só viaja para refresh/logout, nunca
+    // junto das requisições de dados — o access token em memória cobre essas.
+    private static CookieOptions OpcoesCookie(DateTimeOffset? expiraEm) => new()
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Lax,
+        Path = "/api/auth",
+        Expires = expiraEm,
+    };
+}
