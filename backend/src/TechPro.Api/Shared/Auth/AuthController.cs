@@ -8,6 +8,7 @@ namespace TechPro.Api.Shared.Auth;
 [ApiController]
 [Route("api/auth")]
 [EnableRateLimiting("auth")]
+[Produces("application/json")]
 public class AuthController(
     AuthService authService,
     IValidator<RegistrarRequest> validadorRegistrar,
@@ -16,6 +17,9 @@ public class AuthController(
     private const string NomeCookieRefresh = "techpro_refresh";
 
     [HttpPost("registrar")]
+    [ProducesResponseType<AuthResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Registrar(RegistrarRequest requisicao)
     {
         var validacao = await validadorRegistrar.ValidateAsync(requisicao);
@@ -42,6 +46,9 @@ public class AuthController(
     }
 
     [HttpPost("login")]
+    [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(LoginRequest requisicao)
     {
         var validacao = await validadorLogin.ValidateAsync(requisicao);
@@ -65,6 +72,8 @@ public class AuthController(
     }
 
     [HttpPost("refresh")]
+    [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh()
     {
         var cookie = Request.Cookies[NomeCookieRefresh];
@@ -82,6 +91,7 @@ public class AuthController(
     }
 
     [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout()
     {
         await authService.LogoutAsync(Request.Cookies[NomeCookieRefresh]);
@@ -91,6 +101,9 @@ public class AuthController(
 
     [Authorize]
     [HttpGet("me")]
+    [ProducesResponseType<MeResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Me()
     {
         var perfil = await authService.MeAsync(User);

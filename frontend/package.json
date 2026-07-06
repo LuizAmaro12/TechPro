@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gerar-api": "orval --config orval.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
