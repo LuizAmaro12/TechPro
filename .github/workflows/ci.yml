@@ -1,0 +1,59 @@
+# Pipeline mínimo (seção 14 do doc de stack): lint + build do front-end,
+# build + testes xUnit do back-end, a cada push/PR. Deploys (Vercel/Render)
+# entram nas integrações nativas, fora deste workflow.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: Front-end (lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Checagem de tipos
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+  backend:
+    name: Back-end (build + testes)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore TechPro.slnx
+
+      - name: Build
+        run: dotnet build TechPro.slnx --no-restore --configuration Release
+
+      - name: Testes
+        run: dotnet test TechPro.slnx --no-build --configuration Release
