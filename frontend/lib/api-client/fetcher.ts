@@ -14,6 +14,9 @@ export class ApiError extends Error {
 }
 
 function extrairMensagem(status: number, problema: unknown): string {
+  if (status === 429) {
+    return "Muitas tentativas em sequência. Aguarde um instante e tente de novo.";
+  }
   if (problema && typeof problema === "object") {
     const detalhes = problema as { title?: string; errors?: Record<string, string[]> };
     const primeiroErro = detalhes.errors
