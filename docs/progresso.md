@@ -172,10 +172,15 @@ docker compose up -d --build
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 do produto (docs/fases_MVP.md): módulo de Ordens de Serviço —
-   primeiro uso do `RlsHelper` em tabela de produto (PK UUID +
-   `updated_at`/`deleted_at` desde já, groundwork do offline-first da Fase 2).
-3. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
+2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é o
+   **Catálogo** (módulo 6 — serviços, peças, relação serviço-peça e capacidade
+   por tipo de serviço) — primeiro uso do `RlsHelper` em tabelas de produto.
+   PK identity normal: UUID + `updated_at`/`deleted_at` valem **somente** para
+   o escopo offline do técnico (OS, Kanban, anexos — doc de stack, seção 5).
+3. Na sequência da mesma ordem: Clientes e aparelhos → Agenda/portal de
+   agendamento → OS e Kanban → Estoque com baixa automática → Orçamento e
+   pagamento básico → Comunicação essencial → Dashboard → Onboarding guiado.
+4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
-4. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
+5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
    Resend, Render, Vercel, Sentry.
