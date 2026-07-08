@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Tenancy;
 
@@ -20,6 +21,9 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
 
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Fornecedor> Fornecedores => Set<Fornecedor>();
+    public DbSet<Peca> Pecas => Set<Peca>();
+    public DbSet<Servico> Servicos => Set<Servico>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -83,6 +87,57 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
                 NormalizedName = "ATENDENTE",
                 ConcurrencyStamp = "seed-atendente",
             });
+
+        // --- Catálogo (módulo 6): serviços, peças e fornecedores ----------------
+
+        builder.Entity<Fornecedor>(e =>
+        {
+            e.ToTable("fornecedores");
+            e.Property(x => x.Nome).HasMaxLength(200);
+            e.Property(x => x.Contato).HasMaxLength(200);
+            e.HasIndex(x => x.TenantId);
+        });
+
+        builder.Entity<Peca>(e =>
+        {
+            e.ToTable("pecas");
+            e.Property(x => x.Nome).HasMaxLength(200);
+            e.Property(x => x.Descricao).HasMaxLength(500);
+            e.Property(x => x.CustoUnitario).HasPrecision(10, 2);
+            e.Property(x => x.PrecoVenda).HasPrecision(10, 2);
+            e.HasIndex(x => x.TenantId);
+            // Restrict: fornecedor com peça vinculada não pode sumir (service devolve 409).
+            e.HasOne(x => x.Fornecedor).WithMany().HasForeignKey(x => x.FornecedorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Servico>(e =>
+        {
+            e.ToTable("servicos");
+            e.Property(x => x.Nome).HasMaxLength(200);
+            e.Property(x => x.Categoria).HasMaxLength(100);
+            e.Property(x => x.PrecoBase).HasPrecision(10, 2);
+            e.HasIndex(x => x.TenantId);
+        });
+
+        builder.Entity<ServicoPeca>(e =>
+        {
+            e.ToTable("servico_pecas");
+            e.HasKey(x => new { x.ServicoId, x.PecaId });
+            e.HasIndex(x => x.TenantId);
+            e.HasOne<Servico>().WithMany(s => s.Pecas).HasForeignKey(x => x.ServicoId);
+            // Peça referenciada por serviço não pode ser apagada fisicamente.
+            e.HasOne(x => x.Peca).WithMany().HasForeignKey(x => x.PecaId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<ServicoChecklistItem>(e =>
+        {
+            e.ToTable("servico_checklist_itens");
+            e.Property(x => x.Descricao).HasMaxLength(300);
+            e.HasIndex(x => x.TenantId);
+            e.HasOne<Servico>().WithMany(s => s.Checklist).HasForeignKey(x => x.ServicoId);
+        });
 
         AplicarFiltroDeTenantPorConvencao(builder);
     }
