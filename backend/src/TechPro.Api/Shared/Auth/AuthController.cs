@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using TechPro.Api.Shared.Api;
 
 namespace TechPro.Api.Shared.Auth;
 
@@ -25,7 +26,7 @@ public class AuthController(
         var validacao = await validadorRegistrar.ValidateAsync(requisicao);
         if (!validacao.IsValid)
         {
-            return ProblemaDeValidacao(validacao.Errors.Select(e => (e.PropertyName, e.ErrorMessage)));
+            return this.ProblemaDeValidacao(validacao);
         }
 
         var resultado = await authService.RegistrarAsync(requisicao, TipoCliente.Web);
@@ -38,7 +39,12 @@ public class AuthController(
 
         if (resultado.Tokens is null)
         {
-            return ProblemaDeValidacao(resultado.Erros.Select(erro => (nameof(requisicao.Senha), erro)));
+            foreach (var erro in resultado.Erros)
+            {
+                ModelState.AddModelError(nameof(requisicao.Senha), erro);
+            }
+
+            return ValidationProblem(ModelState);
         }
 
         GravarCookieRefresh(resultado.Tokens);
@@ -54,7 +60,7 @@ public class AuthController(
         var validacao = await validadorLogin.ValidateAsync(requisicao);
         if (!validacao.IsValid)
         {
-            return ProblemaDeValidacao(validacao.Errors.Select(e => (e.PropertyName, e.ErrorMessage)));
+            return this.ProblemaDeValidacao(validacao);
         }
 
         var tokens = await authService.LoginAsync(requisicao, TipoCliente.Web);
@@ -108,16 +114,6 @@ public class AuthController(
     {
         var perfil = await authService.MeAsync(User);
         return perfil is null ? NotFound() : Ok(perfil);
-    }
-
-    private IActionResult ProblemaDeValidacao(IEnumerable<(string Campo, string Mensagem)> erros)
-    {
-        foreach (var (campo, mensagem) in erros)
-        {
-            ModelState.AddModelError(campo, mensagem);
-        }
-
-        return ValidationProblem(ModelState);
     }
 
     private void GravarCookieRefresh(TokensEmitidos tokens) =>
