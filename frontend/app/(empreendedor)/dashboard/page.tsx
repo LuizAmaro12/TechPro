@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useGetApiAuthMe } from "@/lib/api-client/gerado";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
@@ -12,8 +10,7 @@ const ROTULO_PAPEL: Record<string, string> = {
 };
 
 export default function PaginaDashboard() {
-  const { usuario, sair } = useAuth();
-  const router = useRouter();
+  const { usuario } = useAuth();
   const { data: respostaMe } = useGetApiAuthMe();
   const me = respostaMe?.status === 200 ? respostaMe.data : undefined;
 
@@ -21,25 +18,9 @@ export default function PaginaDashboard() {
   const papel = ROTULO_PAPEL[me?.papel ?? usuario?.papel ?? ""] ?? "—";
   const tenantId = me?.tenantId ?? usuario?.tenantId ?? "—";
 
-  async function aoSair() {
-    await sair();
-    router.replace("/login");
-  }
-
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
-      <header className="flex items-center justify-between">
-        <span className="text-lg font-bold text-[#14162B]">TechPro</span>
-        <Button
-          variant="ghost"
-          onClick={aoSair}
-          className="text-[#6B7280] hover:text-[#14162B]"
-        >
-          Sair
-        </Button>
-      </header>
-
-      <section className="mt-12">
+      <section>
         <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
           Visão geral
         </p>
@@ -47,8 +28,8 @@ export default function PaginaDashboard() {
           Olá, {me?.nome ?? usuario?.nome ?? "..."}
         </h1>
         <p className="mt-1 text-sm text-[#6B7280]">
-          Sua conta está pronta. Os módulos de ordens de serviço, estoque e
-          financeiro chegam nas próximas fases.
+          Comece cadastrando seus serviços e peças no catálogo — as ordens de
+          serviço e o financeiro chegam nas próximas etapas.
         </p>
 
         {/* Assinatura visual do guia de referência: card branco limpo sobre
