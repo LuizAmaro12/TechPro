@@ -24,6 +24,105 @@ import type {
 } from '@tanstack/react-query';
 
 import { apiFetch } from '../fetcher';
+export interface AgendamentoPublicoRequest {
+  servicoId?: number;
+  data?: string;
+  horaInicio?: string;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+}
+
+export interface AgendamentoPublicoResponse {
+  id?: number;
+  /** @nullable */
+  nomeLoja?: string | null;
+  /** @nullable */
+  servicoNome?: string | null;
+  data?: string;
+  horaInicio?: string;
+  horaFim?: string;
+}
+
+export interface AgendamentoRequest {
+  servicoId?: number;
+  data?: string;
+  horaInicio?: string;
+  /** @nullable */
+  clienteId?: number | null;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+}
+
+export type StatusAgendamento = typeof StatusAgendamento[keyof typeof StatusAgendamento];
+
+
+export const StatusAgendamento = {
+  Agendado: 'Agendado',
+  CheckInRealizado: 'CheckInRealizado',
+  Cancelado: 'Cancelado',
+} as const;
+
+export type OrigemAgendamento = typeof OrigemAgendamento[keyof typeof OrigemAgendamento];
+
+
+export const OrigemAgendamento = {
+  Manual: 'Manual',
+  Portal: 'Portal',
+} as const;
+
+export interface AgendamentoResponse {
+  id?: number;
+  status?: StatusAgendamento;
+  origem?: OrigemAgendamento;
+  servicoId?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  data?: string;
+  horaInicio?: string;
+  horaFim?: string;
+  /** @nullable */
+  clienteId?: number | null;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  criadoEm?: string;
+  /** @nullable */
+  reagendadoEm?: string | null;
+  /** @nullable */
+  canceladoEm?: string | null;
+  /** @nullable */
+  motivoCancelamento?: string | null;
+}
+
 export interface AparelhoRequest {
   /** @nullable */
   marca?: string | null;
@@ -69,6 +168,28 @@ export interface AuthResponse {
   accessToken?: string | null;
   expiraEm?: string;
   usuario?: UsuarioResponse;
+}
+
+export interface BloqueioRequest {
+  data?: string;
+  horaInicio?: string;
+  horaFim?: string;
+  /** @nullable */
+  motivo?: string | null;
+}
+
+export interface BloqueioResponse {
+  id?: number;
+  data?: string;
+  horaInicio?: string;
+  horaFim?: string;
+  /** @nullable */
+  motivo?: string | null;
+}
+
+export interface CancelamentoRequest {
+  /** @nullable */
+  motivo?: string | null;
 }
 
 export interface VinculoResponse {
@@ -152,6 +273,24 @@ export interface ClienteResponsePaginaResponse {
   tamanhoPagina?: number;
 }
 
+export interface ConfiguracaoAgendaRequest {
+  /** @nullable */
+  slug?: string | null;
+}
+
+export interface ConfiguracaoAgendaResponse {
+  /** @nullable */
+  slug?: string | null;
+}
+
+export interface DisponibilidadeResponse {
+  data?: string;
+  servicoId?: number;
+  duracaoMinutos?: number;
+  /** @nullable */
+  horariosLivres?: string[] | null;
+}
+
 export interface EmpresaResponse {
   id?: string;
   /** @nullable */
@@ -173,11 +312,51 @@ export interface FornecedorResponse {
   contato?: string | null;
 }
 
+export interface HorarioFuncionamentoDia {
+  diaSemana?: number;
+  ativo?: boolean;
+  /** @nullable */
+  abertura?: string | null;
+  /** @nullable */
+  fechamento?: string | null;
+  /** @nullable */
+  intervaloInicio?: string | null;
+  /** @nullable */
+  intervaloFim?: string | null;
+}
+
+export interface HorariosFuncionamentoRequest {
+  /** @nullable */
+  dias?: HorarioFuncionamentoDia[] | null;
+}
+
 export interface LoginRequest {
   /** @nullable */
   email?: string | null;
   /** @nullable */
   senha?: string | null;
+}
+
+export interface ServicoPublicoResponse {
+  id?: number;
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  categoria?: string | null;
+  precoBase?: number;
+  duracaoEstimadaMinutos?: number;
+  /** @nullable */
+  prazoMedioDias?: number | null;
+  exigeDiagnostico?: boolean;
+}
+
+export interface LojaPublicaResponse {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  servicos?: ServicoPublicoResponse[] | null;
 }
 
 export interface MeResponse {
@@ -334,6 +513,22 @@ export interface ValidationProblemDetails {
   [key: string]: unknown;
 }
 
+export type GetApiAgendaBloqueiosParams = {
+deData?: string;
+ateData?: string;
+};
+
+export type GetApiAgendaDisponibilidadeParams = {
+servicoId?: number;
+data?: string;
+};
+
+export type GetApiAgendamentosParams = {
+inicio?: string;
+fim?: string;
+status?: StatusAgendamento;
+};
+
 export type GetApiClientesParams = {
 busca?: string;
 somenteVip?: boolean;
@@ -347,6 +542,11 @@ busca?: string;
 incluirInativas?: boolean;
 pagina?: number;
 tamanhoPagina?: number;
+};
+
+export type GetApiPublicoSlugDisponibilidadeParams = {
+servicoId?: number;
+data?: string;
 };
 
 export type GetApiServicosParams = {
@@ -375,6 +575,1377 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type getApiAgendaHorariosResponse200 = {
+  data: HorarioFuncionamentoDia[]
+  status: 200
+}
+
+export type getApiAgendaHorariosResponseSuccess = (getApiAgendaHorariosResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAgendaHorariosResponse = (getApiAgendaHorariosResponseSuccess)
+
+export const getGetApiAgendaHorariosUrl = () => {
+
+
+
+
+  return `/api/agenda/horarios`
+}
+
+export const getApiAgendaHorarios = async ( options?: RequestInit): Promise<getApiAgendaHorariosResponse> => {
+
+  return apiFetch<getApiAgendaHorariosResponse>(getGetApiAgendaHorariosUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendaHorariosQueryKey = () => {
+    return [
+    `/api/agenda/horarios`
+    ] as const;
+    }
+
+
+export const getGetApiAgendaHorariosQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendaHorariosQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendaHorarios>>> = ({ signal }) => getApiAgendaHorarios({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendaHorariosQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendaHorarios>>>
+export type GetApiAgendaHorariosQueryError = unknown
+
+
+export function useGetApiAgendaHorarios<TData = Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaHorarios>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaHorarios>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaHorarios<TData = Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaHorarios>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaHorarios>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaHorarios<TData = Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendaHorarios<TData = Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaHorarios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendaHorariosQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiAgendaHorariosResponse200 = {
+  data: HorarioFuncionamentoDia[]
+  status: 200
+}
+
+export type putApiAgendaHorariosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiAgendaHorariosResponseSuccess = (putApiAgendaHorariosResponse200) & {
+  headers: Headers;
+};
+export type putApiAgendaHorariosResponseError = (putApiAgendaHorariosResponse400) & {
+  headers: Headers;
+};
+
+export type putApiAgendaHorariosResponse = (putApiAgendaHorariosResponseSuccess | putApiAgendaHorariosResponseError)
+
+export const getPutApiAgendaHorariosUrl = () => {
+
+
+
+
+  return `/api/agenda/horarios`
+}
+
+export const putApiAgendaHorarios = async (horariosFuncionamentoRequest?: HorariosFuncionamentoRequest, options?: RequestInit): Promise<putApiAgendaHorariosResponse> => {
+
+  return apiFetch<putApiAgendaHorariosResponse>(getPutApiAgendaHorariosUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(horariosFuncionamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiAgendaHorariosMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaHorarios>>, TError,{data?: HorariosFuncionamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaHorarios>>, TError,{data?: HorariosFuncionamentoRequest}, TContext> => {
+
+const mutationKey = ['putApiAgendaHorarios'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAgendaHorarios>>, {data?: HorariosFuncionamentoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiAgendaHorarios(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiAgendaHorariosMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAgendaHorarios>>>
+    export type PutApiAgendaHorariosMutationBody = HorariosFuncionamentoRequest | undefined
+    export type PutApiAgendaHorariosMutationError = ValidationProblemDetails
+
+    export const usePutApiAgendaHorarios = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaHorarios>>, TError,{data?: HorariosFuncionamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiAgendaHorarios>>,
+        TError,
+        {data?: HorariosFuncionamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiAgendaHorariosMutationOptions(options), queryClient);
+    }
+
+export type getApiAgendaBloqueiosResponse200 = {
+  data: BloqueioResponse[]
+  status: 200
+}
+
+export type getApiAgendaBloqueiosResponseSuccess = (getApiAgendaBloqueiosResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAgendaBloqueiosResponse = (getApiAgendaBloqueiosResponseSuccess)
+
+export const getGetApiAgendaBloqueiosUrl = (params?: GetApiAgendaBloqueiosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/agenda/bloqueios?${stringifiedParams}` : `/api/agenda/bloqueios`
+}
+
+export const getApiAgendaBloqueios = async (params?: GetApiAgendaBloqueiosParams, options?: RequestInit): Promise<getApiAgendaBloqueiosResponse> => {
+
+  return apiFetch<getApiAgendaBloqueiosResponse>(getGetApiAgendaBloqueiosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendaBloqueiosQueryKey = (params?: GetApiAgendaBloqueiosParams,) => {
+    return [
+    `/api/agenda/bloqueios`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiAgendaBloqueiosQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError = unknown>(params?: GetApiAgendaBloqueiosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendaBloqueiosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendaBloqueios>>> = ({ signal }) => getApiAgendaBloqueios(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendaBloqueiosQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendaBloqueios>>>
+export type GetApiAgendaBloqueiosQueryError = unknown
+
+
+export function useGetApiAgendaBloqueios<TData = Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError = unknown>(
+ params: undefined |  GetApiAgendaBloqueiosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaBloqueios>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaBloqueios>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaBloqueios<TData = Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError = unknown>(
+ params?: GetApiAgendaBloqueiosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaBloqueios>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaBloqueios>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaBloqueios<TData = Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError = unknown>(
+ params?: GetApiAgendaBloqueiosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendaBloqueios<TData = Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError = unknown>(
+ params?: GetApiAgendaBloqueiosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaBloqueios>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendaBloqueiosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiAgendaBloqueiosResponse201 = {
+  data: BloqueioResponse
+  status: 201
+}
+
+export type postApiAgendaBloqueiosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiAgendaBloqueiosResponseSuccess = (postApiAgendaBloqueiosResponse201) & {
+  headers: Headers;
+};
+export type postApiAgendaBloqueiosResponseError = (postApiAgendaBloqueiosResponse400) & {
+  headers: Headers;
+};
+
+export type postApiAgendaBloqueiosResponse = (postApiAgendaBloqueiosResponseSuccess | postApiAgendaBloqueiosResponseError)
+
+export const getPostApiAgendaBloqueiosUrl = () => {
+
+
+
+
+  return `/api/agenda/bloqueios`
+}
+
+export const postApiAgendaBloqueios = async (bloqueioRequest?: BloqueioRequest, options?: RequestInit): Promise<postApiAgendaBloqueiosResponse> => {
+
+  return apiFetch<postApiAgendaBloqueiosResponse>(getPostApiAgendaBloqueiosUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bloqueioRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiAgendaBloqueiosMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendaBloqueios>>, TError,{data?: BloqueioRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAgendaBloqueios>>, TError,{data?: BloqueioRequest}, TContext> => {
+
+const mutationKey = ['postApiAgendaBloqueios'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAgendaBloqueios>>, {data?: BloqueioRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAgendaBloqueios(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAgendaBloqueiosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAgendaBloqueios>>>
+    export type PostApiAgendaBloqueiosMutationBody = BloqueioRequest | undefined
+    export type PostApiAgendaBloqueiosMutationError = ValidationProblemDetails
+
+    export const usePostApiAgendaBloqueios = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendaBloqueios>>, TError,{data?: BloqueioRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAgendaBloqueios>>,
+        TError,
+        {data?: BloqueioRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAgendaBloqueiosMutationOptions(options), queryClient);
+    }
+
+export type deleteApiAgendaBloqueiosIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiAgendaBloqueiosIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteApiAgendaBloqueiosIdResponseSuccess = (deleteApiAgendaBloqueiosIdResponse204) & {
+  headers: Headers;
+};
+export type deleteApiAgendaBloqueiosIdResponseError = (deleteApiAgendaBloqueiosIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteApiAgendaBloqueiosIdResponse = (deleteApiAgendaBloqueiosIdResponseSuccess | deleteApiAgendaBloqueiosIdResponseError)
+
+export const getDeleteApiAgendaBloqueiosIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/agenda/bloqueios/${id}`
+}
+
+export const deleteApiAgendaBloqueiosId = async (id: number, options?: RequestInit): Promise<deleteApiAgendaBloqueiosIdResponse> => {
+
+  return apiFetch<deleteApiAgendaBloqueiosIdResponse>(getDeleteApiAgendaBloqueiosIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiAgendaBloqueiosIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteApiAgendaBloqueiosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiAgendaBloqueiosId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiAgendaBloqueiosIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>>
+
+    export type DeleteApiAgendaBloqueiosIdMutationError = ProblemDetails
+
+    export const useDeleteApiAgendaBloqueiosId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiAgendaBloqueiosId>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteApiAgendaBloqueiosIdMutationOptions(options), queryClient);
+    }
+
+export type getApiAgendaConfiguracoesResponse200 = {
+  data: ConfiguracaoAgendaResponse
+  status: 200
+}
+
+export type getApiAgendaConfiguracoesResponseSuccess = (getApiAgendaConfiguracoesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAgendaConfiguracoesResponse = (getApiAgendaConfiguracoesResponseSuccess)
+
+export const getGetApiAgendaConfiguracoesUrl = () => {
+
+
+
+
+  return `/api/agenda/configuracoes`
+}
+
+export const getApiAgendaConfiguracoes = async ( options?: RequestInit): Promise<getApiAgendaConfiguracoesResponse> => {
+
+  return apiFetch<getApiAgendaConfiguracoesResponse>(getGetApiAgendaConfiguracoesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendaConfiguracoesQueryKey = () => {
+    return [
+    `/api/agenda/configuracoes`
+    ] as const;
+    }
+
+
+export const getGetApiAgendaConfiguracoesQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendaConfiguracoesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>> = ({ signal }) => getApiAgendaConfiguracoes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendaConfiguracoesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>>
+export type GetApiAgendaConfiguracoesQueryError = unknown
+
+
+export function useGetApiAgendaConfiguracoes<TData = Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaConfiguracoes<TData = Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaConfiguracoes<TData = Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendaConfiguracoes<TData = Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaConfiguracoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendaConfiguracoesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiAgendaConfiguracoesResponse200 = {
+  data: ConfiguracaoAgendaResponse
+  status: 200
+}
+
+export type putApiAgendaConfiguracoesResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiAgendaConfiguracoesResponse409 = {
+  data: ProblemDetails
+  status: 409
+}
+
+export type putApiAgendaConfiguracoesResponseSuccess = (putApiAgendaConfiguracoesResponse200) & {
+  headers: Headers;
+};
+export type putApiAgendaConfiguracoesResponseError = (putApiAgendaConfiguracoesResponse400 | putApiAgendaConfiguracoesResponse409) & {
+  headers: Headers;
+};
+
+export type putApiAgendaConfiguracoesResponse = (putApiAgendaConfiguracoesResponseSuccess | putApiAgendaConfiguracoesResponseError)
+
+export const getPutApiAgendaConfiguracoesUrl = () => {
+
+
+
+
+  return `/api/agenda/configuracoes`
+}
+
+export const putApiAgendaConfiguracoes = async (configuracaoAgendaRequest?: ConfiguracaoAgendaRequest, options?: RequestInit): Promise<putApiAgendaConfiguracoesResponse> => {
+
+  return apiFetch<putApiAgendaConfiguracoesResponse>(getPutApiAgendaConfiguracoesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(configuracaoAgendaRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiAgendaConfiguracoesMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>, TError,{data?: ConfiguracaoAgendaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>, TError,{data?: ConfiguracaoAgendaRequest}, TContext> => {
+
+const mutationKey = ['putApiAgendaConfiguracoes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>, {data?: ConfiguracaoAgendaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiAgendaConfiguracoes(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiAgendaConfiguracoesMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>>
+    export type PutApiAgendaConfiguracoesMutationBody = ConfiguracaoAgendaRequest | undefined
+    export type PutApiAgendaConfiguracoesMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiAgendaConfiguracoes = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>, TError,{data?: ConfiguracaoAgendaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiAgendaConfiguracoes>>,
+        TError,
+        {data?: ConfiguracaoAgendaRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiAgendaConfiguracoesMutationOptions(options), queryClient);
+    }
+
+export type getApiAgendaDisponibilidadeResponse200 = {
+  data: DisponibilidadeResponse
+  status: 200
+}
+
+export type getApiAgendaDisponibilidadeResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type getApiAgendaDisponibilidadeResponseSuccess = (getApiAgendaDisponibilidadeResponse200) & {
+  headers: Headers;
+};
+export type getApiAgendaDisponibilidadeResponseError = (getApiAgendaDisponibilidadeResponse400) & {
+  headers: Headers;
+};
+
+export type getApiAgendaDisponibilidadeResponse = (getApiAgendaDisponibilidadeResponseSuccess | getApiAgendaDisponibilidadeResponseError)
+
+export const getGetApiAgendaDisponibilidadeUrl = (params?: GetApiAgendaDisponibilidadeParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/agenda/disponibilidade?${stringifiedParams}` : `/api/agenda/disponibilidade`
+}
+
+export const getApiAgendaDisponibilidade = async (params?: GetApiAgendaDisponibilidadeParams, options?: RequestInit): Promise<getApiAgendaDisponibilidadeResponse> => {
+
+  return apiFetch<getApiAgendaDisponibilidadeResponse>(getGetApiAgendaDisponibilidadeUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendaDisponibilidadeQueryKey = (params?: GetApiAgendaDisponibilidadeParams,) => {
+    return [
+    `/api/agenda/disponibilidade`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiAgendaDisponibilidadeQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError = ProblemDetails>(params?: GetApiAgendaDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendaDisponibilidadeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>> = ({ signal }) => getApiAgendaDisponibilidade(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendaDisponibilidadeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>>
+export type GetApiAgendaDisponibilidadeQueryError = ProblemDetails
+
+
+export function useGetApiAgendaDisponibilidade<TData = Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError = ProblemDetails>(
+ params: undefined |  GetApiAgendaDisponibilidadeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaDisponibilidade<TData = Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError = ProblemDetails>(
+ params?: GetApiAgendaDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendaDisponibilidade<TData = Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError = ProblemDetails>(
+ params?: GetApiAgendaDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendaDisponibilidade<TData = Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError = ProblemDetails>(
+ params?: GetApiAgendaDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendaDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendaDisponibilidadeQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiAgendamentosResponse200 = {
+  data: AgendamentoResponse[]
+  status: 200
+}
+
+export type getApiAgendamentosResponseSuccess = (getApiAgendamentosResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAgendamentosResponse = (getApiAgendamentosResponseSuccess)
+
+export const getGetApiAgendamentosUrl = (params?: GetApiAgendamentosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/agendamentos?${stringifiedParams}` : `/api/agendamentos`
+}
+
+export const getApiAgendamentos = async (params?: GetApiAgendamentosParams, options?: RequestInit): Promise<getApiAgendamentosResponse> => {
+
+  return apiFetch<getApiAgendamentosResponse>(getGetApiAgendamentosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendamentosQueryKey = (params?: GetApiAgendamentosParams,) => {
+    return [
+    `/api/agendamentos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiAgendamentosQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendamentos>>, TError = unknown>(params?: GetApiAgendamentosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendamentosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendamentos>>> = ({ signal }) => getApiAgendamentos(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendamentosQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendamentos>>>
+export type GetApiAgendamentosQueryError = unknown
+
+
+export function useGetApiAgendamentos<TData = Awaited<ReturnType<typeof getApiAgendamentos>>, TError = unknown>(
+ params: undefined |  GetApiAgendamentosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendamentos>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendamentos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendamentos<TData = Awaited<ReturnType<typeof getApiAgendamentos>>, TError = unknown>(
+ params?: GetApiAgendamentosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendamentos>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendamentos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendamentos<TData = Awaited<ReturnType<typeof getApiAgendamentos>>, TError = unknown>(
+ params?: GetApiAgendamentosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendamentos<TData = Awaited<ReturnType<typeof getApiAgendamentos>>, TError = unknown>(
+ params?: GetApiAgendamentosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentos>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendamentosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiAgendamentosResponse201 = {
+  data: AgendamentoResponse
+  status: 201
+}
+
+export type postApiAgendamentosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiAgendamentosResponseSuccess = (postApiAgendamentosResponse201) & {
+  headers: Headers;
+};
+export type postApiAgendamentosResponseError = (postApiAgendamentosResponse400) & {
+  headers: Headers;
+};
+
+export type postApiAgendamentosResponse = (postApiAgendamentosResponseSuccess | postApiAgendamentosResponseError)
+
+export const getPostApiAgendamentosUrl = () => {
+
+
+
+
+  return `/api/agendamentos`
+}
+
+export const postApiAgendamentos = async (agendamentoRequest?: AgendamentoRequest, options?: RequestInit): Promise<postApiAgendamentosResponse> => {
+
+  return apiFetch<postApiAgendamentosResponse>(getPostApiAgendamentosUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(agendamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiAgendamentosMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentos>>, TError,{data?: AgendamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentos>>, TError,{data?: AgendamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiAgendamentos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAgendamentos>>, {data?: AgendamentoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAgendamentos(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAgendamentosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAgendamentos>>>
+    export type PostApiAgendamentosMutationBody = AgendamentoRequest | undefined
+    export type PostApiAgendamentosMutationError = ValidationProblemDetails
+
+    export const usePostApiAgendamentos = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentos>>, TError,{data?: AgendamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAgendamentos>>,
+        TError,
+        {data?: AgendamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAgendamentosMutationOptions(options), queryClient);
+    }
+
+export type getApiAgendamentosIdResponse200 = {
+  data: AgendamentoResponse
+  status: 200
+}
+
+export type getApiAgendamentosIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiAgendamentosIdResponseSuccess = (getApiAgendamentosIdResponse200) & {
+  headers: Headers;
+};
+export type getApiAgendamentosIdResponseError = (getApiAgendamentosIdResponse404) & {
+  headers: Headers;
+};
+
+export type getApiAgendamentosIdResponse = (getApiAgendamentosIdResponseSuccess | getApiAgendamentosIdResponseError)
+
+export const getGetApiAgendamentosIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/agendamentos/${id}`
+}
+
+export const getApiAgendamentosId = async (id: number, options?: RequestInit): Promise<getApiAgendamentosIdResponse> => {
+
+  return apiFetch<getApiAgendamentosIdResponse>(getGetApiAgendamentosIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAgendamentosIdQueryKey = (id: number,) => {
+    return [
+    `/api/agendamentos/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiAgendamentosIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiAgendamentosId>>, TError = ProblemDetails>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAgendamentosIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAgendamentosId>>> = ({ signal }) => getApiAgendamentosId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAgendamentosIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAgendamentosId>>>
+export type GetApiAgendamentosIdQueryError = ProblemDetails
+
+
+export function useGetApiAgendamentosId<TData = Awaited<ReturnType<typeof getApiAgendamentosId>>, TError = ProblemDetails>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendamentosId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendamentosId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendamentosId<TData = Awaited<ReturnType<typeof getApiAgendamentosId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAgendamentosId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAgendamentosId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAgendamentosId<TData = Awaited<ReturnType<typeof getApiAgendamentosId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAgendamentosId<TData = Awaited<ReturnType<typeof getApiAgendamentosId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAgendamentosId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAgendamentosIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiAgendamentosIdResponse200 = {
+  data: AgendamentoResponse
+  status: 200
+}
+
+export type putApiAgendamentosIdResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiAgendamentosIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiAgendamentosIdResponseSuccess = (putApiAgendamentosIdResponse200) & {
+  headers: Headers;
+};
+export type putApiAgendamentosIdResponseError = (putApiAgendamentosIdResponse400 | putApiAgendamentosIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiAgendamentosIdResponse = (putApiAgendamentosIdResponseSuccess | putApiAgendamentosIdResponseError)
+
+export const getPutApiAgendamentosIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/agendamentos/${id}`
+}
+
+export const putApiAgendamentosId = async (id: number,
+    agendamentoRequest?: AgendamentoRequest, options?: RequestInit): Promise<putApiAgendamentosIdResponse> => {
+
+  return apiFetch<putApiAgendamentosIdResponse>(getPutApiAgendamentosIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(agendamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiAgendamentosIdMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendamentosId>>, TError,{id: number;data?: AgendamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiAgendamentosId>>, TError,{id: number;data?: AgendamentoRequest}, TContext> => {
+
+const mutationKey = ['putApiAgendamentosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAgendamentosId>>, {id: number;data?: AgendamentoRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiAgendamentosId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiAgendamentosIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAgendamentosId>>>
+    export type PutApiAgendamentosIdMutationBody = AgendamentoRequest | undefined
+    export type PutApiAgendamentosIdMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiAgendamentosId = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAgendamentosId>>, TError,{id: number;data?: AgendamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiAgendamentosId>>,
+        TError,
+        {id: number;data?: AgendamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiAgendamentosIdMutationOptions(options), queryClient);
+    }
+
+export type postApiAgendamentosIdCheckinResponse200 = {
+  data: AgendamentoResponse
+  status: 200
+}
+
+export type postApiAgendamentosIdCheckinResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiAgendamentosIdCheckinResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiAgendamentosIdCheckinResponseSuccess = (postApiAgendamentosIdCheckinResponse200) & {
+  headers: Headers;
+};
+export type postApiAgendamentosIdCheckinResponseError = (postApiAgendamentosIdCheckinResponse400 | postApiAgendamentosIdCheckinResponse404) & {
+  headers: Headers;
+};
+
+export type postApiAgendamentosIdCheckinResponse = (postApiAgendamentosIdCheckinResponseSuccess | postApiAgendamentosIdCheckinResponseError)
+
+export const getPostApiAgendamentosIdCheckinUrl = (id: number,) => {
+
+
+
+
+  return `/api/agendamentos/${id}/checkin`
+}
+
+export const postApiAgendamentosIdCheckin = async (id: number, options?: RequestInit): Promise<postApiAgendamentosIdCheckinResponse> => {
+
+  return apiFetch<postApiAgendamentosIdCheckinResponse>(getPostApiAgendamentosIdCheckinUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiAgendamentosIdCheckinMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['postApiAgendamentosIdCheckin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiAgendamentosIdCheckin(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAgendamentosIdCheckinMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>>
+
+    export type PostApiAgendamentosIdCheckinMutationError = ProblemDetails
+
+    export const usePostApiAgendamentosIdCheckin = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAgendamentosIdCheckin>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getPostApiAgendamentosIdCheckinMutationOptions(options), queryClient);
+    }
+
+export type postApiAgendamentosIdCancelarResponse200 = {
+  data: AgendamentoResponse
+  status: 200
+}
+
+export type postApiAgendamentosIdCancelarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiAgendamentosIdCancelarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiAgendamentosIdCancelarResponseSuccess = (postApiAgendamentosIdCancelarResponse200) & {
+  headers: Headers;
+};
+export type postApiAgendamentosIdCancelarResponseError = (postApiAgendamentosIdCancelarResponse400 | postApiAgendamentosIdCancelarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiAgendamentosIdCancelarResponse = (postApiAgendamentosIdCancelarResponseSuccess | postApiAgendamentosIdCancelarResponseError)
+
+export const getPostApiAgendamentosIdCancelarUrl = (id: number,) => {
+
+
+
+
+  return `/api/agendamentos/${id}/cancelar`
+}
+
+export const postApiAgendamentosIdCancelar = async (id: number,
+    cancelamentoRequest?: CancelamentoRequest, options?: RequestInit): Promise<postApiAgendamentosIdCancelarResponse> => {
+
+  return apiFetch<postApiAgendamentosIdCancelarResponse>(getPostApiAgendamentosIdCancelarUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(cancelamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiAgendamentosIdCancelarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>, TError,{id: number;data?: CancelamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>, TError,{id: number;data?: CancelamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiAgendamentosIdCancelar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>, {id: number;data?: CancelamentoRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiAgendamentosIdCancelar(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAgendamentosIdCancelarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>>
+    export type PostApiAgendamentosIdCancelarMutationBody = CancelamentoRequest | undefined
+    export type PostApiAgendamentosIdCancelarMutationError = ProblemDetails
+
+    export const usePostApiAgendamentosIdCancelar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>, TError,{id: number;data?: CancelamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAgendamentosIdCancelar>>,
+        TError,
+        {id: number;data?: CancelamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAgendamentosIdCancelarMutationOptions(options), queryClient);
+    }
 
 export type postApiClientesClienteIdAparelhosResponse201 = {
   data: AparelhoResponse
@@ -2442,6 +4013,344 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiPecasIdMutationOptions(options), queryClient);
+    }
+
+export type getApiPublicoSlugInfoResponse200 = {
+  data: LojaPublicaResponse
+  status: 200
+}
+
+export type getApiPublicoSlugInfoResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiPublicoSlugInfoResponseSuccess = (getApiPublicoSlugInfoResponse200) & {
+  headers: Headers;
+};
+export type getApiPublicoSlugInfoResponseError = (getApiPublicoSlugInfoResponse404) & {
+  headers: Headers;
+};
+
+export type getApiPublicoSlugInfoResponse = (getApiPublicoSlugInfoResponseSuccess | getApiPublicoSlugInfoResponseError)
+
+export const getGetApiPublicoSlugInfoUrl = (slug: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/info`
+}
+
+export const getApiPublicoSlugInfo = async (slug: string, options?: RequestInit): Promise<getApiPublicoSlugInfoResponse> => {
+
+  return apiFetch<getApiPublicoSlugInfoResponse>(getGetApiPublicoSlugInfoUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiPublicoSlugInfoQueryKey = (slug: string,) => {
+    return [
+    `/api/publico/${slug}/info`
+    ] as const;
+    }
+
+
+export const getGetApiPublicoSlugInfoQueryOptions = <TData = Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError = ProblemDetails>(slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiPublicoSlugInfoQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>> = ({ signal }) => getApiPublicoSlugInfo(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiPublicoSlugInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>>
+export type GetApiPublicoSlugInfoQueryError = ProblemDetails
+
+
+export function useGetApiPublicoSlugInfo<TData = Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError = ProblemDetails>(
+ slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugInfo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugInfo<TData = Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError = ProblemDetails>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugInfo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugInfo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugInfo<TData = Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError = ProblemDetails>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiPublicoSlugInfo<TData = Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError = ProblemDetails>(
+ slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugInfo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiPublicoSlugInfoQueryOptions(slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiPublicoSlugDisponibilidadeResponse200 = {
+  data: DisponibilidadeResponse
+  status: 200
+}
+
+export type getApiPublicoSlugDisponibilidadeResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type getApiPublicoSlugDisponibilidadeResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiPublicoSlugDisponibilidadeResponseSuccess = (getApiPublicoSlugDisponibilidadeResponse200) & {
+  headers: Headers;
+};
+export type getApiPublicoSlugDisponibilidadeResponseError = (getApiPublicoSlugDisponibilidadeResponse400 | getApiPublicoSlugDisponibilidadeResponse404) & {
+  headers: Headers;
+};
+
+export type getApiPublicoSlugDisponibilidadeResponse = (getApiPublicoSlugDisponibilidadeResponseSuccess | getApiPublicoSlugDisponibilidadeResponseError)
+
+export const getGetApiPublicoSlugDisponibilidadeUrl = (slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/publico/${slug}/disponibilidade?${stringifiedParams}` : `/api/publico/${slug}/disponibilidade`
+}
+
+export const getApiPublicoSlugDisponibilidade = async (slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams, options?: RequestInit): Promise<getApiPublicoSlugDisponibilidadeResponse> => {
+
+  return apiFetch<getApiPublicoSlugDisponibilidadeResponse>(getGetApiPublicoSlugDisponibilidadeUrl(slug,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiPublicoSlugDisponibilidadeQueryKey = (slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams,) => {
+    return [
+    `/api/publico/${slug}/disponibilidade`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiPublicoSlugDisponibilidadeQueryOptions = <TData = Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError = ProblemDetails>(slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiPublicoSlugDisponibilidadeQueryKey(slug,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>> = ({ signal }) => getApiPublicoSlugDisponibilidade(slug,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiPublicoSlugDisponibilidadeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>>
+export type GetApiPublicoSlugDisponibilidadeQueryError = ProblemDetails
+
+
+export function useGetApiPublicoSlugDisponibilidade<TData = Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError = ProblemDetails>(
+ slug: string,
+    params: undefined |  GetApiPublicoSlugDisponibilidadeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugDisponibilidade<TData = Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError = ProblemDetails>(
+ slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugDisponibilidade<TData = Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError = ProblemDetails>(
+ slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiPublicoSlugDisponibilidade<TData = Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError = ProblemDetails>(
+ slug: string,
+    params?: GetApiPublicoSlugDisponibilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugDisponibilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiPublicoSlugDisponibilidadeQueryOptions(slug,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiPublicoSlugAgendamentosResponse201 = {
+  data: AgendamentoPublicoResponse
+  status: 201
+}
+
+export type postApiPublicoSlugAgendamentosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiPublicoSlugAgendamentosResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiPublicoSlugAgendamentosResponseSuccess = (postApiPublicoSlugAgendamentosResponse201) & {
+  headers: Headers;
+};
+export type postApiPublicoSlugAgendamentosResponseError = (postApiPublicoSlugAgendamentosResponse400 | postApiPublicoSlugAgendamentosResponse404) & {
+  headers: Headers;
+};
+
+export type postApiPublicoSlugAgendamentosResponse = (postApiPublicoSlugAgendamentosResponseSuccess | postApiPublicoSlugAgendamentosResponseError)
+
+export const getPostApiPublicoSlugAgendamentosUrl = (slug: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/agendamentos`
+}
+
+export const postApiPublicoSlugAgendamentos = async (slug: string,
+    agendamentoPublicoRequest?: AgendamentoPublicoRequest, options?: RequestInit): Promise<postApiPublicoSlugAgendamentosResponse> => {
+
+  return apiFetch<postApiPublicoSlugAgendamentosResponse>(getPostApiPublicoSlugAgendamentosUrl(slug),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(agendamentoPublicoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiPublicoSlugAgendamentosMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>, TError,{slug: string;data?: AgendamentoPublicoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>, TError,{slug: string;data?: AgendamentoPublicoRequest}, TContext> => {
+
+const mutationKey = ['postApiPublicoSlugAgendamentos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>, {slug: string;data?: AgendamentoPublicoRequest}> = (props) => {
+          const {slug,data} = props ?? {};
+
+          return  postApiPublicoSlugAgendamentos(slug,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiPublicoSlugAgendamentosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>>
+    export type PostApiPublicoSlugAgendamentosMutationBody = AgendamentoPublicoRequest | undefined
+    export type PostApiPublicoSlugAgendamentosMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiPublicoSlugAgendamentos = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>, TError,{slug: string;data?: AgendamentoPublicoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiPublicoSlugAgendamentos>>,
+        TError,
+        {slug: string;data?: AgendamentoPublicoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiPublicoSlugAgendamentosMutationOptions(options), queryClient);
     }
 
 export type getApiServicosResponse200 = {
