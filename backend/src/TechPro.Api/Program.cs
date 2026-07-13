@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Persistence;
@@ -56,6 +57,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<FornecedorService>();
 builder.Services.AddScoped<PecaService>();
 builder.Services.AddScoped<ServicoService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<AparelhoService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]
