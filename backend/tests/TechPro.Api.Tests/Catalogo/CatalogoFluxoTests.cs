@@ -180,5 +180,107 @@ public class CatalogoFluxoTests(TechProApiFactory fabrica) : IClassFixture<TechP
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await _cliente.GetAsync("/api/pecas")).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await _cliente.GetAsync("/api/fornecedores")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await _cliente.GetAsync("/api/servicos")).StatusCode);
+    }
+
+    private static object CorpoServico(string nome = "Troca de tela", object[]? pecas = null) => new
+    {
+        nome,
+        categoria = "Tela",
+        precoBase = 350.00m,
+        duracaoEstimadaMinutos = 60,
+        prazoMedioDias = 1,
+        exigeDiagnostico = false,
+        agendavelOnline = true,
+        capacidadeSimultanea = 2,
+        ativo = true,
+        checklist = new[] { "Testar touch em toda a tela", "Conferir Face ID" },
+        pecas = pecas ?? [],
+    };
+
+    [Fact]
+    public async Task ServicoCompletoComChecklistEPecas()
+    {
+        var token = await RegistrarEmpresaAsync("servico.crud@exemplo.com");
+
+        var pecaResposta = await EnviarAsync(HttpMethod.Post, "/api/pecas", token, CorpoPeca(nome: "Tela A54"));
+        var peca = await pecaResposta.Content.ReadFromJsonAsync<PecaResponse>();
+
+        var criado = await EnviarAsync(HttpMethod.Post, "/api/servicos", token,
+            CorpoServico(pecas: [new { pecaId = peca!.Id, quantidadePadrao = 1 }]));
+        Assert.Equal(HttpStatusCode.Created, criado.StatusCode);
+        var servico = await criado.Content.ReadFromJsonAsync<ServicoResponse>();
+        Assert.NotNull(servico);
+        Assert.Equal(new[] { "Testar touch em toda a tela", "Conferir Face ID" }, servico.Checklist);
+        Assert.Equal("Tela A54", Assert.Single(servico.Pecas).Nome);
+        Assert.Equal(2, servico.CapacidadeSimultanea);
+
+        // PUT substitui checklist e peças por inteiro.
+        var atualizado = await EnviarAsync(HttpMethod.Put, $"/api/servicos/{servico.Id}", token, new
+        {
+            nome = "Troca de tela premium",
+            categoria = "Tela",
+            precoBase = 420.00m,
+            duracaoEstimadaMinutos = 90,
+            prazoMedioDias = 2,
+            exigeDiagnostico = true,
+            agendavelOnline = true,
+            capacidadeSimultanea = 1,
+            ativo = true,
+            checklist = new[] { "Teste completo pós-reparo" },
+            pecas = Array.Empty<object>(),
+        });
+        Assert.Equal(HttpStatusCode.OK, atualizado.StatusCode);
+        var servicoAtualizado = await atualizado.Content.ReadFromJsonAsync<ServicoResponse>();
+        Assert.Equal(new[] { "Teste completo pós-reparo" }, servicoAtualizado!.Checklist);
+        Assert.Empty(servicoAtualizado.Pecas);
+
+        // Desativar preserva o registro fora da listagem padrão.
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await EnviarAsync(HttpMethod.Delete, $"/api/servicos/{servico.Id}", token)).StatusCode);
+        var lista = await EnviarAsync(HttpMethod.Get, "/api/servicos", token);
+        var pagina = await lista.Content.ReadFromJsonAsync<PaginaResponse<ServicoResponse>>();
+        Assert.DoesNotContain(pagina!.Itens, s => s.Id == servico.Id);
+    }
+
+    [Fact]
+    public async Task ServicoDeOutraEmpresaEInvisivel()
+    {
+        var tokenA = await RegistrarEmpresaAsync("servico.iso.a@exemplo.com");
+        var tokenB = await RegistrarEmpresaAsync("servico.iso.b@exemplo.com");
+
+        var criado = await EnviarAsync(HttpMethod.Post, "/api/servicos", tokenA, CorpoServico(nome: "Só de A"));
+        var servico = await criado.Content.ReadFromJsonAsync<ServicoResponse>();
+
+        var listaB = await EnviarAsync(HttpMethod.Get, "/api/servicos?incluirInativos=true", tokenB);
+        var paginaB = await listaB.Content.ReadFromJsonAsync<PaginaResponse<ServicoResponse>>();
+        Assert.DoesNotContain(paginaB!.Itens, s => s.Nome == "Só de A");
+
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await EnviarAsync(HttpMethod.Get, $"/api/servicos/{servico!.Id}", tokenB)).StatusCode);
+    }
+
+    [Fact]
+    public async Task ServicoNaoAceitaPecaDeOutraEmpresa()
+    {
+        var tokenA = await RegistrarEmpresaAsync("servico.idor.a@exemplo.com");
+        var tokenB = await RegistrarEmpresaAsync("servico.idor.b@exemplo.com");
+
+        var pecaDeA = await (await EnviarAsync(HttpMethod.Post, "/api/pecas", tokenA, CorpoPeca()))
+            .Content.ReadFromJsonAsync<PecaResponse>();
+
+        // B tenta referenciar a peça de A pelo id: o GQF a torna inexistente → 400.
+        var resposta = await EnviarAsync(HttpMethod.Post, "/api/servicos", tokenB,
+            CorpoServico(pecas: [new { pecaId = pecaDeA!.Id, quantidadePadrao = 1 }]));
+
+        Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
+    }
+
+    [Fact]
+    public async Task ServicoSemNomeRetorna400()
+    {
+        var token = await RegistrarEmpresaAsync("servico.validacao@exemplo.com");
+        var resposta = await EnviarAsync(HttpMethod.Post, "/api/servicos", token, CorpoServico(nome: ""));
+        Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
     }
 }

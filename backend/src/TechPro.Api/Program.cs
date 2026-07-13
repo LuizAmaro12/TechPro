@@ -55,6 +55,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<FornecedorService>();
 builder.Services.AddScoped<PecaService>();
+builder.Services.AddScoped<ServicoService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]
