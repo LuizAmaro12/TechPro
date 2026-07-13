@@ -38,9 +38,35 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **15 testes xUnit verdes** (5 de Global Query
-Filter, 2 de TokenService, 8 de fluxo completo de auth via
-WebApplicationFactory + Sqlite em memória).
+Suíte de testes do back-end: **27 testes xUnit verdes** (5 de Global Query
+Filter, 2 de TokenService, 8 de fluxo completo de auth, 2 de isolamento do
+catálogo e 10 de fluxo do catálogo via WebApplicationFactory + Sqlite em
+memória).
+
+### Etapa Catálogo concluída em 2026-07-08
+
+Módulo 6 (serviços e peças) — item 2 da ordem recomendada da Fase 1 — de
+ponta a ponta: API + RLS verificado no Postgres + cliente orval + telas.
+Evidência e2e (Playwright + Edge, 2026-07-08):
+
+```json
+{
+  "cadastroLevaAoDashboard": true,
+  "navPecasFunciona": true,
+  "pecaCriadaAparaceNaTabela": true,
+  "fornecedorVinculado": true,
+  "semAlertaEstoqueBaixo": true,
+  "servicoCriadoComChecklistEPeca": true,
+  "edicaoRecarregaChecklist": true,
+  "edicaoRecarregaPeca": true,
+  "desativarRemoveDaListagemPadrao": true,
+  "inativoApareceComFiltro": true
+}
+```
+
+RLS conferido direto no banco: as 5 tabelas novas (`fornecedores`, `pecas`,
+`servicos`, `servico_pecas`, `servico_checklist_itens`) com
+`relrowsecurity = t` e `relforcerowsecurity = t`.
 
 ---
 
@@ -118,6 +144,28 @@ docker compose up -d --build
 - Rate limiting 10/min/IP nos endpoints de auth; CORS restrito ao front;
   FluentValidation com mensagens pt-BR.
 
+### Catálogo (módulo 6 — primeira etapa de produto)
+
+- **Serviços** (`/api/servicos` + tela `/servicos`): preço base, categoria
+  (texto livre com sugestões), duração, prazo médio, exige diagnóstico,
+  agendável online, **capacidade simultânea** (consumida pela agenda depois),
+  **checklist padrão ordenado** (tabela própria — a Fase 2 marca item a item
+  na OS) e **peças normalmente utilizadas** com quantidade padrão.
+- **Peças** (`/api/pecas` + tela `/pecas`): custo, preço de venda, quantidade,
+  estoque mínimo com **alerta de estoque baixo** e fornecedor.
+- **Fornecedores** (`/api/fornecedores`, entidade mínima): a Fase 2 precisa de
+  histórico de preço por fornecedor — campo texto viraria migração de dados
+  reais. Fornecedor com peça vinculada não pode ser removido (409).
+- **Exclusão = desativação** (`ativo=false`): serviço/peça podem estar
+  referenciados por OS futuras; listagem padrão esconde inativos
+  (`incluirInativos=true` os revela).
+- **Isolamento testado na API**: empresa B não lista, não lê, não altera nem
+  desativa itens de A (404 via GQF), e **não consegue vincular peça de A a um
+  serviço seu** (400 — o teste anti-IDOR `ServicoNaoAceitaPecaDeOutraEmpresa`).
+- Primeiro uso real do `RlsHelper` em tabelas de produto; PK `int` identity
+  (UUID + `updated_at`/`deleted_at` seguem exclusivos do escopo offline do
+  técnico — seção 5 do doc de stack).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -154,6 +202,14 @@ docker compose up -d --build
   (novo nome do middleware no Next 16).
 - **Bug corrigido do init do shadcn**: ele gerou `--font-sans: var(--font-sans)`
   (auto-referência) no `globals.css`, derrubando a UI para serif.
+- **Sem camada Repository** (o doc de stack a cita na estrutura de pastas):
+  o DbContext + GQF já cumprem o papel; a camada extra entra apenas quando
+  houver query complexa reutilizada. Padrão Controller fino + Service.
+- **Kits de serviço e peça compatível/equivalente ficam para a Fase 2**
+  (fases_MVP.md os lista lá, apesar de o doc de módulos citá-los no módulo 6).
+- **Migrations agora também rodam no container do SDK** (Smart App Control):
+  copiar o repo para `/work`, gerar lá e copiar `Migrations/*.cs` de volta —
+  comando registrado no plano da etapa (docs/superpowers/plans/).
 
 ## Notas de ambiente (máquina de dev)
 
@@ -172,14 +228,13 @@ docker compose up -d --build
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é o
-   **Catálogo** (módulo 6 — serviços, peças, relação serviço-peça e capacidade
-   por tipo de serviço) — primeiro uso do `RlsHelper` em tabelas de produto.
-   PK identity normal: UUID + `updated_at`/`deleted_at` valem **somente** para
-   o escopo offline do técnico (OS, Kanban, anexos — doc de stack, seção 5).
-3. Na sequência da mesma ordem: Clientes e aparelhos → Agenda/portal de
-   agendamento → OS e Kanban → Estoque com baixa automática → Orçamento e
-   pagamento básico → Comunicação essencial → Dashboard → Onboarding guiado.
+2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
+   **Clientes e aparelhos** (módulo 5 — cadastro, filtros, histórico; a
+   estrutura já deve nascer preparada para conta vinculada família/empresa).
+3. Na sequência da mesma ordem: Agenda/portal de agendamento → OS e Kanban
+   (aí sim PK UUID + `updated_at`/`deleted_at`, seção 5 do doc de stack) →
+   Estoque com baixa automática → Orçamento e pagamento básico → Comunicação
+   essencial → Dashboard → Onboarding guiado.
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
