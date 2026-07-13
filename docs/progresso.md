@@ -38,10 +38,33 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **27 testes xUnit verdes** (5 de Global Query
-Filter, 2 de TokenService, 8 de fluxo completo de auth, 2 de isolamento do
-catálogo e 10 de fluxo do catálogo via WebApplicationFactory + Sqlite em
-memória).
+Suíte de testes do back-end: **37 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo e clientes — integração via
+WebApplicationFactory + Sqlite em memória).
+
+### Etapa Clientes e aparelhos concluída em 2026-07-12
+
+Módulo 5 (CRM básico) — item 3 da ordem recomendada da Fase 1 — de ponta a
+ponta: API + RLS verificado no Postgres + cliente orval + tela. Evidência
+e2e (Playwright + Edge, 2026-07-12):
+
+```json
+{
+  "navClientesFunciona": true,
+  "clienteCriado": true,
+  "aparelhoAdicionado": true,
+  "badgeVipNaTabela": true,
+  "contagemAparelhos": true,
+  "vinculoCriadoComBadge": true,
+  "filtroVipEsconde": true,
+  "buscaPorTelefone": true,
+  "desativarEsconde": true,
+  "inativoApareceComFiltro": true
+}
+```
+
+RLS conferido no banco: `clientes` e `aparelhos` com `relrowsecurity = t`
+e `relforcerowsecurity = t`.
 
 ### Etapa Catálogo concluída em 2026-07-08
 
@@ -166,6 +189,27 @@ docker compose up -d --build
   (UUID + `updated_at`/`deleted_at` seguem exclusivos do escopo offline do
   técnico — seção 5 do doc de stack).
 
+### Clientes e aparelhos (módulo 5 — CRM básico)
+
+- **Clientes** (`/api/clientes` + tela `/clientes`): cadastro completo por
+  decisão aprovada em 2026-07-12 (nome e telefone obrigatórios; e-mail, CPF,
+  endereço e observações opcionais), flag **VIP manual** ("recorrente" será
+  derivado quando OS existir), busca por nome/telefone/CPF e filtros
+  ativos/inativos/VIP.
+- **Consentimento LGPD** (módulo 14, Fase 1): checkbox de comunicação
+  operacional com carimbo de data na concessão; revogar limpa o carimbo.
+- **Conta vinculada família/empresa**: FK `cliente_principal_id` com regra de
+  **1 nível** (sem auto-vínculo, sem cadeia, principal com dependentes não
+  vira vinculado) + UI mínima (select "Vinculado a" e badge na listagem).
+- **Aparelhos** como sub-recurso (`/api/clientes/{id}/aparelhos`): marca,
+  modelo, IMEI/nº de série, senha de desbloqueio e observações, gerenciados
+  na própria tela do cliente.
+- **Isolamento testado**: empresa B não lista/lê/altera clientes de A (404),
+  não vincula cliente de A como principal (400 anti-IDOR) e não adiciona
+  aparelho em cliente de A (404).
+- Exclusão = desativação; a anonimização LGPD (seção 16) entra na Fase 2 sem
+  migração destrutiva.
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -210,6 +254,10 @@ docker compose up -d --build
 - **Migrations agora também rodam no container do SDK** (Smart App Control):
   copiar o repo para `/work`, gerar lá e copiar `Migrations/*.cs` de volta —
   comando registrado no plano da etapa (docs/superpowers/plans/).
+- **Senha de desbloqueio do aparelho em texto** (decisão aprovada 2026-07-12):
+  a loja precisa lê-la, então hash não serve; candidata a criptografia de
+  campo se surgir exigência — a criptografia em repouso do provedor cobre o
+  disco. Tratar como dado sensível em qualquer exportação futura.
 
 ## Notas de ambiente (máquina de dev)
 
@@ -222,19 +270,25 @@ docker compose up -d --build
 - **Bind mount Windows→Linux não propaga eventos de arquivo**: edições no
   host podem não disparar hot-reload do Next dentro do container — reiniciar
   o serviço (`docker compose restart frontend`) força a recompilação.
+- **Turbopack no container às vezes materializa uma pasta com o caminho
+  Windows sanitizado** (ex.: `frontend/C:ProjetosPessoalTechProfrontend/`)
+  cheia de chunks de dev — é artefato inofensivo, ignorado no
+  `eslint.config.mjs`; pode ser apagado à vontade.
 
 ---
 
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **Clientes e aparelhos** (módulo 5 — cadastro, filtros, histórico; a
-   estrutura já deve nascer preparada para conta vinculada família/empresa).
-3. Na sequência da mesma ordem: Agenda/portal de agendamento → OS e Kanban
-   (aí sim PK UUID + `updated_at`/`deleted_at`, seção 5 do doc de stack) →
-   Estoque com baixa automática → Orçamento e pagamento básico → Comunicação
-   essencial → Dashboard → Onboarding guiado.
+2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é a
+   **Agenda e portal de agendamento** (módulo 2 — rota personalizada,
+   visualização dia/semana/mês, criação manual e via portal do cliente,
+   bloqueio de horários, capacidade por serviço — o campo já existe no
+   catálogo — e conversão em OS quando o módulo de OS chegar).
+3. Na sequência da mesma ordem: OS e Kanban (aí sim PK UUID +
+   `updated_at`/`deleted_at`, seção 5 do doc de stack) → Estoque com baixa
+   automática → Orçamento e pagamento básico → Comunicação essencial →
+   Dashboard → Onboarding guiado.
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
