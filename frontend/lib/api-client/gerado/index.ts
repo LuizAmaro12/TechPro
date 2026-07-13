@@ -24,6 +24,35 @@ import type {
 } from '@tanstack/react-query';
 
 import { apiFetch } from '../fetcher';
+export interface AparelhoRequest {
+  /** @nullable */
+  marca?: string | null;
+  /** @nullable */
+  modelo?: string | null;
+  /** @nullable */
+  imei?: string | null;
+  /** @nullable */
+  senhaDesbloqueio?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  ativo?: boolean;
+}
+
+export interface AparelhoResponse {
+  id?: number;
+  /** @nullable */
+  marca?: string | null;
+  /** @nullable */
+  modelo?: string | null;
+  /** @nullable */
+  imei?: string | null;
+  /** @nullable */
+  senhaDesbloqueio?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  ativo?: boolean;
+}
+
 export interface UsuarioResponse {
   id?: string;
   /** @nullable */
@@ -40,6 +69,87 @@ export interface AuthResponse {
   accessToken?: string | null;
   expiraEm?: string;
   usuario?: UsuarioResponse;
+}
+
+export interface VinculoResponse {
+  id?: number;
+  /** @nullable */
+  nome?: string | null;
+}
+
+export interface ClienteDetalheResponse {
+  id?: number;
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  cpf?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  vip?: boolean;
+  ativo?: boolean;
+  clientePrincipal?: VinculoResponse;
+  consentiuComunicacoes?: boolean;
+  /** @nullable */
+  consentimentoEm?: string | null;
+  /** @nullable */
+  aparelhos?: AparelhoResponse[] | null;
+}
+
+export interface ClienteRequest {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  cpf?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  vip?: boolean;
+  consentiuComunicacoes?: boolean;
+  /** @nullable */
+  clientePrincipalId?: number | null;
+  ativo?: boolean;
+}
+
+export interface ClienteResponse {
+  id?: number;
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  cpf?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  vip?: boolean;
+  ativo?: boolean;
+  clientePrincipal?: VinculoResponse;
+  consentiuComunicacoes?: boolean;
+  /** @nullable */
+  consentimentoEm?: string | null;
+  quantidadeAparelhos?: number;
+}
+
+export interface ClienteResponsePaginaResponse {
+  /** @nullable */
+  itens?: ClienteResponse[] | null;
+  total?: number;
+  pagina?: number;
+  tamanhoPagina?: number;
 }
 
 export interface EmpresaResponse {
@@ -224,6 +334,14 @@ export interface ValidationProblemDetails {
   [key: string]: unknown;
 }
 
+export type GetApiClientesParams = {
+busca?: string;
+somenteVip?: boolean;
+incluirInativos?: boolean;
+pagina?: number;
+tamanhoPagina?: number;
+};
+
 export type GetApiPecasParams = {
 busca?: string;
 incluirInativas?: boolean;
@@ -257,6 +375,274 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type postApiClientesClienteIdAparelhosResponse201 = {
+  data: AparelhoResponse
+  status: 201
+}
+
+export type postApiClientesClienteIdAparelhosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiClientesClienteIdAparelhosResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiClientesClienteIdAparelhosResponseSuccess = (postApiClientesClienteIdAparelhosResponse201) & {
+  headers: Headers;
+};
+export type postApiClientesClienteIdAparelhosResponseError = (postApiClientesClienteIdAparelhosResponse400 | postApiClientesClienteIdAparelhosResponse404) & {
+  headers: Headers;
+};
+
+export type postApiClientesClienteIdAparelhosResponse = (postApiClientesClienteIdAparelhosResponseSuccess | postApiClientesClienteIdAparelhosResponseError)
+
+export const getPostApiClientesClienteIdAparelhosUrl = (clienteId: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/aparelhos`
+}
+
+export const postApiClientesClienteIdAparelhos = async (clienteId: number,
+    aparelhoRequest?: AparelhoRequest, options?: RequestInit): Promise<postApiClientesClienteIdAparelhosResponse> => {
+
+  return apiFetch<postApiClientesClienteIdAparelhosResponse>(getPostApiClientesClienteIdAparelhosUrl(clienteId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(aparelhoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiClientesClienteIdAparelhosMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>, TError,{clienteId: number;data?: AparelhoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>, TError,{clienteId: number;data?: AparelhoRequest}, TContext> => {
+
+const mutationKey = ['postApiClientesClienteIdAparelhos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>, {clienteId: number;data?: AparelhoRequest}> = (props) => {
+          const {clienteId,data} = props ?? {};
+
+          return  postApiClientesClienteIdAparelhos(clienteId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiClientesClienteIdAparelhosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>>
+    export type PostApiClientesClienteIdAparelhosMutationBody = AparelhoRequest | undefined
+    export type PostApiClientesClienteIdAparelhosMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiClientesClienteIdAparelhos = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>, TError,{clienteId: number;data?: AparelhoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiClientesClienteIdAparelhos>>,
+        TError,
+        {clienteId: number;data?: AparelhoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiClientesClienteIdAparelhosMutationOptions(options), queryClient);
+    }
+
+export type putApiClientesClienteIdAparelhosIdResponse200 = {
+  data: AparelhoResponse
+  status: 200
+}
+
+export type putApiClientesClienteIdAparelhosIdResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiClientesClienteIdAparelhosIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiClientesClienteIdAparelhosIdResponseSuccess = (putApiClientesClienteIdAparelhosIdResponse200) & {
+  headers: Headers;
+};
+export type putApiClientesClienteIdAparelhosIdResponseError = (putApiClientesClienteIdAparelhosIdResponse400 | putApiClientesClienteIdAparelhosIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiClientesClienteIdAparelhosIdResponse = (putApiClientesClienteIdAparelhosIdResponseSuccess | putApiClientesClienteIdAparelhosIdResponseError)
+
+export const getPutApiClientesClienteIdAparelhosIdUrl = (clienteId: number,
+    id: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/aparelhos/${id}`
+}
+
+export const putApiClientesClienteIdAparelhosId = async (clienteId: number,
+    id: number,
+    aparelhoRequest?: AparelhoRequest, options?: RequestInit): Promise<putApiClientesClienteIdAparelhosIdResponse> => {
+
+  return apiFetch<putApiClientesClienteIdAparelhosIdResponse>(getPutApiClientesClienteIdAparelhosIdUrl(clienteId,id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(aparelhoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiClientesClienteIdAparelhosIdMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number;data?: AparelhoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number;data?: AparelhoRequest}, TContext> => {
+
+const mutationKey = ['putApiClientesClienteIdAparelhosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>, {clienteId: number;id: number;data?: AparelhoRequest}> = (props) => {
+          const {clienteId,id,data} = props ?? {};
+
+          return  putApiClientesClienteIdAparelhosId(clienteId,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiClientesClienteIdAparelhosIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>>
+    export type PutApiClientesClienteIdAparelhosIdMutationBody = AparelhoRequest | undefined
+    export type PutApiClientesClienteIdAparelhosIdMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiClientesClienteIdAparelhosId = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number;data?: AparelhoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiClientesClienteIdAparelhosId>>,
+        TError,
+        {clienteId: number;id: number;data?: AparelhoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiClientesClienteIdAparelhosIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiClientesClienteIdAparelhosIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiClientesClienteIdAparelhosIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteApiClientesClienteIdAparelhosIdResponseSuccess = (deleteApiClientesClienteIdAparelhosIdResponse204) & {
+  headers: Headers;
+};
+export type deleteApiClientesClienteIdAparelhosIdResponseError = (deleteApiClientesClienteIdAparelhosIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteApiClientesClienteIdAparelhosIdResponse = (deleteApiClientesClienteIdAparelhosIdResponseSuccess | deleteApiClientesClienteIdAparelhosIdResponseError)
+
+export const getDeleteApiClientesClienteIdAparelhosIdUrl = (clienteId: number,
+    id: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/aparelhos/${id}`
+}
+
+export const deleteApiClientesClienteIdAparelhosId = async (clienteId: number,
+    id: number, options?: RequestInit): Promise<deleteApiClientesClienteIdAparelhosIdResponse> => {
+
+  return apiFetch<deleteApiClientesClienteIdAparelhosIdResponse>(getDeleteApiClientesClienteIdAparelhosIdUrl(clienteId,id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiClientesClienteIdAparelhosIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number}, TContext> => {
+
+const mutationKey = ['deleteApiClientesClienteIdAparelhosId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>, {clienteId: number;id: number}> = (props) => {
+          const {clienteId,id} = props ?? {};
+
+          return  deleteApiClientesClienteIdAparelhosId(clienteId,id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiClientesClienteIdAparelhosIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>>
+
+    export type DeleteApiClientesClienteIdAparelhosIdMutationError = ProblemDetails
+
+    export const useDeleteApiClientesClienteIdAparelhosId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>, TError,{clienteId: number;id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiClientesClienteIdAparelhosId>>,
+        TError,
+        {clienteId: number;id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteApiClientesClienteIdAparelhosIdMutationOptions(options), queryClient);
+    }
 
 export type postApiAuthRegistrarResponse201 = {
   data: AuthResponse
@@ -715,6 +1101,492 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
 
 
 
+
+export type getApiClientesResponse200 = {
+  data: ClienteResponsePaginaResponse
+  status: 200
+}
+
+export type getApiClientesResponseSuccess = (getApiClientesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiClientesResponse = (getApiClientesResponseSuccess)
+
+export const getGetApiClientesUrl = (params?: GetApiClientesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/clientes?${stringifiedParams}` : `/api/clientes`
+}
+
+export const getApiClientes = async (params?: GetApiClientesParams, options?: RequestInit): Promise<getApiClientesResponse> => {
+
+  return apiFetch<getApiClientesResponse>(getGetApiClientesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiClientesQueryKey = (params?: GetApiClientesParams,) => {
+    return [
+    `/api/clientes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiClientesQueryOptions = <TData = Awaited<ReturnType<typeof getApiClientes>>, TError = unknown>(params?: GetApiClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiClientesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiClientes>>> = ({ signal }) => getApiClientes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiClientesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiClientes>>>
+export type GetApiClientesQueryError = unknown
+
+
+export function useGetApiClientes<TData = Awaited<ReturnType<typeof getApiClientes>>, TError = unknown>(
+ params: undefined |  GetApiClientesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientes<TData = Awaited<ReturnType<typeof getApiClientes>>, TError = unknown>(
+ params?: GetApiClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientes<TData = Awaited<ReturnType<typeof getApiClientes>>, TError = unknown>(
+ params?: GetApiClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiClientes<TData = Awaited<ReturnType<typeof getApiClientes>>, TError = unknown>(
+ params?: GetApiClientesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiClientesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiClientesResponse201 = {
+  data: ClienteResponse
+  status: 201
+}
+
+export type postApiClientesResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiClientesResponseSuccess = (postApiClientesResponse201) & {
+  headers: Headers;
+};
+export type postApiClientesResponseError = (postApiClientesResponse400) & {
+  headers: Headers;
+};
+
+export type postApiClientesResponse = (postApiClientesResponseSuccess | postApiClientesResponseError)
+
+export const getPostApiClientesUrl = () => {
+
+
+
+
+  return `/api/clientes`
+}
+
+export const postApiClientes = async (clienteRequest?: ClienteRequest, options?: RequestInit): Promise<postApiClientesResponse> => {
+
+  return apiFetch<postApiClientesResponse>(getPostApiClientesUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(clienteRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiClientesMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientes>>, TError,{data?: ClienteRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiClientes>>, TError,{data?: ClienteRequest}, TContext> => {
+
+const mutationKey = ['postApiClientes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiClientes>>, {data?: ClienteRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiClientes(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiClientesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiClientes>>>
+    export type PostApiClientesMutationBody = ClienteRequest | undefined
+    export type PostApiClientesMutationError = ValidationProblemDetails
+
+    export const usePostApiClientes = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientes>>, TError,{data?: ClienteRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiClientes>>,
+        TError,
+        {data?: ClienteRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiClientesMutationOptions(options), queryClient);
+    }
+
+export type getApiClientesIdResponse200 = {
+  data: ClienteDetalheResponse
+  status: 200
+}
+
+export type getApiClientesIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiClientesIdResponseSuccess = (getApiClientesIdResponse200) & {
+  headers: Headers;
+};
+export type getApiClientesIdResponseError = (getApiClientesIdResponse404) & {
+  headers: Headers;
+};
+
+export type getApiClientesIdResponse = (getApiClientesIdResponseSuccess | getApiClientesIdResponseError)
+
+export const getGetApiClientesIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const getApiClientesId = async (id: number, options?: RequestInit): Promise<getApiClientesIdResponse> => {
+
+  return apiFetch<getApiClientesIdResponse>(getGetApiClientesIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiClientesIdQueryKey = (id: number,) => {
+    return [
+    `/api/clientes/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiClientesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiClientesId>>, TError = ProblemDetails>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiClientesIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiClientesId>>> = ({ signal }) => getApiClientesId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiClientesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiClientesId>>>
+export type GetApiClientesIdQueryError = ProblemDetails
+
+
+export function useGetApiClientesId<TData = Awaited<ReturnType<typeof getApiClientesId>>, TError = ProblemDetails>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesId<TData = Awaited<ReturnType<typeof getApiClientesId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesId<TData = Awaited<ReturnType<typeof getApiClientesId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiClientesId<TData = Awaited<ReturnType<typeof getApiClientesId>>, TError = ProblemDetails>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiClientesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiClientesIdResponse200 = {
+  data: ClienteResponse
+  status: 200
+}
+
+export type putApiClientesIdResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiClientesIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiClientesIdResponseSuccess = (putApiClientesIdResponse200) & {
+  headers: Headers;
+};
+export type putApiClientesIdResponseError = (putApiClientesIdResponse400 | putApiClientesIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiClientesIdResponse = (putApiClientesIdResponseSuccess | putApiClientesIdResponseError)
+
+export const getPutApiClientesIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const putApiClientesId = async (id: number,
+    clienteRequest?: ClienteRequest, options?: RequestInit): Promise<putApiClientesIdResponse> => {
+
+  return apiFetch<putApiClientesIdResponse>(getPutApiClientesIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(clienteRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiClientesIdMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiClientesId>>, TError,{id: number;data?: ClienteRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiClientesId>>, TError,{id: number;data?: ClienteRequest}, TContext> => {
+
+const mutationKey = ['putApiClientesId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiClientesId>>, {id: number;data?: ClienteRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiClientesId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiClientesIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiClientesId>>>
+    export type PutApiClientesIdMutationBody = ClienteRequest | undefined
+    export type PutApiClientesIdMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiClientesId = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiClientesId>>, TError,{id: number;data?: ClienteRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiClientesId>>,
+        TError,
+        {id: number;data?: ClienteRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiClientesIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiClientesIdResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiClientesIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteApiClientesIdResponseSuccess = (deleteApiClientesIdResponse204) & {
+  headers: Headers;
+};
+export type deleteApiClientesIdResponseError = (deleteApiClientesIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteApiClientesIdResponse = (deleteApiClientesIdResponseSuccess | deleteApiClientesIdResponseError)
+
+export const getDeleteApiClientesIdUrl = (id: number,) => {
+
+
+
+
+  return `/api/clientes/${id}`
+}
+
+export const deleteApiClientesId = async (id: number, options?: RequestInit): Promise<deleteApiClientesIdResponse> => {
+
+  return apiFetch<deleteApiClientesIdResponse>(getDeleteApiClientesIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiClientesIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesId>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteApiClientesId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiClientesId>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiClientesId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiClientesIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiClientesId>>>
+
+    export type DeleteApiClientesIdMutationError = ProblemDetails
+
+    export const useDeleteApiClientesId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiClientesId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiClientesId>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteApiClientesIdMutationOptions(options), queryClient);
+    }
 
 export type getApiFornecedoresResponse200 = {
   data: FornecedorResponse[]
