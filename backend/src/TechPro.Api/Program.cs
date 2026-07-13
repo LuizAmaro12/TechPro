@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
@@ -20,12 +22,16 @@ builder.Host.UseSerilog((context, config) => config
     .Enrich.FromLogContext()
     .WriteTo.Console());
 
-builder.Services.AddControllers();
+// Enums viajam como string no JSON (ex.: status do agendamento) — legível no
+// contrato OpenAPI e estável se a ordem dos membros mudar.
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TenantAmbiente>();
 builder.Services.AddScoped<ITenantProvider, HttpTenantProvider>();
 builder.Services.AddScoped<TenantSessionInterceptor>();
 builder.Services.AddDbContext<TechProDbContext>((sp, options) => options
@@ -59,6 +65,9 @@ builder.Services.AddScoped<PecaService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<AparelhoService>();
+builder.Services.AddScoped<AgendaService>();
+builder.Services.AddScoped<DisponibilidadeService>();
+builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]
@@ -95,6 +104,9 @@ builder.Services.AddCors(options => options.AddPolicy("frontend", politica => po
 // Endpoints de auth são a porta de entrada para força bruta: janela fixa por
 // IP. Configurável para que os testes de integração não esbarrem no limite.
 var limiteAuthPorMinuto = builder.Configuration.GetValue("RateLimiting:AuthPorMinuto", 10);
+// A rota pública de agendamento não exige login (doc de stack, seção de
+// segurança) — limite próprio, mais folgado que o de auth.
+var limitePublicoPorMinuto = builder.Configuration.GetValue("RateLimiting:PublicoPorMinuto", 30);
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -103,6 +115,13 @@ builder.Services.AddRateLimiter(options =>
         _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = limiteAuthPorMinuto,
+            Window = TimeSpan.FromMinutes(1),
+        }));
+    options.AddPolicy("publico", contexto => RateLimitPartition.GetFixedWindowLimiter(
+        contexto.Connection.RemoteIpAddress?.ToString() ?? "ip-desconhecido",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = limitePublicoPorMinuto,
             Window = TimeSpan.FromMinutes(1),
         }));
 });

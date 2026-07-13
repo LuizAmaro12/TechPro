@@ -46,8 +46,8 @@ public class GlobalQueryFilterTests
     public void EmpresaDeOutroTenantNaoEVisivel()
     {
         var (contexto, provider) = CriarContexto();
-        var empresaA = new Empresa { Id = Guid.NewGuid(), Nome = "Assistência A", CriadoEm = DateTimeOffset.UtcNow };
-        var empresaB = new Empresa { Id = Guid.NewGuid(), Nome = "Assistência B", CriadoEm = DateTimeOffset.UtcNow };
+        var empresaA = new Empresa { Id = Guid.NewGuid(), Nome = "Assistência A", Slug = "assistencia-a", CriadoEm = DateTimeOffset.UtcNow };
+        var empresaB = new Empresa { Id = Guid.NewGuid(), Nome = "Assistência B", Slug = "assistencia-b", CriadoEm = DateTimeOffset.UtcNow };
         contexto.AddRange(empresaA, empresaB);
         contexto.SaveChanges();
 
@@ -63,7 +63,7 @@ public class GlobalQueryFilterTests
     public void SemTenantNoContextoNenhumaEmpresaEVisivel()
     {
         var (contexto, provider) = CriarContexto();
-        contexto.Add(new Empresa { Id = Guid.NewGuid(), Nome = "Assistência A", CriadoEm = DateTimeOffset.UtcNow });
+        contexto.Add(new Empresa { Id = Guid.NewGuid(), Nome = "Assistência A", Slug = "assistencia-a", CriadoEm = DateTimeOffset.UtcNow });
         contexto.SaveChanges();
 
         provider.TenantId = null;
@@ -107,8 +107,8 @@ public class GlobalQueryFilterTests
     {
         var (contexto, provider) = CriarContexto();
         contexto.AddRange(
-            new Empresa { Id = Guid.NewGuid(), Nome = "A", CriadoEm = DateTimeOffset.UtcNow },
-            new Empresa { Id = Guid.NewGuid(), Nome = "B", CriadoEm = DateTimeOffset.UtcNow });
+            new Empresa { Id = Guid.NewGuid(), Nome = "A", Slug = "a-slug", CriadoEm = DateTimeOffset.UtcNow },
+            new Empresa { Id = Guid.NewGuid(), Nome = "B", Slug = "b-slug", CriadoEm = DateTimeOffset.UtcNow });
         contexto.SaveChanges();
 
         provider.TenantId = null;

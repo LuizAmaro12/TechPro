@@ -8,5 +8,12 @@ public class Empresa
 {
     public Guid Id { get; set; }
     public required string Nome { get; set; }
+
+    /// <summary>
+    /// Identificador público da loja na URL de agendamento (/agendar/{slug}).
+    /// Único globalmente; gerado do nome no cadastro e editável depois.
+    /// </summary>
+    public required string Slug { get; set; }
+
     public DateTimeOffset CriadoEm { get; set; }
 }

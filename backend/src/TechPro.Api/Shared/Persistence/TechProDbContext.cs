@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
@@ -27,6 +28,9 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<Servico> Servicos => Set<Servico>();
     public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Aparelho> Aparelhos => Set<Aparelho>();
+    public DbSet<HorarioFuncionamento> HorariosFuncionamento => Set<HorarioFuncionamento>();
+    public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
+    public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -36,6 +40,8 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
         {
             e.ToTable("empresas");
             e.Property(x => x.Nome).HasMaxLength(200);
+            e.Property(x => x.Slug).HasMaxLength(80);
+            e.HasIndex(x => x.Slug).IsUnique();
             // A Empresa é a raiz do tenant: o filtro usa o próprio Id.
             // Fail-closed: sem tenant no contexto, nenhuma empresa é visível.
             e.HasQueryFilter(x => x.Id == TenantIdAtual);
@@ -171,6 +177,43 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.TenantId);
             e.HasIndex(x => x.ClienteId);
             e.HasOne<Cliente>().WithMany(c => c.Aparelhos).HasForeignKey(x => x.ClienteId);
+        });
+
+        // --- Agenda (módulo 2): horários, bloqueios e agendamentos ---------------
+
+        builder.Entity<HorarioFuncionamento>(e =>
+        {
+            e.ToTable("horarios_funcionamento");
+            e.HasIndex(x => new { x.TenantId, x.DiaSemana }).IsUnique();
+        });
+
+        builder.Entity<BloqueioAgenda>(e =>
+        {
+            e.ToTable("bloqueios_agenda");
+            e.Property(x => x.Motivo).HasMaxLength(200);
+            e.HasIndex(x => new { x.TenantId, x.Data });
+        });
+
+        builder.Entity<Agendamento>(e =>
+        {
+            e.ToTable("agendamentos");
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(30);
+            e.Property(x => x.Origem).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.NomeContato).HasMaxLength(200);
+            e.Property(x => x.TelefoneContato).HasMaxLength(20);
+            e.Property(x => x.EmailContato).HasMaxLength(256);
+            e.Property(x => x.DescricaoProblema).HasMaxLength(1000);
+            e.Property(x => x.AparelhoMarca).HasMaxLength(100);
+            e.Property(x => x.AparelhoModelo).HasMaxLength(150);
+            e.Property(x => x.MotivoCancelamento).HasMaxLength(500);
+            e.HasIndex(x => new { x.TenantId, x.Data });
+            e.HasIndex(x => x.ClienteId);
+            // Restrict: histórico de agenda não some junto com cliente/serviço
+            // (ambos usam desativação, nunca exclusão física — defesa extra).
+            e.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         AplicarFiltroDeTenantPorConvencao(builder);

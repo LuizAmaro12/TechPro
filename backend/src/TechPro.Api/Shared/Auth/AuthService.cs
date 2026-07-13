@@ -56,6 +56,7 @@ public class AuthService(
         {
             Id = Guid.NewGuid(),
             Nome = requisicao.NomeEmpresa.Trim(),
+            Slug = await GerarSlugUnicoAsync(requisicao.NomeEmpresa.Trim()),
             CriadoEm = DateTimeOffset.UtcNow,
         };
         db.Empresas.Add(empresa);
@@ -229,5 +230,23 @@ public class AuthService(
             new UsuarioResponse(usuario.Id, usuario.Nome, usuario.Email ?? string.Empty, papel, usuario.TenantId));
 
         return new TokensEmitidos(resposta, refreshPuro, refresh.ExpiraEm, refresh.Id);
+    }
+
+    /// <summary>
+    /// Slug único global para a URL pública de agendamento. O filtro da
+    /// Empresa é por Id == tenant corrente e no cadastro ainda não há tenant,
+    /// então a checagem de unicidade ignora o filtro de propósito.
+    /// </summary>
+    private async Task<string> GerarSlugUnicoAsync(string nomeEmpresa)
+    {
+        var slugBase = GeradorDeSlug.Gerar(nomeEmpresa);
+        var slug = slugBase;
+        var sufixo = 2;
+        while (await db.Empresas.IgnoreQueryFilters().AnyAsync(e => e.Slug == slug))
+        {
+            slug = $"{slugBase}-{sufixo++}";
+        }
+
+        return slug;
     }
 }
