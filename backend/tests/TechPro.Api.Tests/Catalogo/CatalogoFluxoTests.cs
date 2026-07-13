@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using TechPro.Api.Modules.ServicosEPecas.Dtos;
+using TechPro.Api.Shared.Api;
 using TechPro.Api.Shared.Auth;
 
 namespace TechPro.Api.Tests.Catalogo;
@@ -79,5 +80,105 @@ public class CatalogoFluxoTests(TechProApiFactory fabrica) : IClassFixture<TechP
         var alterarB = await EnviarAsync(HttpMethod.Put, $"/api/fornecedores/{fornecedor!.Id}", tokenB,
             new { nome = "Tentativa de roubo", contato = (string?)null });
         Assert.Equal(HttpStatusCode.NotFound, alterarB.StatusCode);
+    }
+
+    private static object CorpoPeca(
+        string nome = "Tela iPhone 13", int? fornecedorId = null, int quantidade = 5, int minimo = 2) => new
+    {
+        nome,
+        descricao = "OLED compatível",
+        custoUnitario = 450.00m,
+        precoVenda = 900.00m,
+        quantidadeEmEstoque = quantidade,
+        estoqueMinimo = minimo,
+        fornecedorId,
+        ativo = true,
+    };
+
+    [Fact]
+    public async Task PecaCrudCompletoComFornecedorEEstoqueBaixo()
+    {
+        var token = await RegistrarEmpresaAsync("peca.crud@exemplo.com");
+
+        var fornecedorResposta = await EnviarAsync(HttpMethod.Post, "/api/fornecedores", token,
+            new { nome = "ImportaCel", contato = (string?)null });
+        var fornecedor = await fornecedorResposta.Content.ReadFromJsonAsync<FornecedorResponse>();
+
+        var criada = await EnviarAsync(HttpMethod.Post, "/api/pecas", token,
+            CorpoPeca(fornecedorId: fornecedor!.Id));
+        Assert.Equal(HttpStatusCode.Created, criada.StatusCode);
+        var peca = await criada.Content.ReadFromJsonAsync<PecaResponse>();
+        Assert.NotNull(peca);
+        Assert.Equal("ImportaCel", peca.Fornecedor?.Nome);
+        Assert.False(peca.EstoqueBaixo);
+
+        // Fornecedor em uso não pode ser removido (módulo 7 depende do vínculo).
+        var removerFornecedor = await EnviarAsync(
+            HttpMethod.Delete, $"/api/fornecedores/{fornecedor.Id}", token);
+        Assert.Equal(HttpStatusCode.Conflict, removerFornecedor.StatusCode);
+
+        // Quantidade cai para o mínimo: alerta de estoque baixo (módulo 7).
+        var atualizada = await EnviarAsync(HttpMethod.Put, $"/api/pecas/{peca.Id}", token,
+            CorpoPeca(fornecedorId: fornecedor.Id, quantidade: 2, minimo: 2));
+        Assert.Equal(HttpStatusCode.OK, atualizada.StatusCode);
+        var pecaAtualizada = await atualizada.Content.ReadFromJsonAsync<PecaResponse>();
+        Assert.True(pecaAtualizada!.EstoqueBaixo);
+
+        // Desativar preserva o registro, mas some da listagem padrão.
+        var desativada = await EnviarAsync(HttpMethod.Delete, $"/api/pecas/{peca.Id}", token);
+        Assert.Equal(HttpStatusCode.NoContent, desativada.StatusCode);
+
+        var listaPadrao = await EnviarAsync(HttpMethod.Get, "/api/pecas", token);
+        var paginaPadrao = await listaPadrao.Content.ReadFromJsonAsync<PaginaResponse<PecaResponse>>();
+        Assert.DoesNotContain(paginaPadrao!.Itens, p => p.Id == peca.Id);
+
+        var listaCompleta = await EnviarAsync(HttpMethod.Get, "/api/pecas?incluirInativas=true", token);
+        var paginaCompleta = await listaCompleta.Content.ReadFromJsonAsync<PaginaResponse<PecaResponse>>();
+        Assert.Contains(paginaCompleta!.Itens, p => p.Id == peca.Id && !p.Ativo);
+    }
+
+    [Fact]
+    public async Task PecaDeOutraEmpresaEInvisivel()
+    {
+        var tokenA = await RegistrarEmpresaAsync("peca.iso.a@exemplo.com");
+        var tokenB = await RegistrarEmpresaAsync("peca.iso.b@exemplo.com");
+
+        var criada = await EnviarAsync(HttpMethod.Post, "/api/pecas", tokenA,
+            CorpoPeca(nome: "Peça secreta de A"));
+        var peca = await criada.Content.ReadFromJsonAsync<PecaResponse>();
+
+        var listaB = await EnviarAsync(HttpMethod.Get, "/api/pecas?incluirInativas=true", tokenB);
+        var paginaB = await listaB.Content.ReadFromJsonAsync<PaginaResponse<PecaResponse>>();
+        Assert.DoesNotContain(paginaB!.Itens, p => p.Nome == "Peça secreta de A");
+
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await EnviarAsync(HttpMethod.Get, $"/api/pecas/{peca!.Id}", tokenB)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound,
+            (await EnviarAsync(HttpMethod.Delete, $"/api/pecas/{peca.Id}", tokenB)).StatusCode);
+    }
+
+    [Fact]
+    public async Task PecaComPrecoNegativoRetorna400()
+    {
+        var token = await RegistrarEmpresaAsync("peca.validacao@exemplo.com");
+
+        var resposta = await EnviarAsync(HttpMethod.Post, "/api/pecas", token, new
+        {
+            nome = "Peça inválida",
+            custoUnitario = -1.00m,
+            precoVenda = 10.00m,
+            quantidadeEmEstoque = 0,
+            estoqueMinimo = 0,
+            ativo = true,
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
+    }
+
+    [Fact]
+    public async Task CatalogoExigeAutenticacao()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await _cliente.GetAsync("/api/pecas")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await _cliente.GetAsync("/api/fornecedores")).StatusCode);
     }
 }
