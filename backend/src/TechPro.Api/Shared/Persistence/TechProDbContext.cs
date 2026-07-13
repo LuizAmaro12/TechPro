@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Tenancy;
@@ -24,6 +25,8 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<Fornecedor> Fornecedores => Set<Fornecedor>();
     public DbSet<Peca> Pecas => Set<Peca>();
     public DbSet<Servico> Servicos => Set<Servico>();
+    public DbSet<Cliente> Clientes => Set<Cliente>();
+    public DbSet<Aparelho> Aparelhos => Set<Aparelho>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -137,6 +140,37 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.Property(x => x.Descricao).HasMaxLength(300);
             e.HasIndex(x => x.TenantId);
             e.HasOne<Servico>().WithMany(s => s.Checklist).HasForeignKey(x => x.ServicoId);
+        });
+
+        // --- Clientes (módulo 5): CRM básico + aparelhos -------------------------
+
+        builder.Entity<Cliente>(e =>
+        {
+            e.ToTable("clientes");
+            e.Property(x => x.Nome).HasMaxLength(200);
+            e.Property(x => x.Telefone).HasMaxLength(20);
+            e.Property(x => x.Email).HasMaxLength(256);
+            e.Property(x => x.Cpf).HasMaxLength(14);
+            e.Property(x => x.Endereco).HasMaxLength(300);
+            e.Property(x => x.Observacoes).HasMaxLength(1000);
+            e.HasIndex(x => x.TenantId);
+            e.HasIndex(x => new { x.TenantId, x.Nome });
+            // Restrict: um principal com vinculados não pode ser removido por engano.
+            e.HasOne(x => x.ClientePrincipal).WithMany().HasForeignKey(x => x.ClientePrincipalId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Aparelho>(e =>
+        {
+            e.ToTable("aparelhos");
+            e.Property(x => x.Marca).HasMaxLength(100);
+            e.Property(x => x.Modelo).HasMaxLength(150);
+            e.Property(x => x.Imei).HasMaxLength(50);
+            e.Property(x => x.SenhaDesbloqueio).HasMaxLength(100);
+            e.Property(x => x.Observacoes).HasMaxLength(500);
+            e.HasIndex(x => x.TenantId);
+            e.HasIndex(x => x.ClienteId);
+            e.HasOne<Cliente>().WithMany(c => c.Aparelhos).HasForeignKey(x => x.ClienteId);
         });
 
         AplicarFiltroDeTenantPorConvencao(builder);
