@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // O Turbopack do dev server no container Linux ocasionalmente materializa
+    // uma pasta com o caminho Windows sanitizado (ex.: "C:ProjetosPessoal...")
+    // cheia de chunks de build dentro do bind mount — é artefato, não código.
+    "C\\:*/**",
+    "**/.next/**",
   ]),
 ]);
 
