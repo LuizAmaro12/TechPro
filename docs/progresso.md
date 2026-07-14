@@ -38,9 +38,37 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **37 testes xUnit verdes** (GQF por convenção,
-TokenService, fluxo de auth, catálogo e clientes — integração via
+Suíte de testes do back-end: **52 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo, clientes e agenda — integração via
 WebApplicationFactory + Sqlite em memória).
+
+### Etapa Agenda e portal de agendamento concluída em 2026-07-14
+
+Módulo 2 (agendamento e calendário) + o fluxo de agendamento do módulo 1
+(portal do cliente) — item 4 da ordem recomendada da Fase 1 — de ponta a
+ponta: API + RLS verificado no Postgres + cliente orval + telas + portal
+público sem login. Plano e decisões aprovadas em
+`docs/superpowers/plans/2026-07-13-agenda-e-portal-agendamento.md`.
+Evidência e2e (Playwright + Edge, 2026-07-14):
+
+```json
+{
+  "navAgendaFunciona": true,
+  "agendamentoManualCriado": true,
+  "checkinFunciona": true,
+  "configuracoesCarregam": true,
+  "slotOcupadoSomeDoPortal": true,
+  "portalAgendamentoConcluido": true,
+  "portalApareceNaAgendaDaLoja": true,
+  "clienteCriadoPeloPortal": true
+}
+```
+
+O `slotOcupadoSomeDoPortal` prova a capacidade simultânea de ponta a ponta:
+um agendamento manual às 14:00 fez o horário sumir da grade pública.
+RLS conferido no banco: `agendamentos`, `bloqueios_agenda` e
+`horarios_funcionamento` com `relrowsecurity = t` e `relforcerowsecurity = t`;
+fail-closed confirmado (`count(*) = 0` sem `app.tenant_id` na sessão).
 
 ### Etapa Clientes e aparelhos concluída em 2026-07-12
 
@@ -142,8 +170,17 @@ docker compose up -d --build
   fail-closed (sem tenant no contexto, nenhuma linha aparece).
 - **RLS no Postgres** como segunda camada: `app.tenant_id` é setado por
   interceptor em toda conexão (`set_config`); app conecta como `techpro_app`
-  (NOSUPERUSER, **NOBYPASSRLS**); `empresas` com ENABLE+FORCE RLS
-  (SELECT isolado por tenant, INSERT público para o cadastro).
+  (NOSUPERUSER, **NOBYPASSRLS**); `empresas` com ENABLE+FORCE RLS.
+- **Policies de `empresas` (revisadas em 2026-07-13)**: leitura **pública**
+  (a rota de agendamento resolve slug → empresa antes de existir tenant e a
+  tabela é só diretório — id, nome, slug, criado_em), INSERT público para o
+  cadastro e UPDATE restrito à própria empresa (edição de slug). A policy de
+  UPDATE **não existia** até então — o FORCE RLS negaria o UPDATE em silêncio;
+  descoberta registrada em "Desvios e notas".
+- **Tenant fixado fora do JWT** (`TenantAmbiente`): a rota pública resolve o
+  slug e fixa o tenant da requisição; `HttpTenantProvider` o consulta antes da
+  claim — GQF e RLS passam a valer normalmente, sem isolamento reimplementado
+  à mão no fluxo público.
 - `RlsHelper.AplicarIsolamentoTenant()` pronto para aplicar a política padrão
   em toda tabela de produto futura (OS, estoque, financeiro...).
 - **Plano de controle deliberadamente fora do GQF/RLS**: `usuarios` e
@@ -210,6 +247,43 @@ docker compose up -d --build
 - Exclusão = desativação; a anonimização LGPD (seção 16) entra na Fase 2 sem
   migração destrutiva.
 
+### Agenda e portal de agendamento (módulo 2 + fluxo do módulo 1)
+
+- **Horários de funcionamento** (`/api/agenda/horarios` + tela
+  `/agenda/configuracoes`): um registro por dia da semana (abertura,
+  fechamento, intervalo opcional); dia sem registro ou inativo = fechado
+  (fail-closed). Salvo em lote (os 7 dias num PUT).
+- **Bloqueios pontuais** (`/api/agenda/bloqueios`): data + faixa de horário +
+  motivo; somem da grade de disponibilidade. Exclusão física permitida —
+  bloqueio é configuração operacional, não registro de negócio.
+- **Disponibilidade em slots de 30 min** (`/api/agenda/disponibilidade`):
+  grade dentro do horário do dia, menos intervalo e bloqueios; um serviço
+  ocupa `ceil(duração/30)` slots e a **capacidade simultânea** do serviço
+  (campo criado no catálogo) limita sobreposições por sub-slot. Aritmética em
+  minutos inteiros — `TimeOnly.AddMinutes` dá a volta na meia-noite.
+- **Agendamentos** (`/api/agendamentos` + tela `/agenda`): criação manual
+  (cliente vinculado ou contato avulso — snapshot de nome/telefone),
+  reagendamento (marca `reagendado_em`; só no status Agendado), **check-in**
+  (gancho da conversão em OS na etapa 5) e cancelamento com motivo.
+  Calendário próprio em Tailwind com visões dia/semana/mês (sem lib nova,
+  conforme o doc de stack).
+- **Slug público por empresa** (`empresas.slug`, único global): gerado do nome
+  no cadastro (`GeradorDeSlug` — minúsculas, sem acentos, hífens), editável em
+  configurações com URL copiável; conflito responde 409.
+- **Rota pública `/api/publico/{slug}`** (sem login, rate limit próprio
+  30/min/IP): `info` (nome + serviços com `agendavel_online=true`),
+  `disponibilidade` e criação de agendamento. **Vínculo silencioso por
+  telefone** (decisão aprovada 2026-07-13): telefone que bate com cliente
+  ativo (comparação só por dígitos) vincula sem expor nada do cadastro;
+  telefone inédito cria cliente novo no CRM.
+- **Portal `/agendar/{slug}`** (grupo `(portal-cliente)`, sem guard): wizard
+  progressivo — identificação → aparelho/problema → serviço → data/horário →
+  confirmação — no visual do guia. Anexos entram quando o R2 existir.
+- **Isolamento testado também no fluxo público**: slug da loja B + serviço da
+  loja A → 400 em disponibilidade e criação (GQF com tenant fixado); B não
+  lista nem faz check-in em agendamento de A (404); enums viajam como string
+  no JSON (`JsonStringEnumConverter`).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -258,6 +332,24 @@ docker compose up -d --build
   a loja precisa lê-la, então hash não serve; candidata a criptografia de
   campo se surgir exigência — a criptografia em repouso do provedor cobre o
   disco. Tratar como dado sensível em qualquer exportação futura.
+- **Diferimentos da etapa Agenda (aprovados 2026-07-13)**: lembretes
+  automáticos → etapa 8 (Comunicação, Hangfire + WhatsApp/Resend); conversão
+  automática em OS → etapa 5 (o status `CheckInRealizado` é o gancho); anexos
+  no fluxo público → quando a conta Cloudflare R2 existir.
+- **Datas da agenda são "hora de parede" da loja** (`DateOnly`/`TimeOnly`,
+  sem timezone). O bloqueio de data passada no portal usa o dia UTC com
+  tolerância de 1 dia — sem ela, uma loja UTC-3 não agendaria "hoje" à noite.
+  Fuso explícito por loja só se surgir demanda real.
+- **Corrida residual de vaga aceita no MVP**: a disponibilidade é revalidada
+  imediatamente antes do INSERT, mas duas requisições simultâneas no mesmo
+  slot podem passar (sem lock pessimista). Baixíssima probabilidade no volume
+  esperado; revisitar com constraint/lock se aparecer na prática.
+- **Lição de migração com RLS FORCE**: o backfill de `empresas.slug` foi
+  bloqueado em silêncio pelo RLS (migração roda como `techpro_app`, sem
+  policy de UPDATE e sem tenant na sessão) e o índice único falhou nos slugs
+  vazios. Correção: a migração desliga/religa o RLS da tabela em volta do
+  UPDATE (o dono da tabela pode). **Todo backfill futuro em tabela com FORCE
+  RLS precisa disso** — o UPDATE não dá erro, só afeta zero linhas.
 
 ## Notas de ambiente (máquina de dev)
 
@@ -280,15 +372,17 @@ docker compose up -d --build
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é a
-   **Agenda e portal de agendamento** (módulo 2 — rota personalizada,
-   visualização dia/semana/mês, criação manual e via portal do cliente,
-   bloqueio de horários, capacidade por serviço — o campo já existe no
-   catálogo — e conversão em OS quando o módulo de OS chegar).
-3. Na sequência da mesma ordem: OS e Kanban (aí sim PK UUID +
-   `updated_at`/`deleted_at`, seção 5 do doc de stack) → Estoque com baixa
-   automática → Orçamento e pagamento básico → Comunicação essencial →
-   Dashboard → Onboarding guiado.
+2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
+   **OS e Kanban** (módulo 3 — etapas essenciais, arrastar e soltar,
+   responsável técnico, prioridade, prazo; aí sim PK UUID +
+   `updated_at`/`deleted_at`, seção 5 do doc de stack). Inclui ligar a
+   **conversão automática de agendamento em OS** a partir do check-in
+   (gancho já pronto na agenda).
+3. Na sequência da mesma ordem: Estoque com baixa automática → Orçamento e
+   pagamento básico → Comunicação essencial (inclui os lembretes automáticos
+   de agendamento diferidos) → Dashboard → Onboarding guiado (inclui
+   horários de funcionamento no wizard — a tela de configurações da agenda
+   já cobre o dado).
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
