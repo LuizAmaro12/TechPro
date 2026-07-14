@@ -24,6 +24,34 @@ import type {
 } from '@tanstack/react-query';
 
 import { apiFetch } from '../fetcher';
+export type EtapaOrdemServico = typeof EtapaOrdemServico[keyof typeof EtapaOrdemServico];
+
+
+export const EtapaOrdemServico = {
+  CheckInRealizado: 'CheckInRealizado',
+  NaFila: 'NaFila',
+  EmDiagnostico: 'EmDiagnostico',
+  AguardandoAprovacao: 'AguardandoAprovacao',
+  AguardandoPeca: 'AguardandoPeca',
+  EmReparo: 'EmReparo',
+  EmTeste: 'EmTeste',
+  ProntoParaRetirada: 'ProntoParaRetirada',
+  Entregue: 'Entregue',
+  Cancelado: 'Cancelado',
+} as const;
+
+export interface AcompanhamentoResponse {
+  /** @nullable */
+  nomeLoja?: string | null;
+  numero?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  etapa?: EtapaOrdemServico;
+  /** @nullable */
+  prazoEstimado?: string | null;
+  atualizadoEm?: string;
+}
+
 export interface AgendamentoPublicoRequest {
   servicoId?: number;
   data?: string;
@@ -297,6 +325,14 @@ export interface EmpresaResponse {
   nome?: string | null;
 }
 
+export interface EquipeMembroResponse {
+  id?: string;
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  email?: string | null;
+}
+
 export interface FornecedorRequest {
   /** @nullable */
   nome?: string | null;
@@ -310,6 +346,29 @@ export interface FornecedorResponse {
   nome?: string | null;
   /** @nullable */
   contato?: string | null;
+}
+
+export interface HistoricoEtapaResponse {
+  deEtapa?: EtapaOrdemServico;
+  paraEtapa?: EtapaOrdemServico;
+  /** @nullable */
+  usuarioNome?: string | null;
+  /** @nullable */
+  motivo?: string | null;
+  criadoEm?: string;
+}
+
+export interface HistoricoSyncItem {
+  id?: string;
+  ordemServicoId?: string;
+  deEtapa?: EtapaOrdemServico;
+  paraEtapa?: EtapaOrdemServico;
+  /** @nullable */
+  motivo?: string | null;
+  criadoEm?: string;
+  updatedAt?: string;
+  /** @nullable */
+  deletedAt?: string | null;
 }
 
 export interface HorarioFuncionamentoDia {
@@ -369,6 +428,140 @@ export interface MeResponse {
   papel?: string | null;
   tenantId?: string;
   empresa?: EmpresaResponse;
+}
+
+export interface MudancaEtapaRequest {
+  paraEtapa?: EtapaOrdemServico;
+  /** @nullable */
+  motivo?: string | null;
+}
+
+export type PrioridadeOrdemServico = typeof PrioridadeOrdemServico[keyof typeof PrioridadeOrdemServico];
+
+
+export const PrioridadeOrdemServico = {
+  Baixa: 'Baixa',
+  Normal: 'Normal',
+  Alta: 'Alta',
+} as const;
+
+export type StatusPagamentoOrdemServico = typeof StatusPagamentoOrdemServico[keyof typeof StatusPagamentoOrdemServico];
+
+
+export const StatusPagamentoOrdemServico = {
+  NaoPago: 'NaoPago',
+  Parcial: 'Parcial',
+  Pago: 'Pago',
+} as const;
+
+export type StatusAprovacaoOrdemServico = typeof StatusAprovacaoOrdemServico[keyof typeof StatusAprovacaoOrdemServico];
+
+
+export const StatusAprovacaoOrdemServico = {
+  Pendente: 'Pendente',
+  Aprovado: 'Aprovado',
+  Recusado: 'Recusado',
+} as const;
+
+export interface OrdemServicoAtualizacaoRequest {
+  /** @nullable */
+  aparelhoId?: number | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  prioridade?: PrioridadeOrdemServico;
+  /** @nullable */
+  prazoEstimado?: string | null;
+  /** @nullable */
+  responsavelTecnicoId?: string | null;
+  statusPagamento?: StatusPagamentoOrdemServico;
+  statusAprovacao?: StatusAprovacaoOrdemServico;
+  /** @nullable */
+  observacoes?: string | null;
+}
+
+export interface OrdemServicoResponse {
+  id?: string;
+  numero?: number;
+  etapa?: EtapaOrdemServico;
+  prioridade?: PrioridadeOrdemServico;
+  /** @nullable */
+  prazoEstimado?: string | null;
+  clienteId?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  /** @nullable */
+  clienteTelefone?: string | null;
+  servicoId?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  /** @nullable */
+  aparelhoId?: number | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  /** @nullable */
+  responsavelTecnicoId?: string | null;
+  /** @nullable */
+  responsavelTecnicoNome?: string | null;
+  statusPagamento?: StatusPagamentoOrdemServico;
+  statusAprovacao?: StatusAprovacaoOrdemServico;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+  /** @nullable */
+  motivoCancelamento?: string | null;
+  /** @nullable */
+  codigoAcompanhamento?: string | null;
+  /** @nullable */
+  agendamentoId?: number | null;
+  criadoEm?: string;
+  updatedAt?: string;
+}
+
+export interface OrdemServicoDetalheResponse {
+  ordem?: OrdemServicoResponse;
+  /** @nullable */
+  historico?: HistoricoEtapaResponse[] | null;
+}
+
+export interface OrdemServicoRequest {
+  clienteId?: number;
+  servicoId?: number;
+  /** @nullable */
+  aparelhoId?: number | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  prioridade?: PrioridadeOrdemServico;
+  /** @nullable */
+  prazoEstimado?: string | null;
+  /** @nullable */
+  responsavelTecnicoId?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+}
+
+export interface OrdemServicoSyncItem {
+  ordem?: OrdemServicoResponse;
+  /** @nullable */
+  deletedAt?: string | null;
+}
+
+export interface OrdensServicoSyncResponse {
+  /** @nullable */
+  ordens?: OrdemServicoSyncItem[] | null;
+  /** @nullable */
+  historico?: HistoricoSyncItem[] | null;
+  agora?: string;
 }
 
 export interface PecaRequest {
@@ -537,6 +730,17 @@ pagina?: number;
 tamanhoPagina?: number;
 };
 
+export type GetApiOrdensServicoParams = {
+etapa?: EtapaOrdemServico;
+busca?: string;
+responsavelId?: string;
+incluirFinalizadas?: boolean;
+};
+
+export type GetApiOrdensServicoSyncParams = {
+since?: string;
+};
+
 export type GetApiPecasParams = {
 busca?: string;
 incluirInativas?: boolean;
@@ -575,6 +779,128 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type getApiPublicoSlugAcompanharCodigoResponse200 = {
+  data: AcompanhamentoResponse
+  status: 200
+}
+
+export type getApiPublicoSlugAcompanharCodigoResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiPublicoSlugAcompanharCodigoResponseSuccess = (getApiPublicoSlugAcompanharCodigoResponse200) & {
+  headers: Headers;
+};
+export type getApiPublicoSlugAcompanharCodigoResponseError = (getApiPublicoSlugAcompanharCodigoResponse404) & {
+  headers: Headers;
+};
+
+export type getApiPublicoSlugAcompanharCodigoResponse = (getApiPublicoSlugAcompanharCodigoResponseSuccess | getApiPublicoSlugAcompanharCodigoResponseError)
+
+export const getGetApiPublicoSlugAcompanharCodigoUrl = (slug: string,
+    codigo: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/acompanhar/${codigo}`
+}
+
+export const getApiPublicoSlugAcompanharCodigo = async (slug: string,
+    codigo: string, options?: RequestInit): Promise<getApiPublicoSlugAcompanharCodigoResponse> => {
+
+  return apiFetch<getApiPublicoSlugAcompanharCodigoResponse>(getGetApiPublicoSlugAcompanharCodigoUrl(slug,codigo),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiPublicoSlugAcompanharCodigoQueryKey = (slug: string,
+    codigo: string,) => {
+    return [
+    `/api/publico/${slug}/acompanhar/${codigo}`
+    ] as const;
+    }
+
+
+export const getGetApiPublicoSlugAcompanharCodigoQueryOptions = <TData = Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError = ProblemDetails>(slug: string,
+    codigo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiPublicoSlugAcompanharCodigoQueryKey(slug,codigo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>> = ({ signal }) => getApiPublicoSlugAcompanharCodigo(slug,codigo, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined && codigo !== null && codigo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiPublicoSlugAcompanharCodigoQueryResult = NonNullable<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>>
+export type GetApiPublicoSlugAcompanharCodigoQueryError = ProblemDetails
+
+
+export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError = ProblemDetails>(
+ slug: string,
+    codigo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError = ProblemDetails>(
+ slug: string,
+    codigo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError = ProblemDetails>(
+ slug: string,
+    codigo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError = ProblemDetails>(
+ slug: string,
+    codigo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPublicoSlugAcompanharCodigo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiPublicoSlugAcompanharCodigoQueryOptions(slug,codigo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type getApiAgendaHorariosResponse200 = {
   data: HorarioFuncionamentoDia[]
@@ -3159,6 +3485,113 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteApiClientesIdMutationOptions(options), queryClient);
     }
 
+export type getApiEquipeResponse200 = {
+  data: EquipeMembroResponse[]
+  status: 200
+}
+
+export type getApiEquipeResponseSuccess = (getApiEquipeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiEquipeResponse = (getApiEquipeResponseSuccess)
+
+export const getGetApiEquipeUrl = () => {
+
+
+
+
+  return `/api/equipe`
+}
+
+export const getApiEquipe = async ( options?: RequestInit): Promise<getApiEquipeResponse> => {
+
+  return apiFetch<getApiEquipeResponse>(getGetApiEquipeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiEquipeQueryKey = () => {
+    return [
+    `/api/equipe`
+    ] as const;
+    }
+
+
+export const getGetApiEquipeQueryOptions = <TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiEquipeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiEquipe>>> = ({ signal }) => getApiEquipe({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiEquipeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiEquipe>>>
+export type GetApiEquipeQueryError = unknown
+
+
+export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiEquipe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiEquipe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiEquipe>>,
+          TError,
+          Awaited<ReturnType<typeof getApiEquipe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiEquipeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export type getApiFornecedoresResponse200 = {
   data: FornecedorResponse[]
   status: 200
@@ -3527,6 +3960,612 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiFornecedoresIdMutationOptions(options), queryClient);
+    }
+
+export type getApiOrdensServicoResponse200 = {
+  data: OrdemServicoResponse[]
+  status: 200
+}
+
+export type getApiOrdensServicoResponseSuccess = (getApiOrdensServicoResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiOrdensServicoResponse = (getApiOrdensServicoResponseSuccess)
+
+export const getGetApiOrdensServicoUrl = (params?: GetApiOrdensServicoParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ordens-servico?${stringifiedParams}` : `/api/ordens-servico`
+}
+
+export const getApiOrdensServico = async (params?: GetApiOrdensServicoParams, options?: RequestInit): Promise<getApiOrdensServicoResponse> => {
+
+  return apiFetch<getApiOrdensServicoResponse>(getGetApiOrdensServicoUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOrdensServicoQueryKey = (params?: GetApiOrdensServicoParams,) => {
+    return [
+    `/api/ordens-servico`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiOrdensServicoQueryOptions = <TData = Awaited<ReturnType<typeof getApiOrdensServico>>, TError = unknown>(params?: GetApiOrdensServicoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOrdensServicoQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOrdensServico>>> = ({ signal }) => getApiOrdensServico(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOrdensServicoQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOrdensServico>>>
+export type GetApiOrdensServicoQueryError = unknown
+
+
+export function useGetApiOrdensServico<TData = Awaited<ReturnType<typeof getApiOrdensServico>>, TError = unknown>(
+ params: undefined |  GetApiOrdensServicoParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServico>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServico>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServico<TData = Awaited<ReturnType<typeof getApiOrdensServico>>, TError = unknown>(
+ params?: GetApiOrdensServicoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServico>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServico>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServico<TData = Awaited<ReturnType<typeof getApiOrdensServico>>, TError = unknown>(
+ params?: GetApiOrdensServicoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOrdensServico<TData = Awaited<ReturnType<typeof getApiOrdensServico>>, TError = unknown>(
+ params?: GetApiOrdensServicoParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServico>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOrdensServicoQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiOrdensServicoResponse201 = {
+  data: OrdemServicoResponse
+  status: 201
+}
+
+export type postApiOrdensServicoResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoResponseSuccess = (postApiOrdensServicoResponse201) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoResponseError = (postApiOrdensServicoResponse400) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoResponse = (postApiOrdensServicoResponseSuccess | postApiOrdensServicoResponseError)
+
+export const getPostApiOrdensServicoUrl = () => {
+
+
+
+
+  return `/api/ordens-servico`
+}
+
+export const postApiOrdensServico = async (ordemServicoRequest?: OrdemServicoRequest, options?: RequestInit): Promise<postApiOrdensServicoResponse> => {
+
+  return apiFetch<postApiOrdensServicoResponse>(getPostApiOrdensServicoUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(ordemServicoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServico>>, TError,{data?: OrdemServicoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServico>>, TError,{data?: OrdemServicoRequest}, TContext> => {
+
+const mutationKey = ['postApiOrdensServico'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServico>>, {data?: OrdemServicoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiOrdensServico(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServico>>>
+    export type PostApiOrdensServicoMutationBody = OrdemServicoRequest | undefined
+    export type PostApiOrdensServicoMutationError = ValidationProblemDetails
+
+    export const usePostApiOrdensServico = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServico>>, TError,{data?: OrdemServicoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServico>>,
+        TError,
+        {data?: OrdemServicoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoMutationOptions(options), queryClient);
+    }
+
+export type getApiOrdensServicoSyncResponse200 = {
+  data: OrdensServicoSyncResponse
+  status: 200
+}
+
+export type getApiOrdensServicoSyncResponseSuccess = (getApiOrdensServicoSyncResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiOrdensServicoSyncResponse = (getApiOrdensServicoSyncResponseSuccess)
+
+export const getGetApiOrdensServicoSyncUrl = (params?: GetApiOrdensServicoSyncParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/ordens-servico/sync?${stringifiedParams}` : `/api/ordens-servico/sync`
+}
+
+export const getApiOrdensServicoSync = async (params?: GetApiOrdensServicoSyncParams, options?: RequestInit): Promise<getApiOrdensServicoSyncResponse> => {
+
+  return apiFetch<getApiOrdensServicoSyncResponse>(getGetApiOrdensServicoSyncUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOrdensServicoSyncQueryKey = (params?: GetApiOrdensServicoSyncParams,) => {
+    return [
+    `/api/ordens-servico/sync`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiOrdensServicoSyncQueryOptions = <TData = Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError = unknown>(params?: GetApiOrdensServicoSyncParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOrdensServicoSyncQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOrdensServicoSync>>> = ({ signal }) => getApiOrdensServicoSync(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOrdensServicoSyncQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOrdensServicoSync>>>
+export type GetApiOrdensServicoSyncQueryError = unknown
+
+
+export function useGetApiOrdensServicoSync<TData = Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError = unknown>(
+ params: undefined |  GetApiOrdensServicoSyncParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoSync>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoSync>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoSync<TData = Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError = unknown>(
+ params?: GetApiOrdensServicoSyncParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoSync>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoSync>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoSync<TData = Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError = unknown>(
+ params?: GetApiOrdensServicoSyncParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOrdensServicoSync<TData = Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError = unknown>(
+ params?: GetApiOrdensServicoSyncParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoSync>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOrdensServicoSyncQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiOrdensServicoIdResponse200 = {
+  data: OrdemServicoDetalheResponse
+  status: 200
+}
+
+export type getApiOrdensServicoIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiOrdensServicoIdResponseSuccess = (getApiOrdensServicoIdResponse200) & {
+  headers: Headers;
+};
+export type getApiOrdensServicoIdResponseError = (getApiOrdensServicoIdResponse404) & {
+  headers: Headers;
+};
+
+export type getApiOrdensServicoIdResponse = (getApiOrdensServicoIdResponseSuccess | getApiOrdensServicoIdResponseError)
+
+export const getGetApiOrdensServicoIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${id}`
+}
+
+export const getApiOrdensServicoId = async (id: string, options?: RequestInit): Promise<getApiOrdensServicoIdResponse> => {
+
+  return apiFetch<getApiOrdensServicoIdResponse>(getGetApiOrdensServicoIdUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOrdensServicoIdQueryKey = (id: string,) => {
+    return [
+    `/api/ordens-servico/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiOrdensServicoIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOrdensServicoIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOrdensServicoId>>> = ({ signal }) => getApiOrdensServicoId(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOrdensServicoIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOrdensServicoId>>>
+export type GetApiOrdensServicoIdQueryError = ProblemDetails
+
+
+export function useGetApiOrdensServicoId<TData = Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError = ProblemDetails>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoId<TData = Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoId<TData = Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOrdensServicoId<TData = Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOrdensServicoIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiOrdensServicoIdResponse200 = {
+  data: OrdemServicoResponse
+  status: 200
+}
+
+export type putApiOrdensServicoIdResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiOrdensServicoIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiOrdensServicoIdResponseSuccess = (putApiOrdensServicoIdResponse200) & {
+  headers: Headers;
+};
+export type putApiOrdensServicoIdResponseError = (putApiOrdensServicoIdResponse400 | putApiOrdensServicoIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiOrdensServicoIdResponse = (putApiOrdensServicoIdResponseSuccess | putApiOrdensServicoIdResponseError)
+
+export const getPutApiOrdensServicoIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${id}`
+}
+
+export const putApiOrdensServicoId = async (id: string,
+    ordemServicoAtualizacaoRequest?: OrdemServicoAtualizacaoRequest, options?: RequestInit): Promise<putApiOrdensServicoIdResponse> => {
+
+  return apiFetch<putApiOrdensServicoIdResponse>(getPutApiOrdensServicoIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(ordemServicoAtualizacaoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiOrdensServicoIdMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoId>>, TError,{id: string;data?: OrdemServicoAtualizacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoId>>, TError,{id: string;data?: OrdemServicoAtualizacaoRequest}, TContext> => {
+
+const mutationKey = ['putApiOrdensServicoId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiOrdensServicoId>>, {id: string;data?: OrdemServicoAtualizacaoRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiOrdensServicoId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiOrdensServicoIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiOrdensServicoId>>>
+    export type PutApiOrdensServicoIdMutationBody = OrdemServicoAtualizacaoRequest | undefined
+    export type PutApiOrdensServicoIdMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiOrdensServicoId = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoId>>, TError,{id: string;data?: OrdemServicoAtualizacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiOrdensServicoId>>,
+        TError,
+        {id: string;data?: OrdemServicoAtualizacaoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiOrdensServicoIdMutationOptions(options), queryClient);
+    }
+
+export type postApiOrdensServicoIdEtapaResponse200 = {
+  data: OrdemServicoResponse
+  status: 200
+}
+
+export type postApiOrdensServicoIdEtapaResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoIdEtapaResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiOrdensServicoIdEtapaResponseSuccess = (postApiOrdensServicoIdEtapaResponse200) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoIdEtapaResponseError = (postApiOrdensServicoIdEtapaResponse400 | postApiOrdensServicoIdEtapaResponse404) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoIdEtapaResponse = (postApiOrdensServicoIdEtapaResponseSuccess | postApiOrdensServicoIdEtapaResponseError)
+
+export const getPostApiOrdensServicoIdEtapaUrl = (id: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${id}/etapa`
+}
+
+export const postApiOrdensServicoIdEtapa = async (id: string,
+    mudancaEtapaRequest?: MudancaEtapaRequest, options?: RequestInit): Promise<postApiOrdensServicoIdEtapaResponse> => {
+
+  return apiFetch<postApiOrdensServicoIdEtapaResponse>(getPostApiOrdensServicoIdEtapaUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(mudancaEtapaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoIdEtapaMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>, TError,{id: string;data?: MudancaEtapaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>, TError,{id: string;data?: MudancaEtapaRequest}, TContext> => {
+
+const mutationKey = ['postApiOrdensServicoIdEtapa'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>, {id: string;data?: MudancaEtapaRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiOrdensServicoIdEtapa(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoIdEtapaMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>>
+    export type PostApiOrdensServicoIdEtapaMutationBody = MudancaEtapaRequest | undefined
+    export type PostApiOrdensServicoIdEtapaMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiOrdensServicoIdEtapa = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>, TError,{id: string;data?: MudancaEtapaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServicoIdEtapa>>,
+        TError,
+        {id: string;data?: MudancaEtapaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoIdEtapaMutationOptions(options), queryClient);
     }
 
 export type getApiPecasResponse200 = {

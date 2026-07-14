@@ -5,6 +5,53 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/publico/{slug}/acompanhar/{codigo}": {
+      "get": {
+        "tags": [
+          "Acompanhamento"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcompanhamentoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/agenda/horarios": {
       "get": {
         "tags": [
@@ -1265,6 +1312,28 @@
         }
       }
     },
+    "/api/equipe": {
+      "get": {
+        "tags": [
+          "Equipe"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipeMembroResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/fornecedores": {
       "get": {
         "tags": [
@@ -1432,6 +1501,320 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico": {
+      "get": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "etapa",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/EtapaOrdemServico"
+            }
+          },
+          {
+            "name": "busca",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "responsavelId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "incluirFinalizadas",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrdemServicoResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdemServicoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/sync": {
+      "get": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdensServicoSyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{id}": {
+      "get": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdemServicoDetalheResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoAtualizacaoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoAtualizacaoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdemServicoAtualizacaoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdemServicoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{id}/etapa": {
+      "post": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MudancaEtapaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MudancaEtapaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MudancaEtapaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdemServicoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2101,6 +2484,36 @@
   },
   "components": {
     "schemas": {
+      "AcompanhamentoResponse": {
+        "type": "object",
+        "properties": {
+          "nomeLoja": {
+            "type": "string",
+            "nullable": true
+          },
+          "numero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "etapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "prazoEstimado": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "AgendamentoPublicoRequest": {
         "type": "object",
         "properties": {
@@ -2682,6 +3095,39 @@
         },
         "additionalProperties": false
       },
+      "EquipeMembroResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EtapaOrdemServico": {
+        "enum": [
+          "CheckInRealizado",
+          "NaFila",
+          "EmDiagnostico",
+          "AguardandoAprovacao",
+          "AguardandoPeca",
+          "EmReparo",
+          "EmTeste",
+          "ProntoParaRetirada",
+          "Entregue",
+          "Cancelado"
+        ],
+        "type": "string"
+      },
       "FornecedorRequest": {
         "type": "object",
         "properties": {
@@ -2709,6 +3155,67 @@
           },
           "contato": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistoricoEtapaResponse": {
+        "type": "object",
+        "properties": {
+          "deEtapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "paraEtapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "usuarioNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HistoricoSyncItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ordemServicoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deEtapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "paraEtapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         },
@@ -2820,6 +3327,269 @@
           },
           "empresa": {
             "$ref": "#/components/schemas/EmpresaResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MudancaEtapaRequest": {
+        "type": "object",
+        "properties": {
+          "paraEtapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoAtualizacaoRequest": {
+        "type": "object",
+        "properties": {
+          "aparelhoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/PrioridadeOrdemServico"
+          },
+          "prazoEstimado": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "responsavelTecnicoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "statusPagamento": {
+            "$ref": "#/components/schemas/StatusPagamentoOrdemServico"
+          },
+          "statusAprovacao": {
+            "$ref": "#/components/schemas/StatusAprovacaoOrdemServico"
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoDetalheResponse": {
+        "type": "object",
+        "properties": {
+          "ordem": {
+            "$ref": "#/components/schemas/OrdemServicoResponse"
+          },
+          "historico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricoEtapaResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoRequest": {
+        "type": "object",
+        "properties": {
+          "clienteId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "aparelhoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/PrioridadeOrdemServico"
+          },
+          "prazoEstimado": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "responsavelTecnicoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "etapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/PrioridadeOrdemServico"
+          },
+          "prazoEstimado": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "clienteId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "clienteTelefone": {
+            "type": "string",
+            "nullable": true
+          },
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          },
+          "responsavelTecnicoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "responsavelTecnicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusPagamento": {
+            "$ref": "#/components/schemas/StatusPagamentoOrdemServico"
+          },
+          "statusAprovacao": {
+            "$ref": "#/components/schemas/StatusAprovacaoOrdemServico"
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
+          },
+          "motivoCancelamento": {
+            "type": "string",
+            "nullable": true
+          },
+          "codigoAcompanhamento": {
+            "type": "string",
+            "nullable": true
+          },
+          "agendamentoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoSyncItem": {
+        "type": "object",
+        "properties": {
+          "ordem": {
+            "$ref": "#/components/schemas/OrdemServicoResponse"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdensServicoSyncResponse": {
+        "type": "object",
+        "properties": {
+          "ordens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrdemServicoSyncItem"
+            },
+            "nullable": true
+          },
+          "historico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricoSyncItem"
+            },
+            "nullable": true
+          },
+          "agora": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -2936,6 +3706,14 @@
           }
         },
         "additionalProperties": false
+      },
+      "PrioridadeOrdemServico": {
+        "enum": [
+          "Baixa",
+          "Normal",
+          "Alta"
+        ],
+        "type": "string"
       },
       "ProblemDetails": {
         "type": "object",
@@ -3197,6 +3975,22 @@
         ],
         "type": "string"
       },
+      "StatusAprovacaoOrdemServico": {
+        "enum": [
+          "Pendente",
+          "Aprovado",
+          "Recusado"
+        ],
+        "type": "string"
+      },
+      "StatusPagamentoOrdemServico": {
+        "enum": [
+          "NaoPago",
+          "Parcial",
+          "Pago"
+        ],
+        "type": "string"
+      },
       "UsuarioResponse": {
         "type": "object",
         "properties": {
@@ -3278,6 +4072,9 @@
   },
   "tags": [
     {
+      "name": "Acompanhamento"
+    },
+    {
       "name": "Agenda"
     },
     {
@@ -3293,7 +4090,13 @@
       "name": "Clientes"
     },
     {
+      "name": "Equipe"
+    },
+    {
       "name": "Fornecedores"
+    },
+    {
+      "name": "OrdensServico"
     },
     {
       "name": "Pecas"
