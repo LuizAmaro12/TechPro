@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,8 @@ public class AgendamentosController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CheckIn(int id) =>
-        TraduzirResultado(await service.CheckInAsync(id));
+        TraduzirResultado(await service.CheckInAsync(
+            id, Guid.TryParse(User.FindFirstValue("sub"), out var usuarioId) ? usuarioId : null));
 
     [HttpPost("{id:int}/cancelar")]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]

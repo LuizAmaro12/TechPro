@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Tenancy;
@@ -31,6 +32,8 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<HorarioFuncionamento> HorariosFuncionamento => Set<HorarioFuncionamento>();
     public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
+    public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
+    public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -216,7 +219,99 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        // --- OS e Kanban (módulo 3): escopo offline — UUID + colunas de sync -----
+
+        builder.Entity<OrdemServico>(e =>
+        {
+            e.ToTable("ordens_servico");
+            e.Property(x => x.Etapa).HasConversion<string>().HasMaxLength(30);
+            e.Property(x => x.Prioridade).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.StatusPagamento).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.StatusAprovacao).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.AparelhoMarca).HasMaxLength(100);
+            e.Property(x => x.AparelhoModelo).HasMaxLength(150);
+            e.Property(x => x.DescricaoProblema).HasMaxLength(1000);
+            e.Property(x => x.Observacoes).HasMaxLength(1000);
+            e.Property(x => x.MotivoCancelamento).HasMaxLength(500);
+            e.Property(x => x.CodigoAcompanhamento).HasMaxLength(32);
+            e.Property(x => x.ChaveIdempotencia).HasMaxLength(100);
+            e.HasIndex(x => new { x.TenantId, x.Numero }).IsUnique();
+            e.HasIndex(x => x.CodigoAcompanhamento).IsUnique();
+            e.HasIndex(x => new { x.TenantId, x.ChaveIdempotencia }).IsUnique();
+            e.HasIndex(x => new { x.TenantId, x.Etapa });
+            e.HasIndex(x => x.UpdatedAt);
+            // Restrict em tudo: OS é o registro histórico central — nada que
+            // ela referencia pode sumir fisicamente por engano.
+            e.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Aparelho).WithMany().HasForeignKey(x => x.AparelhoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Agendamento).WithMany().HasForeignKey(x => x.AgendamentoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.ResponsavelTecnico).WithMany().HasForeignKey(x => x.ResponsavelTecnicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<OrdemServicoHistoricoEtapa>(e =>
+        {
+            e.ToTable("ordem_servico_historico_etapas");
+            e.Property(x => x.DeEtapa).HasConversion<string>().HasMaxLength(30);
+            e.Property(x => x.ParaEtapa).HasConversion<string>().HasMaxLength(30);
+            e.Property(x => x.Motivo).HasMaxLength(500);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.UpdatedAt);
+            e.HasOne<OrdemServico>().WithMany(o => o.Historico)
+                .HasForeignKey(x => x.OrdemServicoId);
+        });
+
         AplicarFiltroDeTenantPorConvencao(builder);
+
+        // Sqlite (usado só nos testes) não traduz comparações/ordenações de
+        // DateTimeOffset; o conversor para ticks (workaround documentado da
+        // Microsoft) torna o filtro do sync traduzível. Postgres segue com
+        // timestamptz nativo — nada muda em produção.
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                foreach (var propriedade in entityType.GetProperties().Where(p =>
+                             p.ClrType == typeof(DateTimeOffset) || p.ClrType == typeof(DateTimeOffset?)))
+                {
+                    propriedade.SetValueConverter(
+                        new Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter());
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Marca d'água de sincronização (seção 4 do doc de stack): toda escrita
+    /// em entidade do escopo offline carimba UpdatedAt no servidor — sem
+    /// depender de cada service lembrar de setar.
+    /// </summary>
+    public override int SaveChanges()
+    {
+        CarimbarSincronizaveis();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        CarimbarSincronizaveis();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void CarimbarSincronizaveis()
+    {
+        foreach (var entrada in ChangeTracker.Entries<IEntidadeSincronizavel>())
+        {
+            if (entrada.State is EntityState.Added or EntityState.Modified)
+            {
+                entrada.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
     }
 
     /// <summary>

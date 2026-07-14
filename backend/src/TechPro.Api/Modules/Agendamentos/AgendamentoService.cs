@@ -16,7 +16,9 @@ namespace TechPro.Api.Modules.Agendamentos;
 public class AgendamentoService(
     TechProDbContext db,
     ITenantProvider tenantProvider,
-    DisponibilidadeService disponibilidade)
+    DisponibilidadeService disponibilidade,
+    ClienteService clientes,
+    OrdensServico.OrdemServicoService ordensServico)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -160,7 +162,11 @@ public class AgendamentoService(
         return CatalogoResultado<AgendamentoResponse>.Ok(await CarregarResponseAsync(agendamento.Id));
     }
 
-    public async Task<CatalogoResultado<AgendamentoResponse>?> CheckInAsync(int id)
+    /// <summary>
+    /// Check-in materializa a OS automaticamente (módulo 3) na mesma
+    /// transação — ou o aparelho entra no fluxo inteiro, ou nada muda.
+    /// </summary>
+    public async Task<CatalogoResultado<AgendamentoResponse>?> CheckInAsync(int id, Guid? usuarioId)
     {
         var agendamento = await db.Agendamentos.FirstOrDefaultAsync(a => a.Id == id);
         if (agendamento is null)
@@ -174,8 +180,12 @@ public class AgendamentoService(
                 "Só é possível fazer check-in de agendamento ativo.");
         }
 
+        await using var transacao = await db.Database.BeginTransactionAsync();
         agendamento.Status = StatusAgendamento.CheckInRealizado;
         await db.SaveChangesAsync();
+        await ordensServico.CriarDoAgendamentoAsync(agendamento, usuarioId);
+        await transacao.CommitAsync();
+
         return CatalogoResultado<AgendamentoResponse>.Ok(await CarregarResponseAsync(id));
     }
 
@@ -222,29 +232,13 @@ public class AgendamentoService(
         }
 
         var telefone = request.TelefoneContato.Trim();
-        var digitos = new string(telefone.Where(char.IsDigit).ToArray());
-        var cliente = await db.Clientes.FirstOrDefaultAsync(c => c.Ativo
-            && c.Telefone
-                .Replace("(", "").Replace(")", "").Replace("-", "")
-                .Replace(" ", "").Replace(".", "").Replace("+", "") == digitos);
-
-        if (cliente is null)
-        {
-            cliente = new Cliente
-            {
-                TenantId = TenantId,
-                Nome = request.NomeContato.Trim(),
-                Telefone = telefone,
-                Email = Normalizar(request.EmailContato),
-                CriadoEm = DateTimeOffset.UtcNow,
-            };
-            db.Clientes.Add(cliente);
-        }
+        var cliente = await clientes.VincularOuCriarPorTelefoneAsync(
+            request.NomeContato, telefone, request.EmailContato);
 
         var agendamento = new Agendamento
         {
             TenantId = TenantId,
-            Cliente = cliente,
+            ClienteId = cliente.Id,
             ServicoId = request.ServicoId,
             Data = request.Data,
             HoraInicio = request.HoraInicio,

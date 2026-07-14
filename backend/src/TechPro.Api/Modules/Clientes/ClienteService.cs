@@ -194,6 +194,39 @@ public class ClienteService(TechProDbContext db, ITenantProvider tenantProvider)
         return null;
     }
 
+    /// <summary>
+    /// Vínculo silencioso por telefone (decisão 2026-07-13): compara só os
+    /// dígitos com clientes ativos do tenant; telefone inédito cria cliente
+    /// novo. Usado pelo portal público de agendamento e pela conversão de
+    /// agendamento em OS.
+    /// </summary>
+    public async Task<Cliente> VincularOuCriarPorTelefoneAsync(
+        string nome, string telefone, string? email)
+    {
+        telefone = telefone.Trim();
+        var digitos = new string(telefone.Where(char.IsDigit).ToArray());
+        var cliente = await db.Clientes.FirstOrDefaultAsync(c => c.Ativo
+            && c.Telefone
+                .Replace("(", "").Replace(")", "").Replace("-", "")
+                .Replace(" ", "").Replace(".", "").Replace("+", "") == digitos);
+        if (cliente is not null)
+        {
+            return cliente;
+        }
+
+        cliente = new Cliente
+        {
+            TenantId = TenantId,
+            Nome = nome.Trim(),
+            Telefone = telefone,
+            Email = Normalizar(email),
+            CriadoEm = DateTimeOffset.UtcNow,
+        };
+        db.Clientes.Add(cliente);
+        await db.SaveChangesAsync();
+        return cliente;
+    }
+
     private static string? Normalizar(string? valor) =>
         string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
 

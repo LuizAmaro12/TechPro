@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Persistence;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<AparelhoService>();
 builder.Services.AddScoped<AgendaService>();
 builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
+builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]
