@@ -36,3 +36,18 @@ export const ROTULOS_APROVACAO: Record<string, string> = {
   Aprovado: "aprovado",
   Recusado: "recusado",
 };
+
+export const ROTULOS_STATUS_ORCAMENTO: Record<string, string> = {
+  Rascunho: "rascunho",
+  Enviado: "aguardando resposta",
+  Aprovado: "aprovado",
+  Recusado: "recusado",
+};
+
+export const ROTULOS_FORMA_PAGAMENTO: Record<string, string> = {
+  Dinheiro: "dinheiro",
+  Pix: "Pix",
+  CartaoDebito: "cartão de débito",
+  CartaoCredito: "cartão de crédito",
+  Outro: "outro",
+};

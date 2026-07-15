@@ -21,11 +21,35 @@ export const esquemaOrdemServico = z.object({
 
 export type ValoresOrdemServico = z.infer<typeof esquemaOrdemServico>;
 
-export const esquemaEdicaoOrdemServico = esquemaOrdemServico
-  .omit({ clienteId: true, servicoId: true })
-  .extend({
-    statusPagamento: z.string().min(1),
-    statusAprovacao: z.string().min(1),
-  });
+// Status de pagamento/aprovação saíram da edição manual: desde a etapa de
+// orçamento (2026-07-15) são derivados dos fluxos reais.
+export const esquemaEdicaoOrdemServico = esquemaOrdemServico.omit({
+  clienteId: true,
+  servicoId: true,
+});
 
 export type ValoresEdicaoOrdemServico = z.infer<typeof esquemaEdicaoOrdemServico>;
+
+export const esquemaOrcamento = z.object({
+  valorMaoDeObra: z
+    .number("Informe o valor de mão de obra.")
+    .min(0, "O valor não pode ser negativo.")
+    .max(1_000_000, "O valor máximo é 1.000.000."),
+  desconto: z
+    .number("Informe o desconto (0 se não houver).")
+    .min(0, "O desconto não pode ser negativo.")
+    .max(1_000_000, "O desconto máximo é 1.000.000."),
+});
+
+export type ValoresOrcamento = z.infer<typeof esquemaOrcamento>;
+
+export const esquemaPagamento = z.object({
+  valor: z
+    .number("Informe o valor do pagamento.")
+    .positive("O valor deve ser maior que zero.")
+    .max(1_000_000, "O valor máximo é 1.000.000."),
+  forma: z.string().min(1, "Escolha a forma de pagamento."),
+  observacao: z.string().max(200, "A observação pode ter no máximo 200 caracteres."),
+});
+
+export type ValoresPagamento = z.infer<typeof esquemaPagamento>;

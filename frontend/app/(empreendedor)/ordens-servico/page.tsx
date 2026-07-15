@@ -15,6 +15,7 @@ import {
   useGetApiClientes,
   useGetApiEquipe,
   useDeleteApiOrdensServicoIdPecasPecaUsadaId,
+  useDeleteApiOrdensServicoOrdemIdPagamentosPagamentoId,
   useGetApiOrdensServico,
   useGetApiOrdensServicoId,
   useGetApiPecas,
@@ -22,23 +23,35 @@ import {
   usePostApiOrdensServico,
   usePostApiOrdensServicoIdPecas,
   usePostApiOrdensServicoIdPecasAplicarPadrao,
+  usePostApiOrdensServicoOrdemIdOrcamentoAprovar,
+  usePostApiOrdensServicoOrdemIdOrcamentoEnviar,
+  usePostApiOrdensServicoOrdemIdOrcamentoRecusar,
+  usePostApiOrdensServicoOrdemIdPagamentos,
   usePutApiOrdensServicoId,
+  usePutApiOrdensServicoOrdemIdOrcamento,
+  type OrcamentoResponse,
   type OrdemServicoResponse,
   type PecaUsadaResponse,
+  type ResumoPagamentosResponse,
 } from "@/lib/api-client/gerado";
 import { formatarBRL } from "@/lib/formatadores";
 import { formatarDataCurta } from "@/lib/agenda-datas";
 import {
-  ROTULOS_APROVACAO,
+  ROTULOS_FORMA_PAGAMENTO,
   ROTULOS_PAGAMENTO,
   ROTULOS_PRIORIDADE,
+  ROTULOS_STATUS_ORCAMENTO,
   rotuloDaEtapa,
 } from "@/lib/ordens-servico-etapas";
 import {
   esquemaEdicaoOrdemServico,
+  esquemaOrcamento,
   esquemaOrdemServico,
+  esquemaPagamento,
   type ValoresEdicaoOrdemServico,
+  type ValoresOrcamento,
   type ValoresOrdemServico,
+  type ValoresPagamento,
 } from "@/lib/validators/ordens-servico";
 
 function CampoErro({ mensagem }: { mensagem?: string }) {
@@ -101,11 +114,7 @@ export default function PaginaOrdensServico() {
 
   const formEdicao = useForm<ValoresEdicaoOrdemServico>({
     resolver: zodResolver(esquemaEdicaoOrdemServico),
-    defaultValues: {
-      ...VALORES_INICIAIS,
-      statusPagamento: "NaoPago",
-      statusAprovacao: "Pendente",
-    },
+    defaultValues: VALORES_INICIAIS,
   });
 
   const { data: respostaDetalhe } = useGetApiOrdensServicoId(editandoId ?? "", {
@@ -201,8 +210,6 @@ export default function PaginaOrdensServico() {
       prazoEstimado: ordem.prazoEstimado ?? "",
       responsavelTecnicoId: ordem.responsavelTecnicoId ?? "",
       observacoes: ordem.observacoes ?? "",
-      statusPagamento: ordem.statusPagamento ?? "NaoPago",
-      statusAprovacao: ordem.statusAprovacao ?? "Pendente",
     });
   }
 
@@ -245,8 +252,6 @@ export default function PaginaOrdensServico() {
           prioridade: valores.prioridade as never,
           prazoEstimado: valores.prazoEstimado || null,
           responsavelTecnicoId: valores.responsavelTecnicoId || null,
-          statusPagamento: valores.statusPagamento as never,
-          statusAprovacao: valores.statusAprovacao as never,
           observacoes: valores.observacoes || null,
         },
       });
@@ -491,34 +496,6 @@ export default function PaginaOrdensServico() {
                 </select>
               </div>
               <div>
-                <Label htmlFor="edicaoPagamento">Pagamento</Label>
-                <select
-                  id="edicaoPagamento"
-                  className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
-                  {...formEdicao.register("statusPagamento")}
-                >
-                  {Object.entries(ROTULOS_PAGAMENTO).map(([valor, rotulo]) => (
-                    <option key={valor} value={valor}>
-                      {rotulo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="edicaoAprovacao">Aprovação do orçamento</Label>
-                <select
-                  id="edicaoAprovacao"
-                  className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
-                  {...formEdicao.register("statusAprovacao")}
-                >
-                  {Object.entries(ROTULOS_APROVACAO).map(([valor, rotulo]) => (
-                    <option key={valor} value={valor}>
-                      {rotulo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
                 <Label htmlFor="edicaoObservacoes">Observações</Label>
                 <Input
                   id="edicaoObservacoes"
@@ -541,6 +518,22 @@ export default function PaginaOrdensServico() {
               </Button>
             </div>
           </form>
+
+          <SecaoOrcamento
+            key={`${detalhe.ordem?.id}-${detalhe.orcamento?.status ?? "novo"}-${detalhe.orcamento?.total ?? 0}`}
+            ordemId={editandoId}
+            orcamento={detalhe.orcamento ?? null}
+            finalizada={
+              detalhe.ordem?.etapa === "Entregue" || detalhe.ordem?.etapa === "Cancelado"
+            }
+            aoMudar={invalidarPecas}
+          />
+
+          <SecaoPagamentos
+            ordemId={editandoId}
+            resumo={detalhe.pagamentos ?? null}
+            aoMudar={invalidarPecas}
+          />
 
           <div className="mt-6 border-t border-[#14162B]/6 pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -750,6 +743,398 @@ export default function PaginaOrdensServico() {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Orçamento da OS: mão de obra + peças (congeladas no envio) − desconto, com
+ * envio, resposta manual da loja e trilha de auditoria visível. Montada com
+ * key derivada do detalhe — o useForm nasce com os valores certos.
+ */
+function SecaoOrcamento({
+  ordemId,
+  orcamento,
+  finalizada,
+  aoMudar,
+}: {
+  ordemId: string;
+  orcamento: OrcamentoResponse | null;
+  finalizada: boolean;
+  aoMudar: () => void;
+}) {
+  const [motivoRecusa, setMotivoRecusa] = useState("");
+  const [recusando, setRecusando] = useState(false);
+
+  const salvar = usePutApiOrdensServicoOrdemIdOrcamento();
+  const enviar = usePostApiOrdensServicoOrdemIdOrcamentoEnviar();
+  const aprovar = usePostApiOrdensServicoOrdemIdOrcamentoAprovar();
+  const recusar = usePostApiOrdensServicoOrdemIdOrcamentoRecusar();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ValoresOrcamento>({
+    resolver: zodResolver(esquemaOrcamento),
+    defaultValues: {
+      valorMaoDeObra: orcamento?.valorMaoDeObra ?? 0,
+      desconto: orcamento?.desconto ?? 0,
+    },
+  });
+
+  async function executar(acao: () => Promise<unknown>, sucesso: string) {
+    try {
+      await acao();
+      toast.success(sucesso);
+      setRecusando(false);
+      setMotivoRecusa("");
+      aoMudar();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro no orçamento.");
+    }
+  }
+
+  return (
+    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-[#14162B]">Orçamento</h3>
+        {orcamento && (
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              orcamento.status === "Aprovado"
+                ? "bg-emerald-100 text-emerald-700"
+                : orcamento.status === "Recusado"
+                  ? "bg-[#E8536B]/10 text-[#E8536B]"
+                  : "bg-[#14162B]/5 text-[#14162B]"
+            }`}
+          >
+            {ROTULOS_STATUS_ORCAMENTO[orcamento.status ?? "Rascunho"]}
+          </span>
+        )}
+      </div>
+
+      {orcamento?.motivoRecusa && (
+        <p className="mt-1 text-sm text-[#E8536B]">
+          Motivo da recusa: {orcamento.motivoRecusa}
+        </p>
+      )}
+
+      {!finalizada && (
+        <form
+          onSubmit={handleSubmit((valores) =>
+            executar(
+              () => salvar.mutateAsync({ ordemId, data: valores }),
+              "Orçamento salvo como rascunho.",
+            ),
+          )}
+          className="mt-3 flex flex-wrap items-end gap-2"
+        >
+          <div>
+            <Label htmlFor="valorMaoDeObra">Mão de obra (R$)</Label>
+            <Input
+              id="valorMaoDeObra"
+              type="number"
+              step="0.01"
+              min="0"
+              className="mt-1 h-10 w-36"
+              aria-invalid={!!errors.valorMaoDeObra}
+              {...register("valorMaoDeObra", { valueAsNumber: true })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="desconto">Desconto (R$)</Label>
+            <Input
+              id="desconto"
+              type="number"
+              step="0.01"
+              min="0"
+              className="mt-1 h-10 w-32"
+              aria-invalid={!!errors.desconto}
+              {...register("desconto", { valueAsNumber: true })}
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={isSubmitting}
+            className="h-10 rounded-full px-4"
+          >
+            Salvar rascunho
+          </Button>
+          <Button
+            type="button"
+            disabled={!orcamento || enviar.isPending}
+            onClick={() =>
+              executar(
+                () => enviar.mutateAsync({ ordemId }),
+                "Orçamento enviado — OS movida para Aguardando aprovação.",
+              )
+            }
+            className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+          >
+            Enviar orçamento
+          </Button>
+        </form>
+      )}
+      {(errors.valorMaoDeObra || errors.desconto) && (
+        <p className="mt-1 text-sm text-destructive">
+          {errors.valorMaoDeObra?.message ?? errors.desconto?.message}
+        </p>
+      )}
+
+      {orcamento && (
+        <div className="mt-3 rounded-xl border border-[#14162B]/6 px-4 py-3 text-sm">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-[#6B7280]">
+            <span>Mão de obra: {formatarBRL(orcamento.valorMaoDeObra ?? 0)}</span>
+            <span>Peças: {formatarBRL(orcamento.valorPecas ?? 0)}</span>
+            <span>Desconto: −{formatarBRL(orcamento.desconto ?? 0)}</span>
+            <span className="font-semibold text-[#14162B]">
+              Total: {formatarBRL(orcamento.total ?? 0)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {orcamento?.status === "Enviado" && !finalizada && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <p className="text-sm text-[#6B7280]">Cliente respondeu por fora?</p>
+          <Button
+            variant="outline"
+            className="h-8 rounded-full px-3 text-xs"
+            disabled={aprovar.isPending}
+            onClick={() =>
+              executar(
+                () => aprovar.mutateAsync({ ordemId, data: { motivo: "Aprovado pela loja" } }),
+                "Orçamento aprovado (registrado pela loja).",
+              )
+            }
+          >
+            Registrar aprovação
+          </Button>
+          {!recusando ? (
+            <Button
+              variant="ghost"
+              className="h-8 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+              onClick={() => setRecusando(true)}
+            >
+              Registrar recusa
+            </Button>
+          ) : (
+            <>
+              <Input
+                placeholder="Motivo da recusa"
+                value={motivoRecusa}
+                onChange={(e) => setMotivoRecusa(e.target.value)}
+                className="h-8 w-56 text-xs"
+              />
+              <Button
+                variant="outline"
+                className="h-8 rounded-full px-3 text-xs text-[#E8536B]"
+                disabled={recusar.isPending}
+                onClick={() =>
+                  executar(
+                    () => recusar.mutateAsync({ ordemId, data: { motivo: motivoRecusa } }),
+                    "Recusa registrada.",
+                  )
+                }
+              >
+                Confirmar
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
+      {(orcamento?.eventos?.length ?? 0) > 0 && (
+        <ul className="mt-3 space-y-1 text-xs text-[#8B8D98]">
+          {orcamento!.eventos!.map((evento, i) => (
+            <li key={i}>
+              {new Date(evento.criadoEm ?? "").toLocaleString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              — <span className="font-medium text-[#6B7280]">{evento.tipo}</span> via{" "}
+              {evento.canal === "Portal" ? "portal do cliente" : "loja"}
+              {evento.usuarioNome && ` (${evento.usuarioNome})`} ·{" "}
+              {formatarBRL(evento.valorTotal ?? 0)}
+              {evento.motivo && ` · "${evento.motivo}"`}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Pagamentos parciais da OS — status derivado da soma vs. total do orçamento. */
+function SecaoPagamentos({
+  ordemId,
+  resumo,
+  aoMudar,
+}: {
+  ordemId: string;
+  resumo: ResumoPagamentosResponse | null;
+  aoMudar: () => void;
+}) {
+  const registrar = usePostApiOrdensServicoOrdemIdPagamentos();
+  const remover = useDeleteApiOrdensServicoOrdemIdPagamentosPagamentoId();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ValoresPagamento>({
+    resolver: zodResolver(esquemaPagamento),
+    defaultValues: { valor: 0, forma: "Pix", observacao: "" },
+  });
+
+  async function aoRegistrar(valores: ValoresPagamento) {
+    try {
+      await registrar.mutateAsync({
+        ordemId,
+        data: {
+          valor: valores.valor,
+          forma: valores.forma as never,
+          observacao: valores.observacao || null,
+        },
+      });
+      toast.success("Pagamento registrado.");
+      reset({ valor: 0, forma: "Pix", observacao: "" });
+      aoMudar();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao registrar pagamento.");
+    }
+  }
+
+  async function aoRemover(pagamentoId: number | undefined) {
+    if (pagamentoId === undefined) return;
+    try {
+      await remover.mutateAsync({ ordemId, pagamentoId });
+      toast.success("Pagamento removido.");
+      aoMudar();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao remover pagamento.");
+    }
+  }
+
+  return (
+    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-[#14162B]">Pagamentos</h3>
+        {resumo && (
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              resumo.status === "Pago"
+                ? "bg-emerald-100 text-emerald-700"
+                : resumo.status === "Parcial"
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-[#F7F7F9] text-[#8B8D98]"
+            }`}
+          >
+            {ROTULOS_PAGAMENTO[resumo.status ?? "NaoPago"]}
+          </span>
+        )}
+      </div>
+
+      <form
+        onSubmit={handleSubmit(aoRegistrar)}
+        className="mt-3 flex flex-wrap items-end gap-2"
+      >
+        <div>
+          <Label htmlFor="pagamentoValor">Valor (R$)</Label>
+          <Input
+            id="pagamentoValor"
+            type="number"
+            step="0.01"
+            min="0.01"
+            className="mt-1 h-10 w-32"
+            aria-invalid={!!errors.valor}
+            {...register("valor", { valueAsNumber: true })}
+          />
+        </div>
+        <div>
+          <Label htmlFor="pagamentoForma">Forma</Label>
+          <select
+            id="pagamentoForma"
+            className="mt-1 h-10 rounded-md border border-input bg-white px-3 text-sm"
+            {...register("forma")}
+          >
+            {Object.entries(ROTULOS_FORMA_PAGAMENTO).map(([valor, rotulo]) => (
+              <option key={valor} value={valor}>
+                {rotulo}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="min-w-40 flex-1">
+          <Label htmlFor="pagamentoObservacao">Observação (opcional)</Label>
+          <Input
+            id="pagamentoObservacao"
+            placeholder="Entrada, saldo na retirada..."
+            className="mt-1 h-10"
+            {...register("observacao")}
+          />
+        </div>
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={isSubmitting}
+          className="h-10 rounded-full px-4"
+        >
+          Registrar pagamento
+        </Button>
+      </form>
+      {errors.valor && (
+        <p className="mt-1 text-sm text-destructive">{errors.valor.message}</p>
+      )}
+
+      {(resumo?.pagamentos?.length ?? 0) > 0 && (
+        <div className="mt-3 space-y-1">
+          {resumo!.pagamentos!.map((pagamento) => (
+            <div
+              key={pagamento.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm"
+            >
+              <span className="text-[#14162B]">
+                <span className="font-medium">{formatarBRL(pagamento.valor ?? 0)}</span> ·{" "}
+                {ROTULOS_FORMA_PAGAMENTO[pagamento.forma ?? "Outro"]}
+                {pagamento.observacao && (
+                  <span className="text-[#8B8D98]"> — {pagamento.observacao}</span>
+                )}
+                {pagamento.registradoPorNome && (
+                  <span className="text-xs text-[#8B8D98]"> · {pagamento.registradoPorNome}</span>
+                )}
+              </span>
+              <Button
+                variant="ghost"
+                className="h-7 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                onClick={() => aoRemover(pagamento.id)}
+              >
+                Remover
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {resumo && (
+        <p className="mt-2 text-right text-sm text-[#6B7280]">
+          Pago: <span className="font-semibold text-[#14162B]">{formatarBRL(resumo.totalPago ?? 0)}</span>
+          {resumo.totalOrcamento != null && (
+            <>
+              {" "}
+              de {formatarBRL(resumo.totalOrcamento)} · saldo{" "}
+              <span className="font-semibold text-[#14162B]">
+                {formatarBRL(resumo.saldo ?? 0)}
+              </span>
+            </>
+          )}
+        </p>
+      )}
     </div>
   );
 }

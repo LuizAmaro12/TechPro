@@ -161,9 +161,24 @@ export default function PaginaKanban() {
         <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-[#8B8D98]">
           {ordem.prazoEstimado && <span>prazo {formatarDataCurta(ordem.prazoEstimado)}</span>}
           {ordem.responsavelTecnicoNome && <span>· {ordem.responsavelTecnicoNome}</span>}
+          {ordem.statusAprovacao === "Aprovado" && (
+            <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700">
+              orçamento ok
+            </span>
+          )}
+          {ordem.statusAprovacao === "Recusado" && (
+            <span className="rounded-full bg-[#E8536B]/10 px-1.5 py-0.5 font-semibold text-[#E8536B]">
+              recusado
+            </span>
+          )}
           {ordem.statusPagamento === "Pago" && (
             <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700">
               pago
+            </span>
+          )}
+          {ordem.statusPagamento === "Parcial" && (
+            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-700">
+              parcial
             </span>
           )}
         </div>
