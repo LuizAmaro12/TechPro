@@ -22,9 +22,13 @@ validado no Postgres real e fluxo e2e no navegador):
 6. **Estoque com baixa automática** — peças usadas na OS com custo/preço
    congelados, devolução ao remover, sugestão das peças padrão do serviço e
    avisos de estoque baixo/negativo (módulo 7 básico).
+7. **Orçamento e pagamento básico** — orçamento da OS (mão de obra + peças +
+   desconto) com trilha de auditoria, aprovação binária pela loja ou pelo
+   cliente no portal, e pagamentos parciais com status derivado (módulos
+   8/11 básico).
 
-Suíte de testes do backend: 66/66 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **Orçamento e pagamento básico** (módulo 11 básico).
+Suíte de testes do backend: 73/73 verdes. Próxima etapa da ordem recomendada
+(`docs/fases_MVP.md`): **Comunicação essencial** (módulo 9 — WhatsApp + e-mail).
 Detalhes, decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)

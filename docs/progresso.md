@@ -38,9 +38,36 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **66 testes xUnit verdes** (GQF por convenção,
-TokenService, fluxo de auth, catálogo, clientes, agenda, OS e estoque —
-integração via WebApplicationFactory + Sqlite em memória).
+Suíte de testes do back-end: **73 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque e
+financeiro — integração via WebApplicationFactory + Sqlite em memória).
+
+### Etapa Orçamento e pagamento básico concluída em 2026-07-15
+
+Módulos 8/11 básico — item 7 da ordem recomendada da Fase 1 ("orçamento,
+aprovação simples e pagamento básico"). Inclui a **trilha de auditoria
+append-only de aprovação** (seção 16 do doc de stack, diferencial do
+branding). Plano e decisões em
+`docs/superpowers/plans/2026-07-15-orcamento-e-pagamento.md`.
+Evidência e2e (Playwright + Edge, 2026-07-15):
+
+```json
+{
+  "rascunhoSalvoComTotal": true,
+  "orcamentoEnviado": true,
+  "etapaMudouParaAguardando": true,
+  "pagamentoParcialRegistrado": true,
+  "aprovadoNoPortal": true,
+  "trilhaComEnvioEAprovacaoPortal": true,
+  "statusAprovacaoDerivado": true,
+  "quitadoStatusPago": true
+}
+```
+
+O `trilhaComEnvioEAprovacaoPortal` prova a trilha de ponta a ponta: envio pela
+loja + aprovação pelo cliente no portal, cada evento com seu canal. RLS
+conferido: `orcamentos`, `orcamento_eventos` e `pagamentos` com
+`relrowsecurity = t` e `relforcerowsecurity = t`; fail-closed sem tenant.
 
 ### Etapa Estoque com baixa automática concluída em 2026-07-15
 
@@ -397,6 +424,35 @@ docker compose up -d --build
 - **Isolamento testado**: peça de A não entra em OS de B (400); OS de B "não
   existe" para A (404).
 
+### Orçamento e pagamento (módulos 8/11 básico + portal)
+
+- **Orçamento da OS** (`/api/ordens-servico/{id}/orcamento` + seção no detalhe):
+  mão de obra editável (sugerida do preço base) + peças utilizadas (preço
+  **congelado no envio** — o que o cliente vê não muda se a loja registrar
+  mais peças depois) − desconto. Um orçamento por OS na Fase 1 (item a item é
+  Fase 2). Editar um orçamento já respondido volta o status a Rascunho,
+  preservando a trilha.
+- **Trilha de auditoria append-only** (`orcamento_eventos`, seção 16 do doc de
+  stack — diferencial do branding): cada envio/aprovação/recusa grava tipo,
+  **canal** (Loja/Portal), usuário (quando loja), valor total e motivo, nunca
+  sobrescrita.
+- **Aprovação binária** pela loja (registro manual "aprovou pelo WhatsApp") e
+  pelo cliente no portal `/acompanhar/{slug}/{codigo}` sem login. **Só o envio
+  move etapa** (para Aguardando aprovação, com histórico); aprovar/recusar só
+  atualizam o status — a loja decide o próximo passo no Kanban.
+- **Pagamentos parciais** (`/api/ordens-servico/{id}/pagamentos`): vários por
+  OS com forma (dinheiro/Pix/débito/crédito/outro); podem ser removidos (erro
+  de digitação). **`StatusPagamento` e `StatusAprovacao` da OS agora derivados**
+  dos fluxos reais — saíram do PUT manual da OS (eram campos manuais desde a
+  etapa de OS). Sem orçamento, pagamento marca no máximo Parcial.
+- **Acompanhamento público** passou a incluir o orçamento (só depois de
+  enviado — rascunho é interno) e os endpoints de aprovar/recusar, sob o mesmo
+  padrão de tenant fixado por slug + código opaco + rate limiting "publico".
+- **Fora do escopo offline** (PK `int`, sem sync): aprovação exige trilha
+  append-only, nunca last-write-wins (seção 4 do doc de stack) — decisão
+  consciente que separa o financeiro do fluxo de campo do técnico.
+- **Isolamento testado**: orçamento/pagamento de A "não existem" para B (404).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -480,6 +536,20 @@ docker compose up -d --build
   criações simultâneas no mesmo tenant faria a segunda falhar no índice único
   (erro, nunca duplicidade). Volume esperado torna isso raríssimo; retry
   automático fica anotado como melhoria se aparecer na prática.
+- **Status de pagamento/aprovação da OS agora derivados** (etapa de
+  orçamento): o `StatusPagamento`/`StatusAprovacao` deixaram de ser campos
+  manuais no PUT da OS e passaram a ser recalculados pelo `FinanceiroService`
+  (soma dos pagamentos vs. total do orçamento; status do orçamento). Os enums
+  na entidade OS continuam existindo — são a projeção materializada que o
+  Kanban e a listagem já consomem, agora sempre coerente com o financeiro.
+- **Financeiro deliberadamente fora do escopo offline** (PK `int`, sem
+  `updated_at`/`deleted_at`/sync): a seção 4 do doc de stack manda aprovação
+  de orçamento usar trilha append-only em vez de last-write-wins, então
+  orçamento e pagamento não sincronizam com o app do técnico — ficam só no
+  portal web, como os demais módulos não-campo.
+- **Somas em memória no financeiro**: o Sqlite dos testes não agrega `decimal`
+  no servidor; as somas de peças/pagamentos por OS trazem poucas linhas e são
+  feitas no cliente (Postgres continua eficiente com o mesmo código LINQ).
 
 ## Notas de ambiente (máquina de dev)
 
@@ -503,14 +573,16 @@ docker compose up -d --build
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
 2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **Orçamento e pagamento básico** (módulo 11 básico — orçamento da OS com
-   aprovação pelo portal do cliente, registro de pagamento; substitui os
-   campos manuais de aprovação/pagamento da OS e usa o custo/preço congelados
-   das peças para a margem real).
-3. Na sequência da mesma ordem: Comunicação essencial (inclui os lembretes
-   automáticos de agendamento diferidos) → Dashboard → Onboarding guiado
-   (inclui horários de funcionamento no wizard — a tela de configurações da
-   agenda já cobre o dado).
+   **Comunicação essencial** (módulo 9 — WhatsApp utility + e-mail;
+   confirmação/lembrete de agendamento, OS criada, orçamento disponível/
+   aprovado/recusado, reparo concluído e pronto para retirada). Exige contas
+   externas (Meta/WhatsApp Cloud API e Resend, seção 7 do doc de stack) e
+   Hangfire para os lembretes agendados — primeiras dependências de infra
+   externa da Fase 1; vale alinhar antes de começar.
+3. Na sequência da mesma ordem: Dashboard essencial (OS abertas, agendamentos
+   do dia, prontos para retirada, faturamento do mês — os dados já existem) →
+   Onboarding guiado (wizard inicial; horários de funcionamento já cobertos
+   pela tela de configurações da agenda).
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
