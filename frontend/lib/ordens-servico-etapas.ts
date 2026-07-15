@@ -51,3 +51,20 @@ export const ROTULOS_FORMA_PAGAMENTO: Record<string, string> = {
   CartaoCredito: "cartão de crédito",
   Outro: "outro",
 };
+
+export const ROTULOS_EVENTO_COMUNICACAO: Record<string, string> = {
+  AgendamentoConfirmado: "agendamento confirmado",
+  AgendamentoLembrete: "lembrete de agendamento",
+  OrdemServicoCriada: "OS criada",
+  OrcamentoDisponivel: "orçamento disponível",
+  OrcamentoAprovado: "orçamento aprovado",
+  OrcamentoRecusado: "orçamento recusado",
+  ProntoParaRetirada: "pronto para retirada",
+};
+
+export const ROTULOS_STATUS_MENSAGEM: Record<string, string> = {
+  Enviada: "enviada",
+  Simulada: "simulada",
+  Suprimida: "suprimida (sem consentimento)",
+  Falhou: "falhou",
+};

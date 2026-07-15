@@ -18,6 +18,7 @@ import {
   useDeleteApiOrdensServicoOrdemIdPagamentosPagamentoId,
   useGetApiOrdensServico,
   useGetApiOrdensServicoId,
+  useGetApiOrdensServicoOrdemIdMensagens,
   useGetApiPecas,
   useGetApiServicos,
   usePostApiOrdensServico,
@@ -37,9 +38,11 @@ import {
 import { formatarBRL } from "@/lib/formatadores";
 import { formatarDataCurta } from "@/lib/agenda-datas";
 import {
+  ROTULOS_EVENTO_COMUNICACAO,
   ROTULOS_FORMA_PAGAMENTO,
   ROTULOS_PAGAMENTO,
   ROTULOS_PRIORIDADE,
+  ROTULOS_STATUS_MENSAGEM,
   ROTULOS_STATUS_ORCAMENTO,
   rotuloDaEtapa,
 } from "@/lib/ordens-servico-etapas";
@@ -534,6 +537,9 @@ export default function PaginaOrdensServico() {
             resumo={detalhe.pagamentos ?? null}
             aoMudar={invalidarPecas}
           />
+
+          <SecaoNotificacoes ordemId={editandoId} />
+
 
           <div className="mt-6 border-t border-[#14162B]/6 pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1134,6 +1140,66 @@ function SecaoPagamentos({
             </>
           )}
         </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Auditoria das notificações da OS (módulo 9). Mostra canal, evento, status e
+ * horário; "simulada" indica que nenhum provedor real está ligado ainda.
+ */
+function SecaoNotificacoes({ ordemId }: { ordemId: string }) {
+  const { data: resposta } = useGetApiOrdensServicoOrdemIdMensagens(ordemId);
+  const mensagens = resposta?.status === 200 ? resposta.data : [];
+
+  return (
+    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+      <h3 className="text-sm font-semibold text-[#14162B]">Notificações enviadas</h3>
+      {mensagens.length === 0 ? (
+        <p className="mt-2 text-sm text-[#8B8D98]">
+          Nenhuma notificação registrada ainda para esta OS.
+        </p>
+      ) : (
+        <ul className="mt-2 space-y-1 text-sm">
+          {mensagens.map((m) => (
+            <li
+              key={m.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2"
+            >
+              <span className="text-[#14162B]">
+                <span className="font-medium">
+                  {m.canal === "Email" ? "E-mail" : "WhatsApp"}
+                </span>{" "}
+                — {ROTULOS_EVENTO_COMUNICACAO[m.tipoEvento ?? ""] ?? m.tipoEvento}
+                <span className="ml-1 text-xs text-[#8B8D98]">para {m.destino}</span>
+              </span>
+              <span className="flex items-center gap-2 text-xs">
+                <span
+                  className={`rounded-full px-2 py-0.5 font-semibold ${
+                    m.status === "Enviada"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : m.status === "Falhou"
+                        ? "bg-[#E8536B]/10 text-[#E8536B]"
+                        : m.status === "Suprimida"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-[#F7F7F9] text-[#8B8D98]"
+                  }`}
+                >
+                  {ROTULOS_STATUS_MENSAGEM[m.status ?? ""] ?? m.status}
+                </span>
+                <span className="text-[#8B8D98]">
+                  {new Date(m.criadoEm ?? "").toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
