@@ -12,7 +12,10 @@ namespace TechPro.Api.Modules.Financeiro;
 /// OS. Os status de aprovação e pagamento da OS são derivados daqui — os
 /// campos manuais das etapas anteriores saíram da edição.
 /// </summary>
-public class FinanceiroService(TechProDbContext db, ITenantProvider tenantProvider)
+public class FinanceiroService(
+    TechProDbContext db,
+    ITenantProvider tenantProvider,
+    Comunicacao.ComunicacaoService comunicacao)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -128,6 +131,7 @@ public class FinanceiroService(TechProDbContext db, ITenantProvider tenantProvid
 
         await db.SaveChangesAsync();
         await RecalcularStatusPagamentoAsync(ordem);
+        await comunicacao.ProtegerAsync(() => comunicacao.NotificarOrcamentoDisponivelAsync(ordem.Id));
         return CatalogoResultado<OrcamentoResponse>.Ok(await ParaResponseAsync(orcamento));
     }
 
@@ -169,6 +173,8 @@ public class FinanceiroService(TechProDbContext db, ITenantProvider tenantProvid
 
         await db.SaveChangesAsync();
         await RecalcularStatusPagamentoAsync(ordem);
+        await comunicacao.ProtegerAsync(
+            () => comunicacao.NotificarOrcamentoRespostaAsync(ordem.Id, aprovado));
         return CatalogoResultado<OrcamentoResponse>.Ok(await ParaResponseAsync(orcamento));
     }
 

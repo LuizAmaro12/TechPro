@@ -26,6 +26,17 @@ services:
       Jwt__Issuer: TechPro
       Jwt__Audience: TechPro
       Cors__FrontendOrigin: http://localhost:3000
+      # Comunicação (módulo 9). Provedores em 'log' por padrão (simulado,
+      # determinístico) — vire a flag no .env para enviar de verdade.
+      Comunicacao__Hangfire__Habilitado: "true"
+      Comunicacao__UrlBasePublica: http://localhost:3000
+      Comunicacao__Whatsapp__Provedor: ${WHATSAPP_PROVEDOR:-log}
+      Comunicacao__Whatsapp__Evolution__BaseUrl: ${EVOLUTION_BASE_URL:-}
+      Comunicacao__Whatsapp__Evolution__ApiKey: ${EVOLUTION_API_KEY:-}
+      Comunicacao__Whatsapp__Evolution__Instancia: ${EVOLUTION_INSTANCIA:-}
+      Comunicacao__Email__Provedor: ${EMAIL_PROVEDOR:-log}
+      Comunicacao__Email__Resend__ApiKey: ${RESEND_API_KEY:-}
+      Comunicacao__Email__Resend__Remetente: ${RESEND_REMETENTE:-TechPro <onboarding@resend.dev>}
     ports:
       - "5080:8080"
 

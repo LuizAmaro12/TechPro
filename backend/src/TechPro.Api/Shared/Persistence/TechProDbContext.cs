@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -39,6 +40,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
     public DbSet<OrcamentoEvento> OrcamentoEventos => Set<OrcamentoEvento>();
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
+    public DbSet<MensagemEnviada> MensagensEnviadas => Set<MensagemEnviada>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -321,6 +323,24 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.OrdemServicoId);
             e.HasIndex(x => x.TenantId);
             e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        // --- Comunicação (módulo 9): auditoria das notificações -----------------
+
+        builder.Entity<MensagemEnviada>(e =>
+        {
+            e.ToTable("mensagens_enviadas");
+            e.Property(x => x.Canal).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.TipoEvento).HasConversion<string>().HasMaxLength(40);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Destino).HasMaxLength(256);
+            e.Property(x => x.Assunto).HasMaxLength(200);
+            e.Property(x => x.Corpo).HasMaxLength(2000);
+            e.Property(x => x.Erro).HasMaxLength(1000);
+            e.Property(x => x.IdExterno).HasMaxLength(200);
+            e.HasIndex(x => x.TenantId);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.ClienteId);
         });
 
         AplicarFiltroDeTenantPorConvencao(builder);

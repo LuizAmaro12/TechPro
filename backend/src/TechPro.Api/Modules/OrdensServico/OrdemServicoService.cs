@@ -21,7 +21,8 @@ public class OrdemServicoService(
     ITenantProvider tenantProvider,
     ClienteService clientes,
     OrdemServicoPecaService pecas,
-    Financeiro.FinanceiroService financeiro)
+    Financeiro.FinanceiroService financeiro,
+    Comunicacao.ComunicacaoService comunicacao)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -159,6 +160,7 @@ public class OrdemServicoService(
         db.OrdensServico.Add(ordem);
         RegistrarHistorico(ordem, deEtapa: null, ordem.Etapa, usuarioId, motivo: null);
         await db.SaveChangesAsync();
+        await comunicacao.ProtegerAsync(() => comunicacao.NotificarOrdemServicoCriadaAsync(ordem.Id));
 
         return CatalogoResultado<OrdemServicoResponse>.Ok(await CarregarResponseAsync(ordem.Id));
     }
@@ -198,6 +200,7 @@ public class OrdemServicoService(
         db.OrdensServico.Add(ordem);
         RegistrarHistorico(ordem, deEtapa: null, ordem.Etapa, usuarioId, motivo: null);
         await db.SaveChangesAsync();
+        await comunicacao.ProtegerAsync(() => comunicacao.NotificarOrdemServicoCriadaAsync(ordem.Id));
         return ordem;
     }
 
@@ -258,6 +261,13 @@ public class OrdemServicoService(
         }
 
         await db.SaveChangesAsync();
+
+        // "Seu aparelho está pronto" — a mensagem de maior valor da persona.
+        if (request.ParaEtapa == EtapaOrdemServico.ProntoParaRetirada)
+        {
+            await comunicacao.ProtegerAsync(() => comunicacao.NotificarProntoParaRetiradaAsync(id));
+        }
+
         return CatalogoResultado<OrdemServicoResponse>.Ok(await CarregarResponseAsync(id));
     }
 

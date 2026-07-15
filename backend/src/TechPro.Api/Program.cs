@@ -2,6 +2,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using FluentValidation;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -10,6 +12,8 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.Comunicacao;
+using TechPro.Api.Modules.Comunicacao.Canais;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -73,6 +77,67 @@ builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
 builder.Services.AddScoped<FinanceiroService>();
+
+// --- Comunicação (módulo 9): provedor abstraído, adaptador log por padrão ---
+builder.Services.AddScoped<ComunicacaoService>();
+builder.Services.AddScoped<LembreteJob>();
+
+// WhatsApp: Evolution só quando explicitamente selecionado; senão, log.
+if (string.Equals(builder.Configuration["Comunicacao:Whatsapp:Provedor"], "evolution",
+        StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton(new EvolutionOpcoes
+    {
+        BaseUrl = builder.Configuration["Comunicacao:Whatsapp:Evolution:BaseUrl"],
+        ApiKey = builder.Configuration["Comunicacao:Whatsapp:Evolution:ApiKey"],
+        Instancia = builder.Configuration["Comunicacao:Whatsapp:Evolution:Instancia"],
+    });
+    builder.Services.AddHttpClient<EvolutionWhatsAppCanal>();
+    builder.Services.AddScoped<ICanalNotificacao>(sp =>
+        sp.GetRequiredService<EvolutionWhatsAppCanal>());
+}
+else
+{
+    builder.Services.AddScoped<ICanalNotificacao, LogWhatsAppCanal>();
+}
+
+// E-mail: Resend só quando explicitamente selecionado; senão, log.
+if (string.Equals(builder.Configuration["Comunicacao:Email:Provedor"], "resend",
+        StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton(new ResendOpcoes
+    {
+        ApiKey = builder.Configuration["Comunicacao:Email:Resend:ApiKey"],
+        Remetente = builder.Configuration["Comunicacao:Email:Resend:Remetente"]
+            ?? "TechPro <onboarding@resend.dev>",
+    });
+    builder.Services.AddHttpClient<ResendEmailCanal>();
+    builder.Services.AddScoped<ICanalNotificacao>(sp =>
+        sp.GetRequiredService<ResendEmailCanal>());
+}
+else
+{
+    builder.Services.AddScoped<ICanalNotificacao, LogEmailCanal>();
+}
+
+// Hangfire só quando habilitado (docker). Sem ele, o agendador é no-op — os
+// testes e o `dotnet run` puro não dependem de Postgres/Hangfire.
+var hangfireHabilitado = builder.Configuration.GetValue("Comunicacao:Hangfire:Habilitado", false);
+if (hangfireHabilitado)
+{
+    builder.Services.AddHangfire(config => config
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(
+            builder.Configuration.GetConnectionString("TechPro"))));
+    builder.Services.AddHangfireServer();
+    builder.Services.AddScoped<IAgendadorDeLembretes, HangfireAgendadorDeLembretes>();
+}
+else
+{
+    builder.Services.AddScoped<IAgendadorDeLembretes, AgendadorDeLembretesNulo>();
+}
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]
@@ -154,10 +219,26 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Dashboard do Hangfire só em Development (filtro permissivo local; produção
+// exige um filtro de autorização real — anotado no plano da etapa).
+if (hangfireHabilitado && app.Environment.IsDevelopment())
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [new DashboardPermitirTudo()],
+    });
+}
+
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+/// <summary>Filtro do dashboard Hangfire para uso local (Development apenas).</summary>
+internal sealed class DashboardPermitirTudo : Hangfire.Dashboard.IDashboardAuthorizationFilter
+{
+    public bool Authorize(Hangfire.Dashboard.DashboardContext context) => true;
+}
 
 // Exposto para o WebApplicationFactory dos testes de integração.
 public partial class Program;

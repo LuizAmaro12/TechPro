@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TechPro.Api.Modules.Agendamentos.Dtos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Persistence;
 using TechPro.Api.Shared.Tenancy;
@@ -18,10 +19,31 @@ public class AgendamentoService(
     ITenantProvider tenantProvider,
     DisponibilidadeService disponibilidade,
     ClienteService clientes,
-    OrdensServico.OrdemServicoService ordensServico)
+    OrdensServico.OrdemServicoService ordensServico,
+    ComunicacaoService comunicacao,
+    IAgendadorDeLembretes agendadorDeLembretes)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
+
+    /// <summary>
+    /// Notifica a confirmação e agenda o lembrete temporizado (~3h antes; se
+    /// já estiver no passado, não agenda). Chamado após a criação do
+    /// agendamento, sem deixar falha de notificação derrubar o cadastro.
+    /// </summary>
+    private async Task AposCriarAgendamentoAsync(Agendamento agendamento)
+    {
+        await comunicacao.ProtegerAsync(
+            () => comunicacao.NotificarAgendamentoConfirmadoAsync(agendamento.Id));
+
+        var quando = agendamento.Data.ToDateTime(agendamento.HoraInicio, DateTimeKind.Utc)
+            .AddHours(-3);
+        if (quando > DateTime.UtcNow)
+        {
+            agendadorDeLembretes.AgendarLembrete(
+                agendamento.Id, new DateTimeOffset(quando), TenantId);
+        }
+    }
 
     public async Task<List<AgendamentoResponse>> ListarAsync(
         DateOnly? inicio, DateOnly? fim, StatusAgendamento? status)
@@ -102,6 +124,7 @@ public class AgendamentoService(
         };
         db.Agendamentos.Add(agendamento);
         await db.SaveChangesAsync();
+        await AposCriarAgendamentoAsync(agendamento);
 
         return CatalogoResultado<AgendamentoResponse>.Ok(await CarregarResponseAsync(agendamento.Id));
     }
@@ -254,6 +277,7 @@ public class AgendamentoService(
         };
         db.Agendamentos.Add(agendamento);
         await db.SaveChangesAsync();
+        await AposCriarAgendamentoAsync(agendamento);
 
         var servicoNome = await db.Servicos
             .Where(s => s.Id == request.ServicoId)
