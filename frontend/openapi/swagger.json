@@ -52,6 +52,158 @@
         }
       }
     },
+    "/api/publico/{slug}/acompanhar/{codigo}/orcamento/aprovar": {
+      "post": {
+        "tags": [
+          "Acompanhamento"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoPublicoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/publico/{slug}/acompanhar/{codigo}/orcamento/recusar": {
+      "post": {
+        "tags": [
+          "Acompanhamento"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoPublicoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/agenda/horarios": {
       "get": {
         "tags": [
@@ -1327,6 +1479,381 @@
                   "items": {
                     "$ref": "#/components/schemas/EquipeMembroResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/orcamento": {
+      "put": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrcamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrcamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrcamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/orcamento/enviar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/orcamento/aprovar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/orcamento/recusar": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespostaOrcamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrcamentoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/pagamentos": {
+      "post": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PagamentoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PagamentoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PagamentoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumoPagamentosResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{ordemId}/pagamentos/{pagamentoId}": {
+      "delete": {
+        "tags": [
+          "Financeiro"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pagamentoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumoPagamentosResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -2725,6 +3252,9 @@
           "atualizadoEm": {
             "type": "string",
             "format": "date-time"
+          },
+          "orcamento": {
+            "$ref": "#/components/schemas/OrcamentoPublicoResponse"
           }
         },
         "additionalProperties": false
@@ -3058,6 +3588,13 @@
         },
         "additionalProperties": false
       },
+      "CanalEventoOrcamento": {
+        "enum": [
+          "Loja",
+          "Portal"
+        ],
+        "type": "string"
+      },
       "CancelamentoRequest": {
         "type": "object",
         "properties": {
@@ -3343,6 +3880,16 @@
         ],
         "type": "string"
       },
+      "FormaPagamento": {
+        "enum": [
+          "Dinheiro",
+          "Pix",
+          "CartaoDebito",
+          "CartaoCredito",
+          "Outro"
+        ],
+        "type": "string"
+      },
       "FornecedorRequest": {
         "type": "object",
         "properties": {
@@ -3559,6 +4106,133 @@
         },
         "additionalProperties": false
       },
+      "OrcamentoEventoResponse": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoEventoOrcamento"
+          },
+          "canal": {
+            "$ref": "#/components/schemas/CanalEventoOrcamento"
+          },
+          "usuarioNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "valorTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrcamentoPublicoResponse": {
+        "type": "object",
+        "properties": {
+          "valorMaoDeObra": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorPecas": {
+            "type": "number",
+            "format": "double"
+          },
+          "desconto": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusOrcamento"
+          },
+          "enviadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "respondidoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrcamentoRequest": {
+        "type": "object",
+        "properties": {
+          "valorMaoDeObra": {
+            "type": "number",
+            "format": "double"
+          },
+          "desconto": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrcamentoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusOrcamento"
+          },
+          "valorMaoDeObra": {
+            "type": "number",
+            "format": "double"
+          },
+          "valorPecas": {
+            "type": "number",
+            "format": "double"
+          },
+          "desconto": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "motivoRecusa": {
+            "type": "string",
+            "nullable": true
+          },
+          "enviadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "respondidoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "eventos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrcamentoEventoResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "OrdemServicoAtualizacaoRequest": {
         "type": "object",
         "properties": {
@@ -3592,12 +4266,6 @@
             "format": "uuid",
             "nullable": true
           },
-          "statusPagamento": {
-            "$ref": "#/components/schemas/StatusPagamentoOrdemServico"
-          },
-          "statusAprovacao": {
-            "$ref": "#/components/schemas/StatusAprovacaoOrdemServico"
-          },
           "observacoes": {
             "type": "string",
             "nullable": true
@@ -3624,6 +4292,12 @@
               "$ref": "#/components/schemas/PecaUsadaResponse"
             },
             "nullable": true
+          },
+          "orcamento": {
+            "$ref": "#/components/schemas/OrcamentoResponse"
+          },
+          "pagamentos": {
+            "$ref": "#/components/schemas/ResumoPagamentosResponse"
           }
         },
         "additionalProperties": false
@@ -3829,6 +4503,52 @@
           "Portal"
         ],
         "type": "string"
+      },
+      "PagamentoRequest": {
+        "type": "object",
+        "properties": {
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "forma": {
+            "$ref": "#/components/schemas/FormaPagamento"
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PagamentoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "forma": {
+            "$ref": "#/components/schemas/FormaPagamento"
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "registradoPorNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "PecaRequest": {
         "type": "object",
@@ -4094,6 +4814,46 @@
         },
         "additionalProperties": false
       },
+      "RespostaOrcamentoRequest": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResumoPagamentosResponse": {
+        "type": "object",
+        "properties": {
+          "pagamentos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PagamentoResponse"
+            },
+            "nullable": true
+          },
+          "totalPago": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalOrcamento": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "saldo": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusPagamentoOrdemServico"
+          }
+        },
+        "additionalProperties": false
+      },
       "ServicoPecaRequest": {
         "type": "object",
         "properties": {
@@ -4313,11 +5073,28 @@
         ],
         "type": "string"
       },
+      "StatusOrcamento": {
+        "enum": [
+          "Rascunho",
+          "Enviado",
+          "Aprovado",
+          "Recusado"
+        ],
+        "type": "string"
+      },
       "StatusPagamentoOrdemServico": {
         "enum": [
           "NaoPago",
           "Parcial",
           "Pago"
+        ],
+        "type": "string"
+      },
+      "TipoEventoOrcamento": {
+        "enum": [
+          "Enviado",
+          "Aprovado",
+          "Recusado"
         ],
         "type": "string"
       },
@@ -4421,6 +5198,9 @@
     },
     {
       "name": "Equipe"
+    },
+    {
+      "name": "Financeiro"
     },
     {
       "name": "Fornecedores"

@@ -40,6 +40,28 @@ export const EtapaOrdemServico = {
   Cancelado: 'Cancelado',
 } as const;
 
+export type StatusOrcamento = typeof StatusOrcamento[keyof typeof StatusOrcamento];
+
+
+export const StatusOrcamento = {
+  Rascunho: 'Rascunho',
+  Enviado: 'Enviado',
+  Aprovado: 'Aprovado',
+  Recusado: 'Recusado',
+} as const;
+
+export interface OrcamentoPublicoResponse {
+  valorMaoDeObra?: number;
+  valorPecas?: number;
+  desconto?: number;
+  total?: number;
+  status?: StatusOrcamento;
+  /** @nullable */
+  enviadoEm?: string | null;
+  /** @nullable */
+  respondidoEm?: string | null;
+}
+
 export interface AcompanhamentoResponse {
   /** @nullable */
   nomeLoja?: string | null;
@@ -50,6 +72,7 @@ export interface AcompanhamentoResponse {
   /** @nullable */
   prazoEstimado?: string | null;
   atualizadoEm?: string;
+  orcamento?: OrcamentoPublicoResponse;
 }
 
 export interface AgendamentoPublicoRequest {
@@ -215,6 +238,14 @@ export interface BloqueioResponse {
   motivo?: string | null;
 }
 
+export type CanalEventoOrcamento = typeof CanalEventoOrcamento[keyof typeof CanalEventoOrcamento];
+
+
+export const CanalEventoOrcamento = {
+  Loja: 'Loja',
+  Portal: 'Portal',
+} as const;
+
 export interface CancelamentoRequest {
   /** @nullable */
   motivo?: string | null;
@@ -333,6 +364,17 @@ export interface EquipeMembroResponse {
   email?: string | null;
 }
 
+export type FormaPagamento = typeof FormaPagamento[keyof typeof FormaPagamento];
+
+
+export const FormaPagamento = {
+  Dinheiro: 'Dinheiro',
+  Pix: 'Pix',
+  CartaoDebito: 'CartaoDebito',
+  CartaoCredito: 'CartaoCredito',
+  Outro: 'Outro',
+} as const;
+
 export interface FornecedorRequest {
   /** @nullable */
   nome?: string | null;
@@ -436,6 +478,48 @@ export interface MudancaEtapaRequest {
   motivo?: string | null;
 }
 
+export type TipoEventoOrcamento = typeof TipoEventoOrcamento[keyof typeof TipoEventoOrcamento];
+
+
+export const TipoEventoOrcamento = {
+  Enviado: 'Enviado',
+  Aprovado: 'Aprovado',
+  Recusado: 'Recusado',
+} as const;
+
+export interface OrcamentoEventoResponse {
+  tipo?: TipoEventoOrcamento;
+  canal?: CanalEventoOrcamento;
+  /** @nullable */
+  usuarioNome?: string | null;
+  valorTotal?: number;
+  /** @nullable */
+  motivo?: string | null;
+  criadoEm?: string;
+}
+
+export interface OrcamentoRequest {
+  valorMaoDeObra?: number;
+  desconto?: number;
+}
+
+export interface OrcamentoResponse {
+  id?: number;
+  status?: StatusOrcamento;
+  valorMaoDeObra?: number;
+  valorPecas?: number;
+  desconto?: number;
+  total?: number;
+  /** @nullable */
+  motivoRecusa?: string | null;
+  /** @nullable */
+  enviadoEm?: string | null;
+  /** @nullable */
+  respondidoEm?: string | null;
+  /** @nullable */
+  eventos?: OrcamentoEventoResponse[] | null;
+}
+
 export type PrioridadeOrdemServico = typeof PrioridadeOrdemServico[keyof typeof PrioridadeOrdemServico];
 
 
@@ -444,6 +528,24 @@ export const PrioridadeOrdemServico = {
   Normal: 'Normal',
   Alta: 'Alta',
 } as const;
+
+export interface OrdemServicoAtualizacaoRequest {
+  /** @nullable */
+  aparelhoId?: number | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  prioridade?: PrioridadeOrdemServico;
+  /** @nullable */
+  prazoEstimado?: string | null;
+  /** @nullable */
+  responsavelTecnicoId?: string | null;
+  /** @nullable */
+  observacoes?: string | null;
+}
 
 export type StatusPagamentoOrdemServico = typeof StatusPagamentoOrdemServico[keyof typeof StatusPagamentoOrdemServico];
 
@@ -462,26 +564,6 @@ export const StatusAprovacaoOrdemServico = {
   Aprovado: 'Aprovado',
   Recusado: 'Recusado',
 } as const;
-
-export interface OrdemServicoAtualizacaoRequest {
-  /** @nullable */
-  aparelhoId?: number | null;
-  /** @nullable */
-  aparelhoMarca?: string | null;
-  /** @nullable */
-  aparelhoModelo?: string | null;
-  /** @nullable */
-  descricaoProblema?: string | null;
-  prioridade?: PrioridadeOrdemServico;
-  /** @nullable */
-  prazoEstimado?: string | null;
-  /** @nullable */
-  responsavelTecnicoId?: string | null;
-  statusPagamento?: StatusPagamentoOrdemServico;
-  statusAprovacao?: StatusAprovacaoOrdemServico;
-  /** @nullable */
-  observacoes?: string | null;
-}
 
 export interface OrdemServicoResponse {
   id?: string;
@@ -538,12 +620,36 @@ export interface PecaUsadaResponse {
   criadoEm?: string;
 }
 
+export interface PagamentoResponse {
+  id?: number;
+  valor?: number;
+  forma?: FormaPagamento;
+  /** @nullable */
+  observacao?: string | null;
+  /** @nullable */
+  registradoPorNome?: string | null;
+  criadoEm?: string;
+}
+
+export interface ResumoPagamentosResponse {
+  /** @nullable */
+  pagamentos?: PagamentoResponse[] | null;
+  totalPago?: number;
+  /** @nullable */
+  totalOrcamento?: number | null;
+  /** @nullable */
+  saldo?: number | null;
+  status?: StatusPagamentoOrdemServico;
+}
+
 export interface OrdemServicoDetalheResponse {
   ordem?: OrdemServicoResponse;
   /** @nullable */
   historico?: HistoricoEtapaResponse[] | null;
   /** @nullable */
   pecas?: PecaUsadaResponse[] | null;
+  orcamento?: OrcamentoResponse;
+  pagamentos?: ResumoPagamentosResponse;
 }
 
 export interface OrdemServicoRequest {
@@ -593,6 +699,13 @@ export interface OrdensServicoSyncResponse {
   /** @nullable */
   pecasUtilizadas?: PecaUsadaSyncItem[] | null;
   agora?: string;
+}
+
+export interface PagamentoRequest {
+  valor?: number;
+  forma?: FormaPagamento;
+  /** @nullable */
+  observacao?: string | null;
 }
 
 export interface PecaRequest {
@@ -660,6 +773,11 @@ export interface RegistrarRequest {
   email?: string | null;
   /** @nullable */
   senha?: string | null;
+}
+
+export interface RespostaOrcamentoRequest {
+  /** @nullable */
+  motivo?: string | null;
 }
 
 export interface ServicoPecaRequest {
@@ -937,6 +1055,190 @@ export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<
 
 
 
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse200 = {
+  data: OrcamentoPublicoResponse
+  status: 200
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponseSuccess = (postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse200) & {
+  headers: Headers;
+};
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponseError = (postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse400 | postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse = (postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponseSuccess | postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponseError)
+
+export const getPostApiPublicoSlugAcompanharCodigoOrcamentoAprovarUrl = (slug: string,
+    codigo: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/acompanhar/${codigo}/orcamento/aprovar`
+}
+
+export const postApiPublicoSlugAcompanharCodigoOrcamentoAprovar = async (slug: string,
+    codigo: string,
+    respostaOrcamentoRequest?: RespostaOrcamentoRequest, options?: RequestInit): Promise<postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse> => {
+
+  return apiFetch<postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse>(getPostApiPublicoSlugAcompanharCodigoOrcamentoAprovarUrl(slug,codigo),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(respostaOrcamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiPublicoSlugAcompanharCodigoOrcamentoAprovarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiPublicoSlugAcompanharCodigoOrcamentoAprovar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>, {slug: string;codigo: string;data?: RespostaOrcamentoRequest}> = (props) => {
+          const {slug,codigo,data} = props ?? {};
+
+          return  postApiPublicoSlugAcompanharCodigoOrcamentoAprovar(slug,codigo,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoAprovarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>>
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoAprovarMutationBody = RespostaOrcamentoRequest | undefined
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoAprovarMutationError = ProblemDetails
+
+    export const usePostApiPublicoSlugAcompanharCodigoOrcamentoAprovar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoAprovar>>,
+        TError,
+        {slug: string;codigo: string;data?: RespostaOrcamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiPublicoSlugAcompanharCodigoOrcamentoAprovarMutationOptions(options), queryClient);
+    }
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse200 = {
+  data: OrcamentoPublicoResponse
+  status: 200
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponseSuccess = (postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse200) & {
+  headers: Headers;
+};
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponseError = (postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse400 | postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse = (postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponseSuccess | postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponseError)
+
+export const getPostApiPublicoSlugAcompanharCodigoOrcamentoRecusarUrl = (slug: string,
+    codigo: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/acompanhar/${codigo}/orcamento/recusar`
+}
+
+export const postApiPublicoSlugAcompanharCodigoOrcamentoRecusar = async (slug: string,
+    codigo: string,
+    respostaOrcamentoRequest?: RespostaOrcamentoRequest, options?: RequestInit): Promise<postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse> => {
+
+  return apiFetch<postApiPublicoSlugAcompanharCodigoOrcamentoRecusarResponse>(getPostApiPublicoSlugAcompanharCodigoOrcamentoRecusarUrl(slug,codigo),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(respostaOrcamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiPublicoSlugAcompanharCodigoOrcamentoRecusarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiPublicoSlugAcompanharCodigoOrcamentoRecusar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>, {slug: string;codigo: string;data?: RespostaOrcamentoRequest}> = (props) => {
+          const {slug,codigo,data} = props ?? {};
+
+          return  postApiPublicoSlugAcompanharCodigoOrcamentoRecusar(slug,codigo,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoRecusarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>>
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoRecusarMutationBody = RespostaOrcamentoRequest | undefined
+    export type PostApiPublicoSlugAcompanharCodigoOrcamentoRecusarMutationError = ProblemDetails
+
+    export const usePostApiPublicoSlugAcompanharCodigoOrcamentoRecusar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>, TError,{slug: string;codigo: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoOrcamentoRecusar>>,
+        TError,
+        {slug: string;codigo: string;data?: RespostaOrcamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiPublicoSlugAcompanharCodigoOrcamentoRecusarMutationOptions(options), queryClient);
+    }
 
 export type getApiAgendaHorariosResponse200 = {
   data: HorarioFuncionamentoDia[]
@@ -3627,6 +3929,541 @@ export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>
 
 
 
+
+export type putApiOrdensServicoOrdemIdOrcamentoResponse200 = {
+  data: OrcamentoResponse
+  status: 200
+}
+
+export type putApiOrdensServicoOrdemIdOrcamentoResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiOrdensServicoOrdemIdOrcamentoResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiOrdensServicoOrdemIdOrcamentoResponseSuccess = (putApiOrdensServicoOrdemIdOrcamentoResponse200) & {
+  headers: Headers;
+};
+export type putApiOrdensServicoOrdemIdOrcamentoResponseError = (putApiOrdensServicoOrdemIdOrcamentoResponse400 | putApiOrdensServicoOrdemIdOrcamentoResponse404) & {
+  headers: Headers;
+};
+
+export type putApiOrdensServicoOrdemIdOrcamentoResponse = (putApiOrdensServicoOrdemIdOrcamentoResponseSuccess | putApiOrdensServicoOrdemIdOrcamentoResponseError)
+
+export const getPutApiOrdensServicoOrdemIdOrcamentoUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/orcamento`
+}
+
+export const putApiOrdensServicoOrdemIdOrcamento = async (ordemId: string,
+    orcamentoRequest?: OrcamentoRequest, options?: RequestInit): Promise<putApiOrdensServicoOrdemIdOrcamentoResponse> => {
+
+  return apiFetch<putApiOrdensServicoOrdemIdOrcamentoResponse>(getPutApiOrdensServicoOrdemIdOrcamentoUrl(ordemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(orcamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiOrdensServicoOrdemIdOrcamentoMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>, TError,{ordemId: string;data?: OrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>, TError,{ordemId: string;data?: OrcamentoRequest}, TContext> => {
+
+const mutationKey = ['putApiOrdensServicoOrdemIdOrcamento'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>, {ordemId: string;data?: OrcamentoRequest}> = (props) => {
+          const {ordemId,data} = props ?? {};
+
+          return  putApiOrdensServicoOrdemIdOrcamento(ordemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiOrdensServicoOrdemIdOrcamentoMutationResult = NonNullable<Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>>
+    export type PutApiOrdensServicoOrdemIdOrcamentoMutationBody = OrcamentoRequest | undefined
+    export type PutApiOrdensServicoOrdemIdOrcamentoMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePutApiOrdensServicoOrdemIdOrcamento = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>, TError,{ordemId: string;data?: OrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiOrdensServicoOrdemIdOrcamento>>,
+        TError,
+        {ordemId: string;data?: OrcamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiOrdensServicoOrdemIdOrcamentoMutationOptions(options), queryClient);
+    }
+
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponse200 = {
+  data: OrcamentoResponse
+  status: 200
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponseSuccess = (postApiOrdensServicoOrdemIdOrcamentoEnviarResponse200) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponseError = (postApiOrdensServicoOrdemIdOrcamentoEnviarResponse400 | postApiOrdensServicoOrdemIdOrcamentoEnviarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoOrdemIdOrcamentoEnviarResponse = (postApiOrdensServicoOrdemIdOrcamentoEnviarResponseSuccess | postApiOrdensServicoOrdemIdOrcamentoEnviarResponseError)
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoEnviarUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/orcamento/enviar`
+}
+
+export const postApiOrdensServicoOrdemIdOrcamentoEnviar = async (ordemId: string, options?: RequestInit): Promise<postApiOrdensServicoOrdemIdOrcamentoEnviarResponse> => {
+
+  return apiFetch<postApiOrdensServicoOrdemIdOrcamentoEnviarResponse>(getPostApiOrdensServicoOrdemIdOrcamentoEnviarUrl(ordemId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoEnviarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>, TError,{ordemId: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>, TError,{ordemId: string}, TContext> => {
+
+const mutationKey = ['postApiOrdensServicoOrdemIdOrcamentoEnviar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>, {ordemId: string}> = (props) => {
+          const {ordemId} = props ?? {};
+
+          return  postApiOrdensServicoOrdemIdOrcamentoEnviar(ordemId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoOrdemIdOrcamentoEnviarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>>
+
+    export type PostApiOrdensServicoOrdemIdOrcamentoEnviarMutationError = ProblemDetails
+
+    export const usePostApiOrdensServicoOrdemIdOrcamentoEnviar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>, TError,{ordemId: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoEnviar>>,
+        TError,
+        {ordemId: string},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoOrdemIdOrcamentoEnviarMutationOptions(options), queryClient);
+    }
+
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponse200 = {
+  data: OrcamentoResponse
+  status: 200
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponseSuccess = (postApiOrdensServicoOrdemIdOrcamentoAprovarResponse200) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponseError = (postApiOrdensServicoOrdemIdOrcamentoAprovarResponse400 | postApiOrdensServicoOrdemIdOrcamentoAprovarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoOrdemIdOrcamentoAprovarResponse = (postApiOrdensServicoOrdemIdOrcamentoAprovarResponseSuccess | postApiOrdensServicoOrdemIdOrcamentoAprovarResponseError)
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoAprovarUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/orcamento/aprovar`
+}
+
+export const postApiOrdensServicoOrdemIdOrcamentoAprovar = async (ordemId: string,
+    respostaOrcamentoRequest?: RespostaOrcamentoRequest, options?: RequestInit): Promise<postApiOrdensServicoOrdemIdOrcamentoAprovarResponse> => {
+
+  return apiFetch<postApiOrdensServicoOrdemIdOrcamentoAprovarResponse>(getPostApiOrdensServicoOrdemIdOrcamentoAprovarUrl(ordemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(respostaOrcamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoAprovarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiOrdensServicoOrdemIdOrcamentoAprovar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>, {ordemId: string;data?: RespostaOrcamentoRequest}> = (props) => {
+          const {ordemId,data} = props ?? {};
+
+          return  postApiOrdensServicoOrdemIdOrcamentoAprovar(ordemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoOrdemIdOrcamentoAprovarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>>
+    export type PostApiOrdensServicoOrdemIdOrcamentoAprovarMutationBody = RespostaOrcamentoRequest | undefined
+    export type PostApiOrdensServicoOrdemIdOrcamentoAprovarMutationError = ProblemDetails
+
+    export const usePostApiOrdensServicoOrdemIdOrcamentoAprovar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoAprovar>>,
+        TError,
+        {ordemId: string;data?: RespostaOrcamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoOrdemIdOrcamentoAprovarMutationOptions(options), queryClient);
+    }
+
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponse200 = {
+  data: OrcamentoResponse
+  status: 200
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponseSuccess = (postApiOrdensServicoOrdemIdOrcamentoRecusarResponse200) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponseError = (postApiOrdensServicoOrdemIdOrcamentoRecusarResponse400 | postApiOrdensServicoOrdemIdOrcamentoRecusarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoOrdemIdOrcamentoRecusarResponse = (postApiOrdensServicoOrdemIdOrcamentoRecusarResponseSuccess | postApiOrdensServicoOrdemIdOrcamentoRecusarResponseError)
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoRecusarUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/orcamento/recusar`
+}
+
+export const postApiOrdensServicoOrdemIdOrcamentoRecusar = async (ordemId: string,
+    respostaOrcamentoRequest?: RespostaOrcamentoRequest, options?: RequestInit): Promise<postApiOrdensServicoOrdemIdOrcamentoRecusarResponse> => {
+
+  return apiFetch<postApiOrdensServicoOrdemIdOrcamentoRecusarResponse>(getPostApiOrdensServicoOrdemIdOrcamentoRecusarUrl(ordemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(respostaOrcamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoOrdemIdOrcamentoRecusarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiOrdensServicoOrdemIdOrcamentoRecusar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>, {ordemId: string;data?: RespostaOrcamentoRequest}> = (props) => {
+          const {ordemId,data} = props ?? {};
+
+          return  postApiOrdensServicoOrdemIdOrcamentoRecusar(ordemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoOrdemIdOrcamentoRecusarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>>
+    export type PostApiOrdensServicoOrdemIdOrcamentoRecusarMutationBody = RespostaOrcamentoRequest | undefined
+    export type PostApiOrdensServicoOrdemIdOrcamentoRecusarMutationError = ProblemDetails
+
+    export const usePostApiOrdensServicoOrdemIdOrcamentoRecusar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>, TError,{ordemId: string;data?: RespostaOrcamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdOrcamentoRecusar>>,
+        TError,
+        {ordemId: string;data?: RespostaOrcamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoOrdemIdOrcamentoRecusarMutationOptions(options), queryClient);
+    }
+
+export type postApiOrdensServicoOrdemIdPagamentosResponse201 = {
+  data: ResumoPagamentosResponse
+  status: 201
+}
+
+export type postApiOrdensServicoOrdemIdPagamentosResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiOrdensServicoOrdemIdPagamentosResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiOrdensServicoOrdemIdPagamentosResponseSuccess = (postApiOrdensServicoOrdemIdPagamentosResponse201) & {
+  headers: Headers;
+};
+export type postApiOrdensServicoOrdemIdPagamentosResponseError = (postApiOrdensServicoOrdemIdPagamentosResponse400 | postApiOrdensServicoOrdemIdPagamentosResponse404) & {
+  headers: Headers;
+};
+
+export type postApiOrdensServicoOrdemIdPagamentosResponse = (postApiOrdensServicoOrdemIdPagamentosResponseSuccess | postApiOrdensServicoOrdemIdPagamentosResponseError)
+
+export const getPostApiOrdensServicoOrdemIdPagamentosUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/pagamentos`
+}
+
+export const postApiOrdensServicoOrdemIdPagamentos = async (ordemId: string,
+    pagamentoRequest?: PagamentoRequest, options?: RequestInit): Promise<postApiOrdensServicoOrdemIdPagamentosResponse> => {
+
+  return apiFetch<postApiOrdensServicoOrdemIdPagamentosResponse>(getPostApiOrdensServicoOrdemIdPagamentosUrl(ordemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(pagamentoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiOrdensServicoOrdemIdPagamentosMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>, TError,{ordemId: string;data?: PagamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>, TError,{ordemId: string;data?: PagamentoRequest}, TContext> => {
+
+const mutationKey = ['postApiOrdensServicoOrdemIdPagamentos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>, {ordemId: string;data?: PagamentoRequest}> = (props) => {
+          const {ordemId,data} = props ?? {};
+
+          return  postApiOrdensServicoOrdemIdPagamentos(ordemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOrdensServicoOrdemIdPagamentosMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>>
+    export type PostApiOrdensServicoOrdemIdPagamentosMutationBody = PagamentoRequest | undefined
+    export type PostApiOrdensServicoOrdemIdPagamentosMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiOrdensServicoOrdemIdPagamentos = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>, TError,{ordemId: string;data?: PagamentoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOrdensServicoOrdemIdPagamentos>>,
+        TError,
+        {ordemId: string;data?: PagamentoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOrdensServicoOrdemIdPagamentosMutationOptions(options), queryClient);
+    }
+
+export type deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse200 = {
+  data: ResumoPagamentosResponse
+  status: 200
+}
+
+export type deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponseSuccess = (deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse200) & {
+  headers: Headers;
+};
+export type deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponseError = (deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse = (deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponseSuccess | deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponseError)
+
+export const getDeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdUrl = (ordemId: string,
+    pagamentoId: number,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/pagamentos/${pagamentoId}`
+}
+
+export const deleteApiOrdensServicoOrdemIdPagamentosPagamentoId = async (ordemId: string,
+    pagamentoId: number, options?: RequestInit): Promise<deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse> => {
+
+  return apiFetch<deleteApiOrdensServicoOrdemIdPagamentosPagamentoIdResponse>(getDeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdUrl(ordemId,pagamentoId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>, TError,{ordemId: string;pagamentoId: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>, TError,{ordemId: string;pagamentoId: number}, TContext> => {
+
+const mutationKey = ['deleteApiOrdensServicoOrdemIdPagamentosPagamentoId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>, {ordemId: string;pagamentoId: number}> = (props) => {
+          const {ordemId,pagamentoId} = props ?? {};
+
+          return  deleteApiOrdensServicoOrdemIdPagamentosPagamentoId(ordemId,pagamentoId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>>
+
+    export type DeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdMutationError = ProblemDetails
+
+    export const useDeleteApiOrdensServicoOrdemIdPagamentosPagamentoId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>, TError,{ordemId: string;pagamentoId: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiOrdensServicoOrdemIdPagamentosPagamentoId>>,
+        TError,
+        {ordemId: string;pagamentoId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdMutationOptions(options), queryClient);
+    }
 
 export type getApiFornecedoresResponse200 = {
   data: FornecedorResponse[]
