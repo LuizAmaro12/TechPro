@@ -1,8 +1,12 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using TechPro.Api.Modules.Financeiro;
+using TechPro.Api.Modules.Financeiro.Dtos;
 using TechPro.Api.Modules.OrdensServico.Dtos;
+using TechPro.Api.Shared.Api;
 using TechPro.Api.Shared.Persistence;
 using TechPro.Api.Shared.Tenancy;
 
@@ -21,37 +25,97 @@ namespace TechPro.Api.Modules.OrdensServico;
 [Produces("application/json")]
 public class AcompanhamentoController(
     TechProDbContext db,
-    TenantAmbiente tenantAmbiente) : ControllerBase
+    TenantAmbiente tenantAmbiente,
+    FinanceiroService financeiro,
+    IValidator<RespostaOrcamentoRequest> validadorResposta) : ControllerBase
 {
     [HttpGet("{codigo}")]
     [ProducesResponseType<AcompanhamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Obter(string slug, string codigo)
     {
-        var empresa = await db.Empresas
-            .IgnoreQueryFilters()
-            .SingleOrDefaultAsync(e => e.Slug == slug);
-        if (empresa is null)
-        {
-            return NotFound();
-        }
-
-        tenantAmbiente.TenantIdFixado = empresa.Id;
-
-        var ordem = await db.OrdensServico
-            .Include(o => o.Servico)
-            .FirstOrDefaultAsync(o => o.CodigoAcompanhamento == codigo && o.DeletedAt == null);
+        var ordem = await ResolverOrdemAsync(slug, codigo);
         if (ordem is null)
         {
             return NotFound();
         }
 
         return Ok(new AcompanhamentoResponse(
-            empresa.Nome,
+            _nomeLoja!,
             ordem.Numero,
             ordem.Servico!.Nome,
             ordem.Etapa,
             ordem.PrazoEstimado,
-            ordem.UpdatedAt));
+            ordem.UpdatedAt,
+            await financeiro.ObterOrcamentoPublicoAsync(ordem.Id)));
+    }
+
+    /// <summary>Aprovação binária pelo cliente final (módulo 1, Fase 1) — com trilha.</summary>
+    [HttpPost("{codigo}/orcamento/aprovar")]
+    [ProducesResponseType<OrcamentoPublicoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> Aprovar(string slug, string codigo, RespostaOrcamentoRequest request) =>
+        ResponderAsync(slug, codigo, request, aprovado: true);
+
+    [HttpPost("{codigo}/orcamento/recusar")]
+    [ProducesResponseType<OrcamentoPublicoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<IActionResult> Recusar(string slug, string codigo, RespostaOrcamentoRequest request) =>
+        ResponderAsync(slug, codigo, request, aprovado: false);
+
+    private async Task<IActionResult> ResponderAsync(
+        string slug, string codigo, RespostaOrcamentoRequest request, bool aprovado)
+    {
+        var validacao = await validadorResposta.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var ordem = await ResolverOrdemAsync(slug, codigo);
+        if (ordem is null)
+        {
+            return NotFound();
+        }
+
+        var resultado = await financeiro.ResponderAsync(
+            ordem.Id, aprovado, request.Motivo, usuarioId: null, CanalEventoOrcamento.Portal);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return Ok(await financeiro.ObterOrcamentoPublicoAsync(ordem.Id));
+    }
+
+    private string? _nomeLoja;
+
+    /// <summary>
+    /// Slug resolve o tenant (ignora o GQF da Empresa de propósito — ainda não
+    /// há tenant) e o código opaco localiza a OS já sob GQF+RLS.
+    /// </summary>
+    private async Task<OrdemServico?> ResolverOrdemAsync(string slug, string codigo)
+    {
+        var empresa = await db.Empresas
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(e => e.Slug == slug);
+        if (empresa is null)
+        {
+            return null;
+        }
+
+        tenantAmbiente.TenantIdFixado = empresa.Id;
+        _nomeLoja = empresa.Nome;
+
+        return await db.OrdensServico
+            .Include(o => o.Servico)
+            .FirstOrDefaultAsync(o => o.CodigoAcompanhamento == codigo && o.DeletedAt == null);
     }
 }

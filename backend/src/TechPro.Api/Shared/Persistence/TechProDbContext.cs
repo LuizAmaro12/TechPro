@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
+using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
@@ -35,6 +36,9 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
+    public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
+    public DbSet<OrcamentoEvento> OrcamentoEventos => Set<OrcamentoEvento>();
+    public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -278,6 +282,45 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.UpdatedAt);
             e.HasOne<OrdemServico>().WithMany(o => o.Historico)
                 .HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        // --- Financeiro (módulos 8/11): orçamento com trilha e pagamentos --------
+
+        builder.Entity<Orcamento>(e =>
+        {
+            e.ToTable("orcamentos");
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.ValorMaoDeObra).HasPrecision(10, 2);
+            e.Property(x => x.Desconto).HasPrecision(10, 2);
+            e.Property(x => x.ValorPecas).HasPrecision(10, 2);
+            e.Property(x => x.MotivoRecusa).HasMaxLength(500);
+            // Um orçamento por OS na Fase 1 (item a item é Fase 2).
+            e.HasIndex(x => x.OrdemServicoId).IsUnique();
+            e.HasIndex(x => x.TenantId);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        builder.Entity<OrcamentoEvento>(e =>
+        {
+            e.ToTable("orcamento_eventos");
+            e.Property(x => x.Tipo).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Canal).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.ValorTotal).HasPrecision(10, 2);
+            e.Property(x => x.Motivo).HasMaxLength(500);
+            e.HasIndex(x => x.OrcamentoId);
+            e.HasIndex(x => x.TenantId);
+            e.HasOne<Orcamento>().WithMany(o => o.Eventos).HasForeignKey(x => x.OrcamentoId);
+        });
+
+        builder.Entity<Pagamento>(e =>
+        {
+            e.ToTable("pagamentos");
+            e.Property(x => x.Forma).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Valor).HasPrecision(10, 2);
+            e.Property(x => x.Observacao).HasMaxLength(200);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.TenantId);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
         });
 
         AplicarFiltroDeTenantPorConvencao(builder);

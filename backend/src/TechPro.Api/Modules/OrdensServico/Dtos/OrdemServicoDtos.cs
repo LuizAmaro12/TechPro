@@ -13,7 +13,11 @@ public record OrdemServicoRequest(
     Guid? ResponsavelTecnicoId,
     string? Observacoes);
 
-/// <summary>Edição de campos de gestão; cliente e serviço são fixos na Fase 1.</summary>
+/// <summary>
+/// Edição de campos de gestão; cliente e serviço são fixos na Fase 1.
+/// Status de pagamento e de aprovação saíram daqui — desde a etapa de
+/// orçamento/pagamento (2026-07-15) são derivados dos fluxos reais.
+/// </summary>
 public record OrdemServicoAtualizacaoRequest(
     int? AparelhoId,
     string? AparelhoMarca,
@@ -22,8 +26,6 @@ public record OrdemServicoAtualizacaoRequest(
     PrioridadeOrdemServico Prioridade,
     DateOnly? PrazoEstimado,
     Guid? ResponsavelTecnicoId,
-    StatusPagamentoOrdemServico StatusPagamento,
-    StatusAprovacaoOrdemServico StatusAprovacao,
     string? Observacoes);
 
 public record MudancaEtapaRequest(EtapaOrdemServico ParaEtapa, string? Motivo);
@@ -64,7 +66,9 @@ public record HistoricoEtapaResponse(
 public record OrdemServicoDetalheResponse(
     OrdemServicoResponse Ordem,
     List<HistoricoEtapaResponse> Historico,
-    List<PecaUsadaResponse> Pecas);
+    List<PecaUsadaResponse> Pecas,
+    Financeiro.Dtos.OrcamentoResponse? Orcamento,
+    Financeiro.Dtos.ResumoPagamentosResponse? Pagamentos);
 
 // --- Peças utilizadas (baixa automática, módulo 7) -----------------------------
 
@@ -128,4 +132,5 @@ public record AcompanhamentoResponse(
     string ServicoNome,
     EtapaOrdemServico Etapa,
     DateOnly? PrazoEstimado,
-    DateTimeOffset AtualizadoEm);
+    DateTimeOffset AtualizadoEm,
+    Financeiro.Dtos.OrcamentoPublicoResponse? Orcamento);

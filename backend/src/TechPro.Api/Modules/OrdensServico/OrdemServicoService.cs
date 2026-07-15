@@ -20,7 +20,8 @@ public class OrdemServicoService(
     TechProDbContext db,
     ITenantProvider tenantProvider,
     ClienteService clientes,
-    OrdemServicoPecaService pecas)
+    OrdemServicoPecaService pecas,
+    Financeiro.FinanceiroService financeiro)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -96,7 +97,9 @@ public class OrdemServicoService(
                 h.UsuarioId is { } uid && nomes.TryGetValue(uid, out var nome) ? nome : null,
                 h.Motivo,
                 h.CriadoEm)).ToList(),
-            await pecas.CarregarLinhasAsync(id));
+            await pecas.CarregarLinhasAsync(id),
+            await financeiro.ObterOrcamentoAsync(id),
+            await financeiro.ObterResumoPagamentosAsync(id));
     }
 
     public async Task<CatalogoResultado<OrdemServicoResponse>> CriarAsync(
@@ -222,8 +225,6 @@ public class OrdemServicoService(
         ordem.Prioridade = request.Prioridade;
         ordem.PrazoEstimado = request.PrazoEstimado;
         ordem.ResponsavelTecnicoId = request.ResponsavelTecnicoId;
-        ordem.StatusPagamento = request.StatusPagamento;
-        ordem.StatusAprovacao = request.StatusAprovacao;
         ordem.Observacoes = Normalizar(request.Observacoes);
         await db.SaveChangesAsync();
 
@@ -338,12 +339,26 @@ public class OrdemServicoService(
         EtapaOrdemServico? deEtapa,
         EtapaOrdemServico paraEtapa,
         Guid? usuarioId,
+        string? motivo) =>
+        RegistrarHistoricoEtapa(db, TenantId, ordem, deEtapa, paraEtapa, usuarioId, motivo);
+
+    /// <summary>
+    /// Compartilhado com o módulo Financeiro (enviar orçamento move a OS para
+    /// Aguardando aprovação) sem criar ciclo de dependência entre os services.
+    /// </summary>
+    internal static void RegistrarHistoricoEtapa(
+        TechProDbContext db,
+        Guid tenantId,
+        OrdemServico ordem,
+        EtapaOrdemServico? deEtapa,
+        EtapaOrdemServico paraEtapa,
+        Guid? usuarioId,
         string? motivo)
     {
         db.HistoricosEtapaOrdemServico.Add(new OrdemServicoHistoricoEtapa
         {
             Id = Guid.NewGuid(),
-            TenantId = TenantId,
+            TenantId = tenantId,
             OrdemServicoId = ordem.Id,
             DeEtapa = deEtapa,
             ParaEtapa = paraEtapa,

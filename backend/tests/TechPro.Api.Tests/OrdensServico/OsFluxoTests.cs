@@ -209,16 +209,16 @@ public class OsFluxoTests(TechProApiFactory fabrica) : IClassFixture<TechProApiF
             prioridade = "Alta",
             prazoEstimado = "2026-08-01",
             responsavelTecnicoId = membro.Id,
-            statusPagamento = "Parcial",
-            statusAprovacao = "Aprovado",
             observacoes = "Peça encomendada",
         });
         Assert.Equal(HttpStatusCode.OK, editar.StatusCode);
         var editada = await editar.Content.ReadFromJsonAsync<OrdemServicoResponse>();
         Assert.Equal(PrioridadeOrdemServico.Alta, editada!.Prioridade);
         Assert.Equal("Dono", editada.ResponsavelTecnicoNome);
-        Assert.Equal(StatusPagamentoOrdemServico.Parcial, editada.StatusPagamento);
-        Assert.Equal(StatusAprovacaoOrdemServico.Aprovado, editada.StatusAprovacao);
+        // Status de pagamento/aprovação são derivados (etapa de orçamento) —
+        // o PUT não os toca mais.
+        Assert.Equal(StatusPagamentoOrdemServico.NaoPago, editada.StatusPagamento);
+        Assert.Equal(StatusAprovacaoOrdemServico.Pendente, editada.StatusAprovacao);
 
         // Responsável de outra empresa → 400 (anti-IDOR em tabela sem GQF).
         var outroToken = await RegistrarEmpresaAsync("os.edicao.outra@exemplo.com");
@@ -235,8 +235,6 @@ public class OsFluxoTests(TechProApiFactory fabrica) : IClassFixture<TechProApiF
             prioridade = "Normal",
             prazoEstimado = (string?)null,
             responsavelTecnicoId = intruso.Id,
-            statusPagamento = "NaoPago",
-            statusAprovacao = "Pendente",
             observacoes = (string?)null,
         });
         Assert.Equal(HttpStatusCode.BadRequest, invalido.StatusCode);
