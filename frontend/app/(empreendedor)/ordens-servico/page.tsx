@@ -14,13 +14,19 @@ import {
   useGetApiAgendaConfiguracoes,
   useGetApiClientes,
   useGetApiEquipe,
+  useDeleteApiOrdensServicoIdPecasPecaUsadaId,
   useGetApiOrdensServico,
   useGetApiOrdensServicoId,
+  useGetApiPecas,
   useGetApiServicos,
   usePostApiOrdensServico,
+  usePostApiOrdensServicoIdPecas,
+  usePostApiOrdensServicoIdPecasAplicarPadrao,
   usePutApiOrdensServicoId,
   type OrdemServicoResponse,
+  type PecaUsadaResponse,
 } from "@/lib/api-client/gerado";
+import { formatarBRL } from "@/lib/formatadores";
 import { formatarDataCurta } from "@/lib/agenda-datas";
 import {
   ROTULOS_APROVACAO,
@@ -78,6 +84,15 @@ export default function PaginaOrdensServico() {
 
   const criar = usePostApiOrdensServico();
   const atualizar = usePutApiOrdensServicoId();
+  const adicionarPeca = usePostApiOrdensServicoIdPecas();
+  const aplicarPecasPadrao = usePostApiOrdensServicoIdPecasAplicarPadrao();
+  const removerPeca = useDeleteApiOrdensServicoIdPecasPecaUsadaId();
+  const [novaPecaId, setNovaPecaId] = useState("");
+  const [novaQuantidade, setNovaQuantidade] = useState("1");
+
+  const { data: respostaPecas } = useGetApiPecas({ tamanhoPagina: 100 });
+  const pecasCatalogo =
+    respostaPecas?.status === 200 ? (respostaPecas.data.itens ?? []) : [];
 
   const formCriacao = useForm<ValoresOrdemServico>({
     resolver: zodResolver(esquemaOrdemServico),
@@ -100,6 +115,73 @@ export default function PaginaOrdensServico() {
 
   function invalidar() {
     queryClient.invalidateQueries({ queryKey: ["/api/ordens-servico"] });
+  }
+
+  function invalidarPecas() {
+    invalidar();
+    queryClient.invalidateQueries({ queryKey: [`/api/ordens-servico/${editandoId}`] });
+    queryClient.invalidateQueries({ queryKey: ["/api/pecas"] });
+  }
+
+  // Decisão 2026-07-15: estoque negativo é permitido — a UI avisa, não bloqueia.
+  function avisarEstoque(linha: PecaUsadaResponse) {
+    if (linha.estoqueNegativo) {
+      toast.warning(
+        `Estoque de ${linha.pecaNome} ficou negativo (${linha.estoqueRestante}) — ajuste a contagem no catálogo.`,
+      );
+    } else if (linha.estoqueAbaixoDoMinimo) {
+      toast.warning(
+        `${linha.pecaNome} ficou no estoque mínimo ou abaixo (${linha.estoqueRestante} restantes).`,
+      );
+    }
+  }
+
+  async function aoAdicionarPeca() {
+    if (editandoId === null || !novaPecaId) return;
+    try {
+      const resposta = await adicionarPeca.mutateAsync({
+        id: editandoId,
+        data: { pecaId: Number(novaPecaId), quantidade: Number(novaQuantidade) || 1 },
+      });
+      if (resposta.status === 201) {
+        toast.success("Peça registrada — baixa feita no estoque.");
+        avisarEstoque(resposta.data);
+      }
+      setNovaPecaId("");
+      setNovaQuantidade("1");
+      invalidarPecas();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao registrar a peça.");
+    }
+  }
+
+  async function aoAplicarPadrao() {
+    if (editandoId === null) return;
+    try {
+      const resposta = await aplicarPecasPadrao.mutateAsync({ id: editandoId });
+      if (resposta.status === 200) {
+        if (resposta.data.length === 0) {
+          toast.info("As peças padrão do serviço já estão na OS (ou não há nenhuma).");
+        } else {
+          toast.success(`${resposta.data.length} peça(s) do serviço aplicadas.`);
+          resposta.data.forEach(avisarEstoque);
+        }
+      }
+      invalidarPecas();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao aplicar as peças.");
+    }
+  }
+
+  async function aoRemoverPeca(pecaUsadaId: string | undefined) {
+    if (editandoId === null || !pecaUsadaId) return;
+    try {
+      await removerPeca.mutateAsync({ id: editandoId, pecaUsadaId });
+      toast.success("Peça removida — estoque devolvido.");
+      invalidarPecas();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao remover a peça.");
+    }
   }
 
   function abrirCriacao() {
@@ -459,6 +541,107 @@ export default function PaginaOrdensServico() {
               </Button>
             </div>
           </form>
+
+          <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-[#14162B]">Peças utilizadas</h3>
+              {detalhe.ordem?.etapa !== "Entregue" && detalhe.ordem?.etapa !== "Cancelado" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-8 rounded-full px-3 text-xs"
+                  disabled={aplicarPecasPadrao.isPending}
+                  onClick={aoAplicarPadrao}
+                >
+                  Aplicar peças padrão do serviço
+                </Button>
+              )}
+            </div>
+
+            {detalhe.ordem?.etapa !== "Entregue" && detalhe.ordem?.etapa !== "Cancelado" && (
+              <div className="mt-3 flex flex-wrap items-end gap-2">
+                <select
+                  aria-label="Peça"
+                  value={novaPecaId}
+                  onChange={(e) => setNovaPecaId(e.target.value)}
+                  className="h-10 min-w-64 rounded-md border border-input bg-white px-3 text-sm"
+                >
+                  <option value="">Escolha a peça...</option>
+                  {pecasCatalogo
+                    .filter((p) => p.ativo)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome} — {p.quantidadeEmEstoque} em estoque
+                      </option>
+                    ))}
+                </select>
+                <Input
+                  aria-label="Quantidade"
+                  type="number"
+                  min={1}
+                  max={999}
+                  value={novaQuantidade}
+                  onChange={(e) => setNovaQuantidade(e.target.value)}
+                  className="h-10 w-20"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 rounded-full px-4"
+                  disabled={!novaPecaId || adicionarPeca.isPending}
+                  onClick={aoAdicionarPeca}
+                >
+                  Adicionar peça
+                </Button>
+              </div>
+            )}
+
+            {(detalhe.pecas?.length ?? 0) === 0 ? (
+              <p className="mt-3 text-sm text-[#8B8D98]">
+                Nenhuma peça registrada nesta OS.
+              </p>
+            ) : (
+              <div className="mt-3 space-y-1">
+                {detalhe.pecas?.map((linha) => (
+                  <div
+                    key={linha.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm"
+                  >
+                    <span className="text-[#14162B]">
+                      <span className="font-medium">{linha.quantidade}×</span>{" "}
+                      {linha.pecaNome}
+                      <span className="ml-2 text-xs text-[#8B8D98]">
+                        custo {formatarBRL(linha.custoUnitarioNoUso ?? 0)} · venda{" "}
+                        {formatarBRL(linha.precoVendaNoUso ?? 0)}
+                      </span>
+                    </span>
+                    {detalhe.ordem?.etapa !== "Entregue" &&
+                      detalhe.ordem?.etapa !== "Cancelado" && (
+                        <Button
+                          variant="ghost"
+                          className="h-7 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                          onClick={() => aoRemoverPeca(linha.id)}
+                        >
+                          Remover
+                        </Button>
+                      )}
+                  </div>
+                ))}
+                <p className="pt-1 text-right text-sm text-[#6B7280]">
+                  Total em peças (venda):{" "}
+                  <span className="font-semibold text-[#14162B]">
+                    {formatarBRL(
+                      detalhe.pecas?.reduce(
+                        (soma, l) =>
+                          soma + (l.precoVendaNoUso ?? 0) * (l.quantidade ?? 0),
+                        0,
+                      ) ?? 0,
+                    )}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
 
           {(detalhe.historico?.length ?? 0) > 0 && (
             <div className="mt-6 border-t border-[#14162B]/6 pt-4">
