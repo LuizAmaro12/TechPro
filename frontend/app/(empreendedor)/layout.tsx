@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 
 const LINKS = [
   { href: "/dashboard", rotulo: "Visão geral" },
+  { href: "/kanban", rotulo: "Kanban" },
+  { href: "/ordens-servico", rotulo: "Ordens" },
   { href: "/agenda", rotulo: "Agenda" },
   { href: "/clientes", rotulo: "Clientes" },
   { href: "/servicos", rotulo: "Serviços" },
