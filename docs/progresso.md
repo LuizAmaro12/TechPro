@@ -38,9 +38,37 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **52 testes xUnit verdes** (GQF por convenção,
-TokenService, fluxo de auth, catálogo, clientes e agenda — integração via
+Suíte de testes do back-end: **60 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo, clientes, agenda e OS — integração via
 WebApplicationFactory + Sqlite em memória).
+
+### Etapa OS e Kanban concluída em 2026-07-15
+
+Módulo 3 (ordem de serviço e Kanban) + acompanhamento público de status do
+módulo 1 — item 5 da ordem recomendada da Fase 1. Primeira etapa do **escopo
+offline do técnico** (UUID, `updated_at`/`deleted_at`, sync por delta e
+Idempotency-Key). Plano e decisões aprovadas em
+`docs/superpowers/plans/2026-07-14-os-e-kanban.md`.
+Evidência e2e (Playwright + Edge, 2026-07-15):
+
+```json
+{
+  "osManualCriada": true,
+  "detalheComLinkETrilha": true,
+  "checkinNoKanbanCriaOs": true,
+  "moverPorSelectFunciona": true,
+  "dragAndDropFunciona": true,
+  "cancelamentoComMotivo": true,
+  "acompanhamentoPublicoFunciona": true,
+  "codigoInvalido404": true
+}
+```
+
+O `checkinNoKanbanCriaOs` prova a conversão automática de ponta a ponta: o
+card do agendamento arrastado/clicado em check-in vira a OS #2 na coluna
+seguinte. RLS conferido no banco: `ordens_servico` e
+`ordem_servico_historico_etapas` com `relrowsecurity = t` e
+`relforcerowsecurity = t`; fail-closed confirmado sem `app.tenant_id`.
 
 ### Etapa Agenda e portal de agendamento concluída em 2026-07-14
 
@@ -284,6 +312,44 @@ docker compose up -d --build
   lista nem faz check-in em agendamento de A (404); enums viajam como string
   no JSON (`JsonStringEnumConverter`).
 
+### OS e Kanban (módulo 3 — primeira etapa do escopo offline)
+
+- **OrdemServico** (`/api/ordens-servico` + telas `/ordens-servico` e
+  `/kanban`): 10 etapas (a coluna "Agendado" do Kanban mostra agendamentos que
+  ainda não viraram OS), responsável técnico, prioridade, prazo estimado,
+  status de pagamento e de aprovação (campos manuais até as etapas 6–7),
+  problema, observações e snapshot de aparelho (FK opcional para o CRM).
+- **Escopo offline estreou** (seções 4 e 5 do doc de stack):
+  `IEntidadeSincronizavel` (UUID + `updated_at` carimbado automaticamente
+  pelo DbContext no SaveChanges + `deleted_at` como lápide),
+  `GET /api/ordens-servico/sync?since=` (delta com lápides e `agora` do
+  servidor) e `Idempotency-Key` na criação (coluna única por tenant —
+  reenvio devolve a mesma OS).
+- **Número sequencial por empresa** (decisão 2026-07-14): "OS #124" único por
+  tenant, sem vazar volume entre empresas; o UUID segue como chave real.
+- **Trilha de etapas append-only** (`ordem_servico_historico_etapas`): toda
+  mudança grava de → para, usuário e motivo — alimenta a linha do tempo e o
+  SLA visual da Fase 2. Movimentação livre entre etapas (correções
+  permitidas); cancelar exige motivo.
+- **Conversão automática no check-in**: o check-in do agendamento cria a OS
+  na mesma transação (cliente, serviço, snapshot do aparelho e problema);
+  agendamento avulso usa o vínculo silencioso por telefone (helper movido
+  para o `ClienteService`, compartilhado com o portal).
+- **Acompanhamento público** (decisão 2026-07-14): código opaco de 16 chars
+  (RNG criptográfico) por OS; rota `GET /api/publico/{slug}/acompanhar/{codigo}`
+  reusa o padrão de tenant fixado por slug (sem afrouxar RLS) e expõe só
+  loja, número, serviço, etapa e prazo. Página `/acompanhar/{slug}/{codigo}`
+  com régua do fluxo.
+- **Kanban com @dnd-kit** (dependência nova aprovada em 2026-07-14): drag
+  entre colunas + select "mover" por card como fallback touch; arrastar
+  agendamento para "Check-in realizado" faz o check-in; Entregue/Cancelado
+  atrás do filtro "mostrar finalizadas".
+- **`GET /api/equipe`**: usuários da empresa para o select de responsável
+  (plano de controle sem GQF — filtro por tenant explícito + validação
+  anti-IDOR ao atribuir responsável, coberta por teste).
+- **Isolamento testado**: B não lista/lê/move OS de A (404), não cria OS com
+  cliente de A (400); código de acompanhamento certo no slug errado → 404.
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -350,6 +416,23 @@ docker compose up -d --build
   vazios. Correção: a migração desliga/religa o RLS da tabela em volta do
   UPDATE (o dono da tabela pode). **Todo backfill futuro em tabela com FORCE
   RLS precisa disso** — o UPDATE não dá erro, só afeta zero linhas.
+- **@dnd-kit/core adicionado ao front** (decisão aprovada 2026-07-14): única
+  dependência fora da lista do doc de stack — drag-and-drop do Kanban com
+  suporte a touch; o fallback por select em cada card cobre onde drag não
+  opera.
+- **Rota pública de acompanhamento leva o slug**
+  (`/acompanhar/{slug}/{codigo}` em vez de só `{codigo}`, refinando o plano
+  da etapa): o slug resolve o tenant pelo padrão já existente e o código é
+  buscado sob GQF+RLS — sem criar exceção de RLS nova para busca global de
+  código.
+- **Sqlite dos testes não traduz DateTimeOffset** (comparação nem ORDER BY):
+  o DbContext aplica `DateTimeOffsetToBinaryConverter` (workaround documentado
+  da Microsoft) **somente quando o provider é Sqlite** — Postgres segue com
+  `timestamptz` nativo; o filtro `since` do sync exigiu isso.
+- **Número sequencial da OS = max+1 na transação**: corrida entre duas
+  criações simultâneas no mesmo tenant faria a segunda falhar no índice único
+  (erro, nunca duplicidade). Volume esperado torna isso raríssimo; retry
+  automático fica anotado como melhoria se aparecer na prática.
 
 ## Notas de ambiente (máquina de dev)
 
@@ -373,16 +456,15 @@ docker compose up -d --build
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
 2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **OS e Kanban** (módulo 3 — etapas essenciais, arrastar e soltar,
-   responsável técnico, prioridade, prazo; aí sim PK UUID +
-   `updated_at`/`deleted_at`, seção 5 do doc de stack). Inclui ligar a
-   **conversão automática de agendamento em OS** a partir do check-in
-   (gancho já pronto na agenda).
-3. Na sequência da mesma ordem: Estoque com baixa automática → Orçamento e
-   pagamento básico → Comunicação essencial (inclui os lembretes automáticos
-   de agendamento diferidos) → Dashboard → Onboarding guiado (inclui
-   horários de funcionamento no wizard — a tela de configurações da agenda
-   já cobre o dado).
+   **Estoque com baixa automática** (módulo 7 básico — peças já existem no
+   catálogo com quantidade/mínimo; falta movimentação, baixa ao usar peça na
+   OS e alerta de reposição). Registrar peça usada na OS conecta com o
+   fluxo do técnico.
+3. Na sequência da mesma ordem: Orçamento e pagamento básico (substitui os
+   campos manuais de aprovação/pagamento da OS) → Comunicação essencial
+   (inclui os lembretes automáticos de agendamento diferidos) → Dashboard →
+   Onboarding guiado (inclui horários de funcionamento no wizard — a tela de
+   configurações da agenda já cobre o dado).
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,

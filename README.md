@@ -15,10 +15,14 @@ validado no Postgres real e fluxo e2e no navegador):
 4. **Agenda e portal de agendamento** — calendário dia/semana/mês, horários de
    funcionamento, bloqueios, capacidade por serviço e portal público sem login
    em `/agendar/{slug}` (módulo 2 + fluxo do módulo 1).
+5. **OS e Kanban** — ordem de serviço com número por loja, trilha de etapas,
+   Kanban drag-and-drop, conversão automática do agendamento no check-in e
+   acompanhamento público em `/acompanhar/{slug}/{codigo}` (módulo 3, já com
+   o schema offline-ready: UUID, sync por delta e idempotência).
 
-Suíte de testes do backend: 52/52 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **OS e Kanban** (módulo 3). Detalhes, decisões e
-evidências em `docs/progresso.md`.
+Suíte de testes do backend: 60/60 verdes. Próxima etapa da ordem recomendada
+(`docs/fases_MVP.md`): **Estoque com baixa automática** (módulo 7 básico).
+Detalhes, decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 
