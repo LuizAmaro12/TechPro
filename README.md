@@ -19,9 +19,12 @@ validado no Postgres real e fluxo e2e no navegador):
    Kanban drag-and-drop, conversão automática do agendamento no check-in e
    acompanhamento público em `/acompanhar/{slug}/{codigo}` (módulo 3, já com
    o schema offline-ready: UUID, sync por delta e idempotência).
+6. **Estoque com baixa automática** — peças usadas na OS com custo/preço
+   congelados, devolução ao remover, sugestão das peças padrão do serviço e
+   avisos de estoque baixo/negativo (módulo 7 básico).
 
-Suíte de testes do backend: 60/60 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **Estoque com baixa automática** (módulo 7 básico).
+Suíte de testes do backend: 66/66 verdes. Próxima etapa da ordem recomendada
+(`docs/fases_MVP.md`): **Orçamento e pagamento básico** (módulo 11 básico).
 Detalhes, decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)

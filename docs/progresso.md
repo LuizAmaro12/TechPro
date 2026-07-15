@@ -38,9 +38,32 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **60 testes xUnit verdes** (GQF por convenção,
-TokenService, fluxo de auth, catálogo, clientes, agenda e OS — integração via
-WebApplicationFactory + Sqlite em memória).
+Suíte de testes do back-end: **66 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo, clientes, agenda, OS e estoque —
+integração via WebApplicationFactory + Sqlite em memória).
+
+### Etapa Estoque com baixa automática concluída em 2026-07-15
+
+Módulo 7 básico — item 6 da ordem recomendada. Cadastro/quantidade/custo/
+mínimo/alerta já existiam do catálogo; a etapa entregou a **baixa automática
+ao usar peça em OS**. Plano e decisões em
+`docs/superpowers/plans/2026-07-15-estoque-baixa-automatica.md`.
+Evidência e2e (Playwright + Edge, 2026-07-15):
+
+```json
+{
+  "pecasPadraoAplicadas": true,
+  "baixaComAvisoDeMinimo": true,
+  "estoqueTelaBaixou": true,
+  "estoqueColaBaixou": true,
+  "negativoPermitidoComAviso": true,
+  "totalDePecasCorreto": true,
+  "devolucaoAoRemover": true
+}
+```
+
+RLS conferido: `ordem_servico_pecas` com `relrowsecurity = t` e
+`relforcerowsecurity = t`; fail-closed confirmado sem `app.tenant_id`.
 
 ### Etapa OS e Kanban concluída em 2026-07-15
 
@@ -350,6 +373,30 @@ docker compose up -d --build
 - **Isolamento testado**: B não lista/lê/move OS de A (404), não cria OS com
   cliente de A (400); código de acompanhamento certo no slug errado → 404.
 
+### Estoque com baixa automática (módulo 7 básico)
+
+- **Peças utilizadas na OS** (`/api/ordens-servico/{id}/pecas` + seção no
+  detalhe da OS): adicionar baixa o estoque na hora e **congela custo e preço
+  de venda no momento do uso** (`ordem_servico_pecas` — a margem real do
+  financeiro nasce daqui); remover devolve ao estoque via **soft-delete**
+  (lápide sincronizável); total em peças exibido na OS.
+- **Estoque negativo permitido com aviso** (decisão do usuário 2026-07-15,
+  diferente da recomendação de bloquear): a baixa nunca é recusada; a resposta
+  traz flags (restante, abaixo do mínimo, negativo) e a UI avisa por toast.
+  Correção de contagem é editar a peça no catálogo.
+- **Aplicar peças padrão do serviço** (idempotente): um clique registra as
+  "peças normalmente utilizadas" do catálogo, pulando as já presentes.
+- **OS finalizada (Entregue/Cancelado) não recebe nem devolve peças** — o
+  registro histórico fica estável.
+- **Sync por delta estendido**: as peças utilizadas (com lápides) entram no
+  `GET /api/ordens-servico/sync` — o app do técnico da Fase 2 registra peça
+  usada offline (módulo 4).
+- Entradas/ajustes de estoque continuam pela edição da peça; histórico
+  completo de movimentação, previsão de reposição e lista de compra são
+  Fase 2 (doc de módulos).
+- **Isolamento testado**: peça de A não entra em OS de B (400); OS de B "não
+  existe" para A (404).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -456,15 +503,14 @@ docker compose up -d --build
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
 2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **Estoque com baixa automática** (módulo 7 básico — peças já existem no
-   catálogo com quantidade/mínimo; falta movimentação, baixa ao usar peça na
-   OS e alerta de reposição). Registrar peça usada na OS conecta com o
-   fluxo do técnico.
-3. Na sequência da mesma ordem: Orçamento e pagamento básico (substitui os
-   campos manuais de aprovação/pagamento da OS) → Comunicação essencial
-   (inclui os lembretes automáticos de agendamento diferidos) → Dashboard →
-   Onboarding guiado (inclui horários de funcionamento no wizard — a tela de
-   configurações da agenda já cobre o dado).
+   **Orçamento e pagamento básico** (módulo 11 básico — orçamento da OS com
+   aprovação pelo portal do cliente, registro de pagamento; substitui os
+   campos manuais de aprovação/pagamento da OS e usa o custo/preço congelados
+   das peças para a margem real).
+3. Na sequência da mesma ordem: Comunicação essencial (inclui os lembretes
+   automáticos de agendamento diferidos) → Dashboard → Onboarding guiado
+   (inclui horários de funcionamento no wizard — a tela de configurações da
+   agenda já cobre o dado).
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
