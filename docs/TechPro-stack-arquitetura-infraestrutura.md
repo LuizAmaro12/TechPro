@@ -143,6 +143,20 @@ Nas entidades do escopo de campo do técnico (`OrdensServico`, status/histórico
 ## 7. Comunicação (WhatsApp e e-mail)
 
 ### WhatsApp: API oficial da Meta (Cloud API), direto, sem BSP
+
+> **Atualização 2026-07-15 (decisão do usuário — desvio registrado):** para o
+> MVP, o WhatsApp será integrado via **Evolution API** (auto-hospedada, base
+> Baileys), e não pela Cloud API da Meta descrita abaixo. O e-mail segue no
+> Resend. A cautela desta mesma seção contra bibliotecas não oficiais continua
+> **válida e reconhecida**: há risco real de banimento do número (Baileys viola
+> os termos do WhatsApp). A mitigação adotada é arquitetural — o módulo 9 fala
+> só com a interface `ICanalNotificacao`, com adaptador `log` como padrão e
+> Evolution/Resend selecionáveis por flag de provedor; se o número for banido,
+> troca-se o adaptador para a Cloud API da Meta sem tocar no resto do sistema.
+> A janela de 24h e a aprovação de templates descritas abaixo permanecem como
+> o plano de migração para o canal oficial. Jobs em background (lembrete de
+> agendamento) usam **Hangfire sobre Postgres**, conforme a seção 4.2.
+
 Contexto que mudou desde meados de 2025: a Meta passou de cobrança por conversa (24h) para **cobrança por mensagem entregue**, com quatro categorias — marketing, utilidade (utility), autenticação e serviço. **Mensagens de serviço, respondendo dentro de uma janela de 24h aberta pelo próprio cliente, continuam gratuitas.** Mensagens de utilidade (que é a categoria da maior parte das suas notificações — confirmação de agendamento, OS criada, orçamento disponível, pronto para retirada) têm custo baixo por mensagem, e ficam ainda mais baratas dentro da janela de 24h.
 
 **Implicação prática de design:** desenhe os fluxos de notificação para, sempre que possível, responder dentro da janela de 24h de uma interação iniciada pelo cliente (ex.: cliente confirma agendamento pelo portal, o que conta como iniciar a janela) em vez de sempre disparar mensagens novas fora dela. Isso não é só economia — é a diferença entre pagar por praticamente toda notificação ou pagar por uma fração pequena delas.

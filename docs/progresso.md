@@ -38,9 +38,35 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **73 testes xUnit verdes** (GQF por convenção,
-TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque e
-financeiro — integração via WebApplicationFactory + Sqlite em memória).
+Suíte de testes do back-end: **79 testes xUnit verdes** (GQF por convenção,
+TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
+financeiro e comunicação — integração via WebApplicationFactory + Sqlite em
+memória).
+
+### Etapa Comunicação essencial concluída em 2026-07-15
+
+Módulo 9 — item 8 da ordem recomendada da Fase 1. Abordagem (a): provedor
+abstraído com adaptador **log como padrão** (dev/teste sem envio real),
+Evolution (WhatsApp) e Resend (e-mail) selecionáveis por flag — "pronto para
+plugar". Plano e decisões em
+`docs/superpowers/plans/2026-07-15-comunicacao-essencial.md`.
+Evidência e2e (Playwright + Edge, 2026-07-15, modo simulado):
+
+```json
+{
+  "notificacoesRegistradasNaOs": true,
+  "modoSimulacaoVisivel": true,
+  "supressaoPorConsentimentoVisivel": true,
+  "osComConsentimentoTemQuatroMensagens": true,
+  "todasSimuladas": true,
+  "semConsentimentoSuprimida": true
+}
+```
+
+Verificado também contra o Postgres real: RLS ENABLE+FORCE em
+`mensagens_enviadas` (fail-closed sem tenant), Hangfire criou suas 12 tabelas
+no schema próprio, e o smoke test confirmou o registro por canal (WhatsApp +
+e-mail) ao criar uma OS.
 
 ### Etapa Orçamento e pagamento básico concluída em 2026-07-15
 
@@ -453,6 +479,32 @@ docker compose up -d --build
   consciente que separa o financeiro do fluxo de campo do técnico.
 - **Isolamento testado**: orçamento/pagamento de A "não existem" para B (404).
 
+### Comunicação essencial (módulo 9 — provedor abstraído)
+
+- **Provedor abstraído** (`ICanalNotificacao`): adaptadores `LogWhatsAppCanal`/
+  `LogEmailCanal` (padrão, só registram), `EvolutionWhatsAppCanal` e
+  `ResendEmailCanal` selecionados por flag `Comunicacao:{Whatsapp,Email}:Provedor`
+  (`log`|`evolution`|`resend`). Default `log` mantém dev/e2e determinístico.
+- **ComunicacaoService**: disparo **automático e síncrono** por evento; respeita
+  o **consentimento LGPD** (cliente sem consentimento → mensagem `Suprimida`,
+  registrada para auditoria); envia em **todos os canais disponíveis** (WhatsApp
+  sempre; e-mail se houver); falha de provedor externo vira `Falhou` e **nunca
+  derruba a ação** que disparou (`ProtegerAsync`). Um registro `MensagemEnviada`
+  por canal (RLS ENABLE+FORCE) — o "registro mínimo para auditoria" da Fase 1 e
+  base do inbox unificado da Fase 2.
+- **Eventos**: agendamento confirmado (criar), OS criada (criar + conversão do
+  check-in), orçamento disponível (enviar), orçamento aprovado/recusado
+  (responder — loja e portal), pronto para retirada (mudança de etapa).
+- **Hangfire** (Postgres) para o **lembrete temporizado** (~3h antes; não agenda
+  se já passou). Ligado só com `Comunicacao:Hangfire:Habilitado=true` (docker);
+  sem a flag, `IAgendadorDeLembretes` é no-op — testes/`dotnet run` puro não
+  dependem de Postgres/Hangfire. O `LembreteJob` roda fora do HTTP e fixa o
+  tenant via `TenantAmbiente` (padrão das rotas públicas); só envia se o
+  agendamento ainda estiver `Agendado` (cancelado/check-in → não envia).
+- **Endpoint** `GET /api/ordens-servico/{id}/mensagens` (auditoria) + seção
+  "Notificações enviadas" no detalhe da OS (canal, evento, status, horário).
+- **Isolamento testado**: mensagens de A não aparecem para B (GQF).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -550,6 +602,23 @@ docker compose up -d --build
 - **Somas em memória no financeiro**: o Sqlite dos testes não agrega `decimal`
   no servidor; as somas de peças/pagamentos por OS trazem poucas linhas e são
   feitas no cliente (Postgres continua eficiente com o mesmo código LINQ).
+- **WhatsApp via Evolution API, não Meta Cloud API** (decisão do usuário
+  2026-07-15): desvio da seção 7 do doc de stack, que agora traz a nota do
+  desvio. A cautela do doc contra libs não oficiais (Baileys → risco de
+  banimento do número) é reconhecida; mitigação é a abstração de provedor —
+  troca-se para a Cloud API sem tocar no resto se preciso. WhatsApp segue em
+  modo `log` até haver uma instância Evolution configurada.
+- **Notificações imediatas são síncronas** (dentro da request; log/teste
+  determinístico e resiliente por `ProtegerAsync`). Movê-las para jobs de
+  background (Hangfire) é melhoria de resiliência/latência da Fase 2 — só o
+  lembrete temporizado usa Hangfire hoje.
+- **Segredo do Resend só no `.env`** (gitignored), dormente até
+  `EMAIL_PROVEDOR=resend`. A key foi compartilhada no chat → **recomendada a
+  rotação**. Sem domínio verificado no Resend, só `onboarding@resend.dev`
+  envia, e apenas para o e-mail do dono da conta.
+- **Dashboard do Hangfire** (`/hangfire`) só em Development, com filtro
+  permissivo local — **produção exige um filtro de autorização real** (anotado
+  no código).
 
 ## Notas de ambiente (máquina de dev)
 
@@ -573,16 +642,16 @@ docker compose up -d --build
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
 2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **Comunicação essencial** (módulo 9 — WhatsApp utility + e-mail;
-   confirmação/lembrete de agendamento, OS criada, orçamento disponível/
-   aprovado/recusado, reparo concluído e pronto para retirada). Exige contas
-   externas (Meta/WhatsApp Cloud API e Resend, seção 7 do doc de stack) e
-   Hangfire para os lembretes agendados — primeiras dependências de infra
-   externa da Fase 1; vale alinhar antes de começar.
-3. Na sequência da mesma ordem: Dashboard essencial (OS abertas, agendamentos
-   do dia, prontos para retirada, faturamento do mês — os dados já existem) →
-   Onboarding guiado (wizard inicial; horários de funcionamento já cobertos
-   pela tela de configurações da agenda).
+   **Dashboard essencial** (módulo 12 — OS abertas, agendamentos do dia,
+   serviços em atraso, aparelhos em reparo, prontos para retirada, faturamento
+   do mês). Todos os dados já existem no sistema — é uma etapa de agregação e
+   visualização, sem nova dependência externa.
+3. Na sequência: Onboarding guiado (módulo 13 — wizard inicial; horários de
+   funcionamento já cobertos pela tela de configurações da agenda; sugestões
+   de serviços comuns; checklist de ativação). Fecha o escopo da Fase 1.
+4. Pendências de infra externa para ligar a comunicação de verdade: instância
+   Evolution (WhatsApp) + `WHATSAPP_PROVEDOR=evolution`; domínio verificado no
+   Resend + `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,

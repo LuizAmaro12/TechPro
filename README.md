@@ -26,10 +26,14 @@ validado no Postgres real e fluxo e2e no navegador):
    desconto) com trilha de auditoria, aprovação binária pela loja ou pelo
    cliente no portal, e pagamentos parciais com status derivado (módulos
    8/11 básico).
+8. **Comunicação essencial** — notificações por WhatsApp e e-mail nos eventos
+   do fluxo (agendamento, OS, orçamento, pronto para retirada) com provedor
+   abstraído (adaptador simulado por padrão; Evolution/Resend por flag),
+   respeito ao consentimento LGPD e lembrete via Hangfire (módulo 9).
 
-Suíte de testes do backend: 73/73 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **Comunicação essencial** (módulo 9 — WhatsApp + e-mail).
-Detalhes, decisões e evidências em `docs/progresso.md`.
+Suíte de testes do backend: 79/79 verdes. Próxima etapa da ordem recomendada
+(`docs/fases_MVP.md`): **Dashboard essencial** (módulo 12). Detalhes, decisões
+e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 
