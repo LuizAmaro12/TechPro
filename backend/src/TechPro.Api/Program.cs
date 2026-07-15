@@ -70,6 +70,7 @@ builder.Services.AddScoped<AgendaService>();
 builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<OrdemServicoService>();
+builder.Services.AddScoped<OrdemServicoPecaService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var chaveJwt = builder.Configuration["Jwt:Key"]

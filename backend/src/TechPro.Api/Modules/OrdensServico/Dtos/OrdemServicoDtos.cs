@@ -63,7 +63,25 @@ public record HistoricoEtapaResponse(
 
 public record OrdemServicoDetalheResponse(
     OrdemServicoResponse Ordem,
-    List<HistoricoEtapaResponse> Historico);
+    List<HistoricoEtapaResponse> Historico,
+    List<PecaUsadaResponse> Pecas);
+
+// --- Peças utilizadas (baixa automática, módulo 7) -----------------------------
+
+public record PecaUsadaRequest(int PecaId, int Quantidade);
+
+/// <summary>Flags de estoque pós-baixa: a UI avisa, nunca bloqueia (decisão 2026-07-15).</summary>
+public record PecaUsadaResponse(
+    Guid Id,
+    int PecaId,
+    string PecaNome,
+    int Quantidade,
+    decimal CustoUnitarioNoUso,
+    decimal PrecoVendaNoUso,
+    int EstoqueRestante,
+    bool EstoqueAbaixoDoMinimo,
+    bool EstoqueNegativo,
+    DateTimeOffset CriadoEm);
 
 // --- Sincronização por delta (contrato da Fase 2, seção 4 do doc de stack) ---
 
@@ -81,9 +99,21 @@ public record HistoricoSyncItem(
     DateTimeOffset UpdatedAt,
     DateTimeOffset? DeletedAt);
 
+public record PecaUsadaSyncItem(
+    Guid Id,
+    Guid OrdemServicoId,
+    int PecaId,
+    int Quantidade,
+    decimal CustoUnitarioNoUso,
+    decimal PrecoVendaNoUso,
+    DateTimeOffset CriadoEm,
+    DateTimeOffset UpdatedAt,
+    DateTimeOffset? DeletedAt);
+
 public record OrdensServicoSyncResponse(
     List<OrdemServicoSyncItem> Ordens,
     List<HistoricoSyncItem> Historico,
+    List<PecaUsadaSyncItem> PecasUtilizadas,
     DateTimeOffset Agora);
 
 // --- Equipe (responsável técnico) ---------------------------------------------

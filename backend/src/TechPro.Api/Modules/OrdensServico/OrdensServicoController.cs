@@ -14,9 +14,11 @@ namespace TechPro.Api.Modules.OrdensServico;
 [Produces("application/json")]
 public class OrdensServicoController(
     OrdemServicoService service,
+    OrdemServicoPecaService pecasService,
     IValidator<OrdemServicoRequest> validadorCriacao,
     IValidator<OrdemServicoAtualizacaoRequest> validadorAtualizacao,
-    IValidator<MudancaEtapaRequest> validadorEtapa) : ControllerBase
+    IValidator<MudancaEtapaRequest> validadorEtapa,
+    IValidator<PecaUsadaRequest> validadorPecaUsada) : ControllerBase
 {
     private Guid? UsuarioId =>
         Guid.TryParse(User.FindFirstValue("sub"), out var id) ? id : null;
@@ -95,6 +97,80 @@ public class OrdensServicoController(
         }
 
         return TraduzirResultado(await service.MudarEtapaAsync(id, request, UsuarioId));
+    }
+
+    // --- Peças utilizadas (baixa automática, módulo 7) --------------------------
+
+    [HttpGet("{id:guid}/pecas")]
+    [ProducesResponseType<List<PecaUsadaResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarPecas(Guid id) =>
+        await pecasService.ListarAsync(id) is { } lista ? Ok(lista) : NotFound();
+
+    [HttpPost("{id:guid}/pecas")]
+    [ProducesResponseType<PecaUsadaResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AdicionarPeca(Guid id, PecaUsadaRequest request)
+    {
+        var validacao = await validadorPecaUsada.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var resultado = await pecasService.AdicionarAsync(id, request);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return Created($"/api/ordens-servico/{id}/pecas/{resultado.Valor!.Id}", resultado.Valor);
+    }
+
+    [HttpPost("{id:guid}/pecas/aplicar-padrao")]
+    [ProducesResponseType<List<PecaUsadaResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AplicarPecasPadrao(Guid id)
+    {
+        var resultado = await pecasService.AplicarPadraoAsync(id);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return Ok(resultado.Valor);
+    }
+
+    [HttpDelete("{id:guid}/pecas/{pecaUsadaId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoverPeca(Guid id, Guid pecaUsadaId)
+    {
+        var resultado = await pecasService.RemoverAsync(id, pecaUsadaId);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return NoContent();
     }
 
     private IActionResult TraduzirResultado(CatalogoResultado<OrdemServicoResponse>? resultado)

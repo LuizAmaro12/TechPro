@@ -34,6 +34,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
+    public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -251,6 +252,19 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasOne(x => x.Agendamento).WithMany().HasForeignKey(x => x.AgendamentoId)
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.ResponsavelTecnico).WithMany().HasForeignKey(x => x.ResponsavelTecnicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<OrdemServicoPeca>(e =>
+        {
+            e.ToTable("ordem_servico_pecas");
+            e.Property(x => x.CustoUnitarioNoUso).HasPrecision(10, 2);
+            e.Property(x => x.PrecoVendaNoUso).HasPrecision(10, 2);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.UpdatedAt);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
+            // Restrict: peça referenciada por OS não some fisicamente.
+            e.HasOne(x => x.Peca).WithMany().HasForeignKey(x => x.PecaId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

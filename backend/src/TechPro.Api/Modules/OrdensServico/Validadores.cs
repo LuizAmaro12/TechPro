@@ -36,6 +36,16 @@ public class OrdemServicoAtualizacaoRequestValidator
     }
 }
 
+public class PecaUsadaRequestValidator : AbstractValidator<PecaUsadaRequest>
+{
+    public PecaUsadaRequestValidator()
+    {
+        RuleFor(p => p.PecaId).GreaterThan(0).WithMessage("Informe a peça.");
+        RuleFor(p => p.Quantidade)
+            .InclusiveBetween(1, 999).WithMessage("A quantidade deve estar entre 1 e 999.");
+    }
+}
+
 public class MudancaEtapaRequestValidator : AbstractValidator<MudancaEtapaRequest>
 {
     public MudancaEtapaRequestValidator()

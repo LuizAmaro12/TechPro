@@ -19,7 +19,8 @@ namespace TechPro.Api.Modules.OrdensServico;
 public class OrdemServicoService(
     TechProDbContext db,
     ITenantProvider tenantProvider,
-    ClienteService clientes)
+    ClienteService clientes,
+    OrdemServicoPecaService pecas)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -94,7 +95,8 @@ public class OrdemServicoService(
                 h.ParaEtapa,
                 h.UsuarioId is { } uid && nomes.TryGetValue(uid, out var nome) ? nome : null,
                 h.Motivo,
-                h.CriadoEm)).ToList());
+                h.CriadoEm)).ToList(),
+            await pecas.CarregarLinhasAsync(id));
     }
 
     public async Task<CatalogoResultado<OrdemServicoResponse>> CriarAsync(
@@ -269,10 +271,12 @@ public class OrdemServicoService(
         // DateTimeOffset também não traduz — fica em memória.
         var queryOrdens = QueryCompleta();
         var queryHistorico = db.HistoricosEtapaOrdemServico.AsQueryable();
+        var queryPecas = db.OrdensServicoPecas.AsQueryable();
         if (since is { } marca)
         {
             queryOrdens = queryOrdens.Where(o => o.UpdatedAt > marca);
             queryHistorico = queryHistorico.Where(h => h.UpdatedAt > marca);
+            queryPecas = queryPecas.Where(p => p.UpdatedAt > marca);
         }
 
         var ordens = (await queryOrdens.ToListAsync())
@@ -281,12 +285,19 @@ public class OrdemServicoService(
         var historico = (await queryHistorico.ToListAsync())
             .OrderBy(h => h.UpdatedAt)
             .ToList();
+        var pecasUtilizadas = (await queryPecas.ToListAsync())
+            .OrderBy(p => p.UpdatedAt)
+            .ToList();
 
         return new OrdensServicoSyncResponse(
             ordens.Select(o => new OrdemServicoSyncItem(ParaResponse(o), o.DeletedAt)).ToList(),
             historico.Select(h => new HistoricoSyncItem(
                 h.Id, h.OrdemServicoId, h.DeEtapa, h.ParaEtapa, h.Motivo,
                 h.CriadoEm, h.UpdatedAt, h.DeletedAt)).ToList(),
+            pecasUtilizadas.Select(p => new PecaUsadaSyncItem(
+                p.Id, p.OrdemServicoId, p.PecaId, p.Quantidade,
+                p.CustoUnitarioNoUso, p.PrecoVendaNoUso,
+                p.CriadoEm, p.UpdatedAt, p.DeletedAt)).ToList(),
             agora);
     }
 
