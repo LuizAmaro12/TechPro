@@ -246,6 +246,14 @@ export const CanalEventoOrcamento = {
   Portal: 'Portal',
 } as const;
 
+export type CanalNotificacao = typeof CanalNotificacao[keyof typeof CanalNotificacao];
+
+
+export const CanalNotificacao = {
+  WhatsApp: 'WhatsApp',
+  Email: 'Email',
+} as const;
+
 export interface CancelamentoRequest {
   /** @nullable */
   motivo?: string | null;
@@ -470,6 +478,41 @@ export interface MeResponse {
   papel?: string | null;
   tenantId?: string;
   empresa?: EmpresaResponse;
+}
+
+export type TipoEventoComunicacao = typeof TipoEventoComunicacao[keyof typeof TipoEventoComunicacao];
+
+
+export const TipoEventoComunicacao = {
+  AgendamentoConfirmado: 'AgendamentoConfirmado',
+  AgendamentoLembrete: 'AgendamentoLembrete',
+  OrdemServicoCriada: 'OrdemServicoCriada',
+  OrcamentoDisponivel: 'OrcamentoDisponivel',
+  OrcamentoAprovado: 'OrcamentoAprovado',
+  OrcamentoRecusado: 'OrcamentoRecusado',
+  ProntoParaRetirada: 'ProntoParaRetirada',
+} as const;
+
+export type StatusMensagem = typeof StatusMensagem[keyof typeof StatusMensagem];
+
+
+export const StatusMensagem = {
+  Enviada: 'Enviada',
+  Simulada: 'Simulada',
+  Suprimida: 'Suprimida',
+  Falhou: 'Falhou',
+} as const;
+
+export interface MensagemEnviadaResponse {
+  id?: number;
+  canal?: CanalNotificacao;
+  /** @nullable */
+  destino?: string | null;
+  tipoEvento?: TipoEventoComunicacao;
+  status?: StatusMensagem;
+  /** @nullable */
+  erro?: string | null;
+  criadoEm?: string;
 }
 
 export interface MudancaEtapaRequest {
@@ -4834,6 +4877,113 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteApiFornecedoresIdMutationOptions(options), queryClient);
     }
+
+export type getApiOrdensServicoOrdemIdMensagensResponse200 = {
+  data: MensagemEnviadaResponse[]
+  status: 200
+}
+
+export type getApiOrdensServicoOrdemIdMensagensResponseSuccess = (getApiOrdensServicoOrdemIdMensagensResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiOrdensServicoOrdemIdMensagensResponse = (getApiOrdensServicoOrdemIdMensagensResponseSuccess)
+
+export const getGetApiOrdensServicoOrdemIdMensagensUrl = (ordemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${ordemId}/mensagens`
+}
+
+export const getApiOrdensServicoOrdemIdMensagens = async (ordemId: string, options?: RequestInit): Promise<getApiOrdensServicoOrdemIdMensagensResponse> => {
+
+  return apiFetch<getApiOrdensServicoOrdemIdMensagensResponse>(getGetApiOrdensServicoOrdemIdMensagensUrl(ordemId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOrdensServicoOrdemIdMensagensQueryKey = (ordemId: string,) => {
+    return [
+    `/api/ordens-servico/${ordemId}/mensagens`
+    ] as const;
+    }
+
+
+export const getGetApiOrdensServicoOrdemIdMensagensQueryOptions = <TData = Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError = unknown>(ordemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOrdensServicoOrdemIdMensagensQueryKey(ordemId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>> = ({ signal }) => getApiOrdensServicoOrdemIdMensagens(ordemId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: ordemId !== null && ordemId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOrdensServicoOrdemIdMensagensQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>>
+export type GetApiOrdensServicoOrdemIdMensagensQueryError = unknown
+
+
+export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError = unknown>(
+ ordemId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError = unknown>(
+ ordemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError = unknown>(
+ ordemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError = unknown>(
+ ordemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoOrdemIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOrdensServicoOrdemIdMensagensQueryOptions(ordemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type getApiOrdensServicoResponse200 = {
   data: OrdemServicoResponse[]

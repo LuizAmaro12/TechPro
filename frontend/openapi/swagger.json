@@ -2039,6 +2039,39 @@
         }
       }
     },
+    "/api/ordens-servico/{ordemId}/mensagens": {
+      "get": {
+        "tags": [
+          "Mensagens"
+        ],
+        "parameters": [
+          {
+            "name": "ordemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MensagemEnviadaResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ordens-servico": {
       "get": {
         "tags": [
@@ -3595,6 +3628,13 @@
         ],
         "type": "string"
       },
+      "CanalNotificacao": {
+        "enum": [
+          "WhatsApp",
+          "Email"
+        ],
+        "type": "string"
+      },
       "CancelamentoRequest": {
         "type": "object",
         "properties": {
@@ -4089,6 +4129,37 @@
           },
           "empresa": {
             "$ref": "#/components/schemas/EmpresaResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MensagemEnviadaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canal": {
+            "$ref": "#/components/schemas/CanalNotificacao"
+          },
+          "destino": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoEvento": {
+            "$ref": "#/components/schemas/TipoEventoComunicacao"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusMensagem"
+          },
+          "erro": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -5073,6 +5144,15 @@
         ],
         "type": "string"
       },
+      "StatusMensagem": {
+        "enum": [
+          "Enviada",
+          "Simulada",
+          "Suprimida",
+          "Falhou"
+        ],
+        "type": "string"
+      },
       "StatusOrcamento": {
         "enum": [
           "Rascunho",
@@ -5087,6 +5167,18 @@
           "NaoPago",
           "Parcial",
           "Pago"
+        ],
+        "type": "string"
+      },
+      "TipoEventoComunicacao": {
+        "enum": [
+          "AgendamentoConfirmado",
+          "AgendamentoLembrete",
+          "OrdemServicoCriada",
+          "OrcamentoDisponivel",
+          "OrcamentoAprovado",
+          "OrcamentoRecusado",
+          "ProntoParaRetirada"
         ],
         "type": "string"
       },
@@ -5204,6 +5296,9 @@
     },
     {
       "name": "Fornecedores"
+    },
+    {
+      "name": "Mensagens"
     },
     {
       "name": "OrdensServico"
