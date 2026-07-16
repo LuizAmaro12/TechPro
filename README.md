@@ -40,15 +40,16 @@ dashboard) está atendido:
     serviços sugeridos, peças, dados de exemplo removíveis), checklist de
     ativação derivado e redirecionamento no primeiro acesso (módulo 0).
 
-Suíte de testes do backend: 90/90 verdes.
+11. **Financeiro básico** — tela `/financeiro` com faturamento por período,
+    transações, composição por forma de pagamento, ticket médio, "a receber"
+    (orçamentos aprovados com saldo) e projeção de caixa (módulo 8).
 
-**Lacunas conhecidas da Fase 1** (auditoria de 2026-07-16 contra o escopo por
-módulo): o **módulo 8 (Financeiro básico)** tem só o KPI de faturamento do mês —
-faltam a tela `/financeiro` com receita por período, transações, pagamentos
-pendentes/concluídos e ticket médio; e o **módulo 13 (Configurações e equipe)**
-está majoritariamente pendente (dados da loja editáveis, conta do usuário,
-preferências de notificação). Detalhes, decisões e evidências em
-`docs/progresso.md`.
+Suíte de testes do backend: 97/97 verdes.
+
+**Lacuna conhecida da Fase 1** (auditoria de 2026-07-16 contra o escopo por
+módulo): o **módulo 13 (Configurações e equipe)** está majoritariamente
+pendente — dados da loja editáveis, conta do usuário e preferências de
+notificação. Detalhes, decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 

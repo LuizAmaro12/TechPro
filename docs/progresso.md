@@ -38,10 +38,29 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **90 testes xUnit verdes** (GQF por convenção,
+Suíte de testes do back-end: **97 testes xUnit verdes** (GQF por convenção,
 TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
 financeiro, comunicação, dashboard e onboarding — integração via
 WebApplicationFactory + Sqlite em memória).
+
+### Etapa Financeiro básico concluída em 2026-07-16 (fecha a lacuna do módulo 8)
+
+Módulo 8 (essenciais da Fase 1). Plano e decisões em
+`docs/superpowers/plans/2026-07-16-financeiro-basico.md`.
+Evidência e2e (Playwright + Edge, 2026-07-16):
+
+```json
+{
+  "dashboardLevaAoFinanceiro": true,
+  "kpisFaturamentoETicket": true,
+  "aReceberSoAprovado": true,
+  "projecaoDeCaixa": true,
+  "composicaoPorForma": true,
+  "tabelaDeTransacoes": true,
+  "filtroDePeriodoFunciona": true,
+  "apiConfere": true
+}
+```
 
 > **Ordem recomendada da Fase 1: 10/10 concluídos em 2026-07-16**, cada um com
 > testes de integração, RLS verificado no Postgres real e evidência e2e no
@@ -53,31 +72,15 @@ WebApplicationFactory + Sqlite em memória).
 >
 > **Correção registrada em 2026-07-16:** um resumo anterior declarou "Fase 1
 > completa". Isso valia para a *ordem recomendada* (10 itens), mas **não** para
-> o *escopo por módulo* da Fase 1, que ainda tem duas lacunas reais (ver
-> "Lacunas conhecidas da Fase 1" abaixo): o **módulo 8 (Financeiro básico)**
-> só tem o KPI de faturamento do mês, sem tela própria, e o **módulo 13
-> (Configurações e equipe básica)** está majoritariamente por fazer. A Fase 1
-> **não** está fechada enquanto esses dois não forem entregues.
+> o *escopo por módulo* da Fase 1, que tinha duas lacunas reais. O **módulo 8
+> (Financeiro básico)** foi fechado em 2026-07-16 (ver etapa abaixo); resta o
+> **módulo 13 (Configurações e equipe básica)**. A Fase 1 **não** está fechada
+> enquanto ele não for entregue.
 
 ## Lacunas conhecidas da Fase 1 (a fazer)
 
 Levantadas na auditoria de 2026-07-16, conferindo o *escopo por módulo* de
-`docs/fases_MVP.md` contra o código:
-
-### Módulo 8 — Financeiro básico (parcial)
-
-| Item do escopo | Status |
-|---|---|
-| Faturamento | ✅ KPI do mês no dashboard |
-| Base preparada p/ separar receita, custo de peça e margem | ✅ custo/preço congelados nas peças da OS |
-| Receita por período | ❌ sem seletor de período |
-| Transações | ❌ sem visão global (pagamentos só dentro de cada OS) |
-| Pagamentos pendentes e concluídos | ❌ sem visão global |
-| Ticket médio | ❌ |
-
-A rota `financeiro/` prevista na seção 13 do doc de stack **não existe** no
-front-end. O dado já está todo no banco (`pagamentos`, `orcamentos`,
-`ordem_servico_pecas`) — falta a agregação e a tela.
+`docs/fases_MVP.md` contra o código. **Módulo 8 resolvido em 2026-07-16.**
 
 ### Módulo 13 — Configurações e equipe básica (majoritariamente pendente)
 
@@ -611,6 +614,27 @@ docker compose up -d --build
   radar no topo, KPIs clicáveis (levam a Kanban/Agenda/OS) e faturamento com
   tendência. Isolamento testado (dashboard de A zerado para B).
 
+### Financeiro básico (módulo 8 — visão de caixa)
+
+- **`GET /api/financeiro?de&ate`** + tela **`/financeiro`** (a rota prevista na
+  seção 13 do doc de stack): leitura pura sob GQF, sem entidade nem migração.
+- **Faturamento por período** (presets Hoje/7 dias/Este mês/Mês passado +
+  intervalo livre; default = mês corrente), **transações** (data, OS, cliente,
+  forma, valor), **composição por forma de pagamento** e **ticket médio =
+  faturamento ÷ nº de OS distintas pagas** (decisão 2026-07-16 — coerente com o
+  faturamento, que é caixa recebido).
+- **A receber = OS viva com orçamento APROVADO e saldo em aberto** (decisão
+  2026-07-16): orçamento só enviado é proposta, não receita vendida, e OS
+  cancelada sai da conta. Ambos cobertos por teste.
+- **Projeção de caixa** ("quanto está para entrar", item novo do doc): a receber
+  + valor esperado dos agendamentos dos próximos 7 dias (estimado pelo preço
+  base do serviço — a UI deixa explícito que o orçamento final pode diferir).
+- "A receber" e a projeção são **visão atual**, não filtradas pelo período —
+  coberto por teste para evitar interpretação errada.
+- Margem, lucro bruto, receita por serviço e relatórios exportáveis seguem na
+  Fase 2 (doc); a base para eles (custo x preço congelados na peça da OS) já
+  existe desde a etapa de estoque.
+
 ### Onboarding guiado (módulo 0 — encapsula os fluxos reais)
 
 - **Wizard `/bem-vindo`** (5 passos): dados da loja (nome + slug editável),
@@ -766,14 +790,12 @@ docker compose up -d --build
 
 ## Próximos passos sugeridos
 
-### 1. Fechar as lacunas da Fase 1 (código de produto)
+### 1. Fechar a última lacuna da Fase 1 (código de produto)
 
-- **Módulo 8 — Financeiro básico**: tela `/financeiro` (prevista na seção 13 do
-  doc de stack) com receita por período, transações, pagamentos pendentes e
-  concluídos e ticket médio. O dado já existe no banco; falta agregar e exibir.
 - **Módulo 13 — Configurações e equipe básica**: dados da loja editáveis
   (nome, contatos, políticas), conta do usuário (perfil + troca de senha) e
   preferências básicas de notificação. Logo depende do R2.
+- ~~Módulo 8 — Financeiro básico~~ ✅ concluído em 2026-07-16.
 
 ### 2. Operação e produção (fora do código de produto)
 
