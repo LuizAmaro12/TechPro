@@ -1,17 +1,62 @@
 "use client";
 
 import Link from "next/link";
-import { useGetApiDashboard } from "@/lib/api-client/gerado";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  useDeleteApiOnboardingDadosExemplo,
+  useGetApiDashboard,
+  useGetApiOnboarding,
+} from "@/lib/api-client/gerado";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { formatarBRL } from "@/lib/formatadores";
-import { formatarDataCurta } from "@/lib/agenda-datas";
 
 type Kpi = { rotulo: string; valor: number; href: string; destaque?: boolean };
 
+const PASSOS_ATIVACAO: { chave: string; rotulo: string; href: string }[] = [
+  { chave: "lojaConfigurada", rotulo: "Dados da loja", href: "/agenda/configuracoes" },
+  { chave: "horariosConfigurados", rotulo: "Horários de funcionamento", href: "/agenda/configuracoes" },
+  { chave: "temServico", rotulo: "Primeiro serviço", href: "/servicos" },
+  { chave: "temPeca", rotulo: "Primeira peça", href: "/pecas" },
+  { chave: "temCliente", rotulo: "Primeiro cliente", href: "/clientes" },
+];
+
 export default function PaginaDashboard() {
   const { usuario } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: resposta, isLoading } = useGetApiDashboard();
   const dash = resposta?.status === 200 ? resposta.data : undefined;
+
+  // Primeiro acesso: leva ao wizard de ativação. Depois de concluir/pular, o
+  // card de ativação abaixo cobre os passos que ainda faltam.
+  const { data: respostaOnboarding } = useGetApiOnboarding();
+  const onboarding = respostaOnboarding?.status === 200 ? respostaOnboarding.data : undefined;
+  useEffect(() => {
+    if (onboarding && !onboarding.onboardingConcluido) {
+      router.replace("/bem-vindo");
+    }
+  }, [onboarding, router]);
+
+  const removerExemplo = useDeleteApiOnboardingDadosExemplo();
+  async function aoRemoverExemplo() {
+    try {
+      await removerExemplo.mutateAsync();
+      toast.success("Dados de exemplo removidos.");
+      queryClient.invalidateQueries({ queryKey: ["/api/onboarding"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+    } catch {
+      toast.error("Não foi possível remover os dados de exemplo.");
+    }
+  }
+
+  const passos = onboarding?.passos as Record<string, boolean> | undefined;
+  const ativacaoIncompleta =
+    onboarding?.onboardingConcluido &&
+    (onboarding?.passosConcluidos ?? 0) < (onboarding?.totalPassos ?? 5);
 
   const kpis: Kpi[] = [
     { rotulo: "OS abertas", valor: dash?.osAbertas ?? 0, href: "/kanban" },
@@ -49,6 +94,58 @@ export default function PaginaDashboard() {
       <p className="mt-1 text-sm text-[#6B7280]">
         O resumo da operação de hoje — o que precisa de atenção vem primeiro.
       </p>
+
+      {/* --- Ativação: passos que ainda faltam (some quando completo) ------- */}
+      {(ativacaoIncompleta || onboarding?.temDadosExemplo) && (
+        <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-[#F7F7F9] p-6">
+          {ativacaoIncompleta && (
+            <>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-[#14162B]">
+                  Ativação da loja
+                </h2>
+                <span className="text-xs font-semibold text-[#6B7280]">
+                  {onboarding?.passosConcluidos} de {onboarding?.totalPassos}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {PASSOS_ATIVACAO.map((p) => {
+                  const feito = passos?.[p.chave] ?? false;
+                  return (
+                    <Link
+                      key={p.chave}
+                      href={p.href}
+                      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm ${
+                        feito
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-[#14162B]/15 bg-white text-[#14162B] hover:border-[#14162B]"
+                      }`}
+                    >
+                      <span>{feito ? "✓" : "○"}</span>
+                      {p.rotulo}
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          {onboarding?.temDadosExemplo && (
+            <div className={ativacaoIncompleta ? "mt-4" : ""}>
+              <p className="text-sm text-[#6B7280]">
+                Você tem um cliente e uma OS de exemplo carregados.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-2 h-8 rounded-full px-3 text-xs"
+                disabled={removerExemplo.isPending}
+                onClick={aoRemoverExemplo}
+              >
+                Remover dados de exemplo
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* --- Radar do dia: o que precisa de ação agora ---------------------- */}
       {temRadar && (
