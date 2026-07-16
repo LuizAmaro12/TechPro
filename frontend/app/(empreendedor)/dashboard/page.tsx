@@ -241,7 +241,10 @@ export default function PaginaDashboard() {
       </section>
 
       {/* --- Faturamento do mês + comparativo ------------------------------ */}
-      <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+      <Link
+        href="/financeiro"
+        className="mt-6 block rounded-2xl border border-[#14162B]/8 bg-white p-6 transition-colors hover:border-[#14162B]/30"
+      >
         <p className="text-xs font-medium tracking-wide text-[#8B8D98] uppercase">
           Faturamento do mês
         </p>
@@ -261,9 +264,9 @@ export default function PaginaDashboard() {
         </div>
         <p className="mt-1 text-sm text-[#6B7280]">
           Mês anterior: {formatarBRL(dash?.faturamentoMesAnterior ?? 0)} · pagamentos
-          recebidos (caixa)
+          recebidos (caixa) — ver detalhes no Financeiro
         </p>
-      </section>
+      </Link>
     </div>
   );
 }
