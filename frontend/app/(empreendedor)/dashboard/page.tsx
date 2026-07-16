@@ -1,72 +1,171 @@
 "use client";
 
-import { useGetApiAuthMe } from "@/lib/api-client/gerado";
+import Link from "next/link";
+import { useGetApiDashboard } from "@/lib/api-client/gerado";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { formatarBRL } from "@/lib/formatadores";
+import { formatarDataCurta } from "@/lib/agenda-datas";
 
-const ROTULO_PAPEL: Record<string, string> = {
-  gestor: "Gestor",
-  tecnico: "Técnico",
-  atendente: "Atendente",
-};
+type Kpi = { rotulo: string; valor: number; href: string; destaque?: boolean };
 
 export default function PaginaDashboard() {
   const { usuario } = useAuth();
-  const { data: respostaMe } = useGetApiAuthMe();
-  const me = respostaMe?.status === 200 ? respostaMe.data : undefined;
+  const { data: resposta, isLoading } = useGetApiDashboard();
+  const dash = resposta?.status === 200 ? resposta.data : undefined;
 
-  const nomeEmpresa = me?.empresa?.nome ?? "—";
-  const papel = ROTULO_PAPEL[me?.papel ?? usuario?.papel ?? ""] ?? "—";
-  const tenantId = me?.tenantId ?? usuario?.tenantId ?? "—";
+  const kpis: Kpi[] = [
+    { rotulo: "OS abertas", valor: dash?.osAbertas ?? 0, href: "/kanban" },
+    { rotulo: "Agendamentos hoje", valor: dash?.agendamentosHoje ?? 0, href: "/agenda" },
+    {
+      rotulo: "Serviços em atraso",
+      valor: dash?.servicosEmAtraso ?? 0,
+      href: "/ordens-servico",
+      destaque: (dash?.servicosEmAtraso ?? 0) > 0,
+    },
+    { rotulo: "Aparelhos em reparo", valor: dash?.aparelhosEmReparo ?? 0, href: "/kanban" },
+    {
+      rotulo: "Prontos para retirada",
+      valor: dash?.prontosParaRetirada ?? 0,
+      href: "/kanban",
+    },
+  ];
+
+  const variacao = dash?.variacaoFaturamentoPct ?? null;
+  const subiu = (variacao ?? 0) >= 0;
+  const osAtrasadas = dash?.radar?.osAtrasadas ?? [];
+  const orcamentosPendentes = dash?.radar?.orcamentosPendentes ?? [];
+  const temRadar =
+    (dash?.radar?.totalOsAtrasadas ?? 0) > 0 ||
+    (dash?.radar?.totalOrcamentosPendentes ?? 0) > 0;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
-      <section>
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
-          Visão geral
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-[#14162B]">
-          Olá, {me?.nome ?? usuario?.nome ?? "..."}
-        </h1>
-        <p className="mt-1 text-sm text-[#6B7280]">
-          Comece cadastrando seus serviços e peças no catálogo — as ordens de
-          serviço e o financeiro chegam nas próximas etapas.
-        </p>
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+        Visão geral
+      </p>
+      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">
+        Olá, {usuario?.nome ?? "..."}
+      </h1>
+      <p className="mt-1 text-sm text-[#6B7280]">
+        O resumo da operação de hoje — o que precisa de atenção vem primeiro.
+      </p>
 
-        {/* Assinatura visual do guia de referência: card branco limpo sobre
-            um glow gradiente — único ponto onde a cor "explode" na página. */}
-        <div className="relative mt-10">
+      {/* --- Radar do dia: o que precisa de ação agora ---------------------- */}
+      {temRadar && (
+        <section className="relative mt-8">
           <div
             aria-hidden
-            className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-orange-400 via-pink-500 to-indigo-500 opacity-15 blur-2xl"
+            className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-orange-400 via-pink-500 to-indigo-500 opacity-10 blur-2xl"
           />
-          <div className="relative grid gap-6 rounded-2xl border border-[#14162B]/8 bg-white p-8 sm:grid-cols-3">
-            <div>
-              <p className="text-xs font-medium text-[#8B8D98] uppercase tracking-wide">
-                Empresa
-              </p>
-              <p className="mt-1 text-lg font-semibold text-[#14162B]">
-                {nomeEmpresa}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-[#8B8D98] uppercase tracking-wide">
-                Seu papel
-              </p>
-              <p className="mt-1 text-lg font-semibold text-[#14162B]">{papel}</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-[#8B8D98] uppercase tracking-wide">
-                Tenant ID
-              </p>
-              <p
-                className="mt-1 truncate font-mono text-sm text-[#6B7280]"
-                title={tenantId}
-              >
-                {tenantId}
-              </p>
+          <div className="relative rounded-2xl border border-[#E8536B]/20 bg-white p-6">
+            <h2 className="text-sm font-semibold tracking-wide text-[#E8536B] uppercase">
+              Radar do dia
+            </h2>
+            <div className="mt-4 grid gap-6 md:grid-cols-2">
+              {osAtrasadas.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-[#14162B]">
+                    OS em atraso ({dash?.radar?.totalOsAtrasadas})
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {osAtrasadas.map((os) => (
+                      <li key={os.id}>
+                        <Link
+                          href="/ordens-servico"
+                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[#F7F7F9]"
+                        >
+                          <span className="text-[#14162B]">
+                            <span className="font-medium">#{os.numero}</span> {os.clienteNome}
+                            <span className="text-xs text-[#8B8D98]"> · {os.servicoNome}</span>
+                          </span>
+                          <span className="shrink-0 rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-xs font-semibold text-[#E8536B]">
+                            {os.diasAtraso}d
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {orcamentosPendentes.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold text-[#14162B]">
+                    Orçamentos aguardando resposta ({dash?.radar?.totalOrcamentosPendentes})
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {orcamentosPendentes.map((o) => (
+                      <li key={o.id}>
+                        <Link
+                          href="/ordens-servico"
+                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[#F7F7F9]"
+                        >
+                          <span className="text-[#14162B]">
+                            <span className="font-medium">#{o.numero}</span> {o.clienteNome}
+                            <span className="text-xs text-[#8B8D98]">
+                              {" "}
+                              · {formatarBRL(o.total ?? 0)}
+                            </span>
+                          </span>
+                          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                            há {o.diasAguardando}d
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
+        </section>
+      )}
+
+      {/* --- KPIs ----------------------------------------------------------- */}
+      <section className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {kpis.map((kpi) => (
+          <Link
+            key={kpi.rotulo}
+            href={kpi.href}
+            className={`rounded-2xl border p-4 transition-colors hover:border-[#14162B]/30 ${
+              kpi.destaque ? "border-[#E8536B]/30 bg-[#E8536B]/[0.03]" : "border-[#14162B]/8 bg-white"
+            }`}
+          >
+            <p
+              className={`text-3xl font-bold ${
+                kpi.destaque ? "text-[#E8536B]" : "text-[#14162B]"
+              }`}
+            >
+              {isLoading ? "—" : kpi.valor}
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">{kpi.rotulo}</p>
+          </Link>
+        ))}
+      </section>
+
+      {/* --- Faturamento do mês + comparativo ------------------------------ */}
+      <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+        <p className="text-xs font-medium tracking-wide text-[#8B8D98] uppercase">
+          Faturamento do mês
+        </p>
+        <div className="mt-1 flex flex-wrap items-baseline gap-3">
+          <span className="text-3xl font-bold text-[#14162B]">
+            {formatarBRL(dash?.faturamentoMes ?? 0)}
+          </span>
+          {variacao !== null && (
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                subiu ? "bg-emerald-100 text-emerald-700" : "bg-[#E8536B]/10 text-[#E8536B]"
+              }`}
+            >
+              {subiu ? "▲" : "▼"} {Math.abs(variacao)}% vs. mês anterior
+            </span>
+          )}
         </div>
+        <p className="mt-1 text-sm text-[#6B7280]">
+          Mês anterior: {formatarBRL(dash?.faturamentoMesAnterior ?? 0)} · pagamentos
+          recebidos (caixa)
+        </p>
       </section>
     </div>
   );
