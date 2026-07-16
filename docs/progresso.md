@@ -38,10 +38,27 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **79 testes xUnit verdes** (GQF por convenção,
+Suíte de testes do back-end: **85 testes xUnit verdes** (GQF por convenção,
 TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
-financeiro e comunicação — integração via WebApplicationFactory + Sqlite em
-memória).
+financeiro, comunicação e dashboard — integração via WebApplicationFactory +
+Sqlite em memória).
+
+### Etapa Dashboard essencial concluída em 2026-07-16
+
+Módulo 12 — item 9 da ordem recomendada da Fase 1. Agregação read-only dos
+dados que já existem (sem entidade, sem migração). Plano e decisões em
+`docs/superpowers/plans/2026-07-15-dashboard-essencial.md`.
+Evidência e2e (Playwright + Edge, 2026-07-16):
+
+```json
+{
+  "kpisCorretos": true,
+  "radarMostraAtrasada": true,
+  "faturamentoVisivel": true,
+  "kpiLevaAoKanban": true,
+  "apiConfere": true
+}
+```
 
 ### Etapa Comunicação essencial concluída em 2026-07-15
 
@@ -505,6 +522,26 @@ docker compose up -d --build
   "Notificações enviadas" no detalhe da OS (canal, evento, status, horário).
 - **Isolamento testado**: mensagens de A não aparecem para B (GQF).
 
+### Dashboard essencial (módulo 12 — agregação read-only)
+
+- **`GET /api/dashboard`** (módulo `Dashboard/`, sem entidade/migração): 6 KPIs
+  da Fase 1 — OS abertas (não finalizadas), agendamentos do dia, serviços em
+  atraso (prazo vencido e não finalizada), **aparelhos em reparo = bancada
+  inteira** (NaFila→EmTeste), prontos para retirada, e **faturamento do mês =
+  pagamentos recebidos no mês** (caixa real).
+- **Comparativo** faturamento mês atual vs. anterior + variação % (null quando
+  o anterior é zero).
+- **"Radar do dia"**: OS atrasadas e orçamentos pendentes há mais de 2 dias
+  (com link para a OS), listas limitadas a 10 com o total sinalizado. O
+  terceiro item do doc ("peça que chegou libera reparo parado") ficou de fora —
+  depende de rastreio de chegada de peça, que só existe com entradas de estoque
+  (Fase 2). Anotado.
+- Leitura pura sob GQF; somas de decimal em memória (Sqlite dos testes);
+  "hoje"/"mês" são a data UTC do servidor (hora de parede da loja).
+- **Front `/dashboard`** deixou de exibir empresa/papel/tenant e virou o painel:
+  radar no topo, KPIs clicáveis (levam a Kanban/Agenda/OS) e faturamento com
+  tendência. Isolamento testado (dashboard de A zerado para B).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -641,17 +678,17 @@ docker compose up -d --build
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é
-   **Dashboard essencial** (módulo 12 — OS abertas, agendamentos do dia,
-   serviços em atraso, aparelhos em reparo, prontos para retirada, faturamento
-   do mês). Todos os dados já existem no sistema — é uma etapa de agregação e
-   visualização, sem nova dependência externa.
-3. Na sequência: Onboarding guiado (módulo 13 — wizard inicial; horários de
-   funcionamento já cobertos pela tela de configurações da agenda; sugestões
-   de serviços comuns; checklist de ativação). Fecha o escopo da Fase 1.
-4. Pendências de infra externa para ligar a comunicação de verdade: instância
+2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é o
+   **Onboarding guiado** (módulo 13 — wizard inicial: dados da loja, sugestões
+   de serviços comuns editáveis, checklist de ativação com progresso). Fecha o
+   escopo funcional da Fase 1. Horários de funcionamento já cobertos pela tela
+   de configurações da agenda; dados da loja (nome/slug) já existem.
+3. Pendências de infra externa para ligar a comunicação de verdade: instância
    Evolution (WhatsApp) + `WHATSAPP_PROVEDOR=evolution`; domínio verificado no
    Resend + `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
+4. Melhorias anotadas para a Fase 2: radar "peça que chegou libera reparo"
+   (depende de entradas de estoque); notificações imediatas em background
+   (Hangfire); comparativos avançados no dashboard (margem, ticket médio).
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,

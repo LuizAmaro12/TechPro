@@ -30,10 +30,13 @@ validado no Postgres real e fluxo e2e no navegador):
    do fluxo (agendamento, OS, orçamento, pronto para retirada) com provedor
    abstraído (adaptador simulado por padrão; Evolution/Resend por flag),
    respeito ao consentimento LGPD e lembrete via Hangfire (módulo 9).
+9. **Dashboard essencial** — painel com KPIs da operação (OS abertas,
+   agendamentos do dia, atrasos, bancada, prontos, faturamento do mês),
+   "Radar do dia" acionável e comparativo mês a mês (módulo 12).
 
-Suíte de testes do backend: 79/79 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **Dashboard essencial** (módulo 12). Detalhes, decisões
-e evidências em `docs/progresso.md`.
+Suíte de testes do backend: 85/85 verdes. Próxima etapa da ordem recomendada
+(`docs/fases_MVP.md`): **Onboarding guiado** (módulo 13) — fecha a Fase 1.
+Detalhes, decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 
