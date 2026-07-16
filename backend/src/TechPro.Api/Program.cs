@@ -14,6 +14,7 @@ using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.Comunicacao.Canais;
+using TechPro.Api.Modules.Dashboard;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.OrdensServico;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -77,6 +78,7 @@ builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
 builder.Services.AddScoped<FinanceiroService>();
+builder.Services.AddScoped<DashboardService>();
 
 // --- Comunicação (módulo 9): provedor abstraído, adaptador log por padrão ---
 builder.Services.AddScoped<ComunicacaoService>();
