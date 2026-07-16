@@ -2091,6 +2091,59 @@
         }
       }
     },
+    "/api/onboarding": {
+      "get": {
+        "tags": [
+          "Onboarding"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/onboarding/concluir": {
+      "post": {
+        "tags": [
+          "Onboarding"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/onboarding/dados-exemplo": {
+      "post": {
+        "tags": [
+          "Onboarding"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Onboarding"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/ordens-servico": {
       "get": {
         "tags": [
@@ -4238,6 +4291,29 @@
         },
         "additionalProperties": false
       },
+      "OnboardingStatusResponse": {
+        "type": "object",
+        "properties": {
+          "onboardingConcluido": {
+            "type": "boolean"
+          },
+          "passos": {
+            "$ref": "#/components/schemas/PassosOnboarding"
+          },
+          "passosConcluidos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPassos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "temDadosExemplo": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "OrcamentoEventoResponse": {
         "type": "object",
         "properties": {
@@ -4738,6 +4814,27 @@
           "criadoEm": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PassosOnboarding": {
+        "type": "object",
+        "properties": {
+          "lojaConfigurada": {
+            "type": "boolean"
+          },
+          "horariosConfigurados": {
+            "type": "boolean"
+          },
+          "temServico": {
+            "type": "boolean"
+          },
+          "temPeca": {
+            "type": "boolean"
+          },
+          "temCliente": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -5451,6 +5548,9 @@
     },
     {
       "name": "Mensagens"
+    },
+    {
+      "name": "Onboarding"
     },
     {
       "name": "OrdensServico"

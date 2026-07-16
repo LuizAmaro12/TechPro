@@ -564,6 +564,22 @@ export interface MudancaEtapaRequest {
   motivo?: string | null;
 }
 
+export interface PassosOnboarding {
+  lojaConfigurada?: boolean;
+  horariosConfigurados?: boolean;
+  temServico?: boolean;
+  temPeca?: boolean;
+  temCliente?: boolean;
+}
+
+export interface OnboardingStatusResponse {
+  onboardingConcluido?: boolean;
+  passos?: PassosOnboarding;
+  passosConcluidos?: number;
+  totalPassos?: number;
+  temDadosExemplo?: boolean;
+}
+
 export type TipoEventoOrcamento = typeof TipoEventoOrcamento[keyof typeof TipoEventoOrcamento];
 
 
@@ -5134,6 +5150,344 @@ export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnTyp
 
 
 
+
+export type getApiOnboardingResponse200 = {
+  data: OnboardingStatusResponse
+  status: 200
+}
+
+export type getApiOnboardingResponseSuccess = (getApiOnboardingResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiOnboardingResponse = (getApiOnboardingResponseSuccess)
+
+export const getGetApiOnboardingUrl = () => {
+
+
+
+
+  return `/api/onboarding`
+}
+
+export const getApiOnboarding = async ( options?: RequestInit): Promise<getApiOnboardingResponse> => {
+
+  return apiFetch<getApiOnboardingResponse>(getGetApiOnboardingUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOnboardingQueryKey = () => {
+    return [
+    `/api/onboarding`
+    ] as const;
+    }
+
+
+export const getGetApiOnboardingQueryOptions = <TData = Awaited<ReturnType<typeof getApiOnboarding>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOnboardingQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOnboarding>>> = ({ signal }) => getApiOnboarding({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOnboardingQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOnboarding>>>
+export type GetApiOnboardingQueryError = unknown
+
+
+export function useGetApiOnboarding<TData = Awaited<ReturnType<typeof getApiOnboarding>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOnboarding>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOnboarding>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOnboarding<TData = Awaited<ReturnType<typeof getApiOnboarding>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOnboarding>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOnboarding>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOnboarding<TData = Awaited<ReturnType<typeof getApiOnboarding>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOnboarding<TData = Awaited<ReturnType<typeof getApiOnboarding>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOnboarding>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOnboardingQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiOnboardingConcluirResponse204 = {
+  data: void
+  status: 204
+}
+
+export type postApiOnboardingConcluirResponseSuccess = (postApiOnboardingConcluirResponse204) & {
+  headers: Headers;
+};
+;
+
+export type postApiOnboardingConcluirResponse = (postApiOnboardingConcluirResponseSuccess)
+
+export const getPostApiOnboardingConcluirUrl = () => {
+
+
+
+
+  return `/api/onboarding/concluir`
+}
+
+export const postApiOnboardingConcluir = async ( options?: RequestInit): Promise<postApiOnboardingConcluirResponse> => {
+
+  return apiFetch<postApiOnboardingConcluirResponse>(getPostApiOnboardingConcluirUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiOnboardingConcluirMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingConcluir>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingConcluir>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiOnboardingConcluir'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOnboardingConcluir>>, void> = () => {
+
+
+          return  postApiOnboardingConcluir(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOnboardingConcluirMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOnboardingConcluir>>>
+
+    export type PostApiOnboardingConcluirMutationError = unknown
+
+    export const usePostApiOnboardingConcluir = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingConcluir>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOnboardingConcluir>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiOnboardingConcluirMutationOptions(options), queryClient);
+    }
+
+export type postApiOnboardingDadosExemploResponse204 = {
+  data: void
+  status: 204
+}
+
+export type postApiOnboardingDadosExemploResponseSuccess = (postApiOnboardingDadosExemploResponse204) & {
+  headers: Headers;
+};
+;
+
+export type postApiOnboardingDadosExemploResponse = (postApiOnboardingDadosExemploResponseSuccess)
+
+export const getPostApiOnboardingDadosExemploUrl = () => {
+
+
+
+
+  return `/api/onboarding/dados-exemplo`
+}
+
+export const postApiOnboardingDadosExemplo = async ( options?: RequestInit): Promise<postApiOnboardingDadosExemploResponse> => {
+
+  return apiFetch<postApiOnboardingDadosExemploResponse>(getPostApiOnboardingDadosExemploUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiOnboardingDadosExemploMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiOnboardingDadosExemplo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>, void> = () => {
+
+
+          return  postApiOnboardingDadosExemplo(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOnboardingDadosExemploMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>>
+
+    export type PostApiOnboardingDadosExemploMutationError = unknown
+
+    export const usePostApiOnboardingDadosExemplo = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOnboardingDadosExemplo>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiOnboardingDadosExemploMutationOptions(options), queryClient);
+    }
+
+export type deleteApiOnboardingDadosExemploResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteApiOnboardingDadosExemploResponseSuccess = (deleteApiOnboardingDadosExemploResponse204) & {
+  headers: Headers;
+};
+;
+
+export type deleteApiOnboardingDadosExemploResponse = (deleteApiOnboardingDadosExemploResponseSuccess)
+
+export const getDeleteApiOnboardingDadosExemploUrl = () => {
+
+
+
+
+  return `/api/onboarding/dados-exemplo`
+}
+
+export const deleteApiOnboardingDadosExemplo = async ( options?: RequestInit): Promise<deleteApiOnboardingDadosExemploResponse> => {
+
+  return apiFetch<deleteApiOnboardingDadosExemploResponse>(getDeleteApiOnboardingDadosExemploUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiOnboardingDadosExemploMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>, TError,void, TContext> => {
+
+const mutationKey = ['deleteApiOnboardingDadosExemplo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>, void> = () => {
+
+
+          return  deleteApiOnboardingDadosExemplo(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiOnboardingDadosExemploMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>>
+
+    export type DeleteApiOnboardingDadosExemploMutationError = unknown
+
+    export const useDeleteApiOnboardingDadosExemplo = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>, TError,void, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiOnboardingDadosExemplo>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteApiOnboardingDadosExemploMutationOptions(options), queryClient);
+    }
 
 export type getApiOrdensServicoResponse200 = {
   data: OrdemServicoResponse[]
