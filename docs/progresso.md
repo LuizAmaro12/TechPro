@@ -43,13 +43,53 @@ TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
 financeiro, comunicação, dashboard e onboarding — integração via
 WebApplicationFactory + Sqlite em memória).
 
-> **Fase 1 do MVP concluída em 2026-07-16.** Os 10 itens da ordem recomendada
-> (`docs/fases_MVP.md`) estão implementados de ponta a ponta, cada um com
+> **Ordem recomendada da Fase 1: 10/10 concluídos em 2026-07-16**, cada um com
 > testes de integração, RLS verificado no Postgres real e evidência e2e no
-> navegador. O critério de pronto da Fase 1 — "a loja se cadastra, configura
-> serviços e peças, recebe um agendamento, gera uma OS, move até a entrega,
-> baixa estoque, registra pagamento, notifica o cliente e vê o estado no
-> dashboard, sem intervenção manual do fundador" — está atendido.
+> navegador. O **critério de conclusão** da Fase 1 (`docs/fases_MVP.md`) — "a
+> loja se cadastra, configura serviços e peças, recebe um agendamento, gera uma
+> OS, move até a entrega, baixa estoque, registra pagamento, notifica o cliente
+> e vê o estado no dashboard, sem intervenção manual do fundador" — está
+> atendido de ponta a ponta.
+>
+> **Correção registrada em 2026-07-16:** um resumo anterior declarou "Fase 1
+> completa". Isso valia para a *ordem recomendada* (10 itens), mas **não** para
+> o *escopo por módulo* da Fase 1, que ainda tem duas lacunas reais (ver
+> "Lacunas conhecidas da Fase 1" abaixo): o **módulo 8 (Financeiro básico)**
+> só tem o KPI de faturamento do mês, sem tela própria, e o **módulo 13
+> (Configurações e equipe básica)** está majoritariamente por fazer. A Fase 1
+> **não** está fechada enquanto esses dois não forem entregues.
+
+## Lacunas conhecidas da Fase 1 (a fazer)
+
+Levantadas na auditoria de 2026-07-16, conferindo o *escopo por módulo* de
+`docs/fases_MVP.md` contra o código:
+
+### Módulo 8 — Financeiro básico (parcial)
+
+| Item do escopo | Status |
+|---|---|
+| Faturamento | ✅ KPI do mês no dashboard |
+| Base preparada p/ separar receita, custo de peça e margem | ✅ custo/preço congelados nas peças da OS |
+| Receita por período | ❌ sem seletor de período |
+| Transações | ❌ sem visão global (pagamentos só dentro de cada OS) |
+| Pagamentos pendentes e concluídos | ❌ sem visão global |
+| Ticket médio | ❌ |
+
+A rota `financeiro/` prevista na seção 13 do doc de stack **não existe** no
+front-end. O dado já está todo no banco (`pagamentos`, `orcamentos`,
+`ordem_servico_pecas`) — falta a agregação e a tela.
+
+### Módulo 13 — Configurações e equipe básica (majoritariamente pendente)
+
+| Item do escopo | Status |
+|---|---|
+| Horários da loja | ✅ em `/agenda/configuracoes` |
+| Endereço público (slug) | ✅ em `/agenda/configuracoes` |
+| Dados da loja: nome editável, contatos, políticas | ❌ nome só é definido no cadastro |
+| Logo da loja | ❌ bloqueado por Cloudflare R2 (não provisionado) |
+| Conta do usuário (perfil, troca de senha) | ❌ |
+| Preferências básicas de notificação | ❌ |
+| Convite de equipe | ❌ deferido (o doc põe permissões granulares na Fase 2) |
 
 ### Etapa Onboarding guiado concluída em 2026-07-16 (fecha a Fase 1)
 
@@ -726,25 +766,43 @@ docker compose up -d --build
 
 ## Próximos passos sugeridos
 
-1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. **Fase 1 concluída.** Antes de abrir a Fase 2, os próximos passos naturais
-   são de **operação/produção**, não de código de produto:
-   - Publicar o repositório no GitHub e ver o CI verde (job front + back).
-   - Provisionar produção conforme o doc de stack: Render (API + Postgres),
-     Vercel (front), e as contas externas (Cloudflare R2, Meta/Resend/Evolution,
-     Sentry). Rodar as migrations como passo de deploy (não automático).
-   - Ligar a comunicação de verdade: instância Evolution (WhatsApp) +
-     `WHATSAPP_PROVEDOR=evolution`; domínio verificado no Resend +
-     `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
-3. **Fase 2** (doc de módulos): app do técnico (React Native/Expo, offline —
-   o schema/sync já está pronto), financeiro com margem, avaliações, aprovação
-   de orçamento item a item, importação de contatos, LGPD visível
-   (exportação/anonimização), central de mensagens unificada.
-4. Melhorias anotadas para a Fase 2 surgidas nesta fase: radar "peça que chegou
-   libera reparo" (depende de entradas de estoque); notificações imediatas em
-   background (Hangfire); comparativos avançados no dashboard (margem, ticket
-   médio); logo da loja e convite de equipe no onboarding.
-4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
-   provedor de e-mail — Resend, seção 7 do doc de stack).
-5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
-   Resend, Render, Vercel, Sentry.
+### 1. Fechar as lacunas da Fase 1 (código de produto)
+
+- **Módulo 8 — Financeiro básico**: tela `/financeiro` (prevista na seção 13 do
+  doc de stack) com receita por período, transações, pagamentos pendentes e
+  concluídos e ticket médio. O dado já existe no banco; falta agregar e exibir.
+- **Módulo 13 — Configurações e equipe básica**: dados da loja editáveis
+  (nome, contatos, políticas), conta do usuário (perfil + troca de senha) e
+  preferências básicas de notificação. Logo depende do R2.
+
+### 2. Operação e produção (fora do código de produto)
+
+- Publicar o repositório no GitHub e ver o CI verde no primeiro push
+  (job front + back já configurados).
+- Provisionar produção conforme o doc de stack: Render (API + Postgres),
+  Vercel (front). Migrations como passo de deploy, nunca automático.
+- Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
+  Resend, Render, Vercel, Sentry.
+- Ligar a comunicação de verdade: instância Evolution +
+  `WHATSAPP_PROVEDOR=evolution`; domínio verificado no Resend +
+  `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
+- **Rotacionar a API key do Resend** (foi compartilhada em chat).
+- Dashboard do Hangfire (`/hangfire`) precisa de filtro de autorização real
+  antes de ir a produção (hoje é permissivo e só sobe em Development).
+
+### 3. Fase 2 (doc de módulos)
+
+App/Portal do técnico (React Native/Expo, offline-first — o schema/sync já
+está pronto), financeiro com margem e rentabilidade, avaliações e reputação,
+aprovação de orçamento item a item, linha do tempo visual da OS, evidência
+fotográfica, importação de contatos, LGPD visível (exportação/anonimização),
+central de mensagens unificada, kits de serviço, previsão de reposição.
+
+### 4. Melhorias anotadas ao longo da Fase 1
+
+- Radar "peça que chegou libera reparo parado" (depende de entradas de estoque).
+- Notificações imediatas em background via Hangfire (hoje são síncronas).
+- Confirmação de e-mail e recuperação de senha (Identity já suporta; depende do
+  provedor de e-mail ligado).
+- Logo da loja e convite de equipe no onboarding (R2 / fluxo de convite).
+- Retry no número sequencial da OS se a corrida aparecer na prática.
