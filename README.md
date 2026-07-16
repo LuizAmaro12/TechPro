@@ -2,10 +2,11 @@
 
 SaaS de gestão operacional especializado em assistência técnica de celular e eletrônicos portáteis: agendamento, ordem de serviço, Kanban, estoque, comunicação e financeiro — multi-tenant com isolamento por empresa desde a fundação (LGPD).
 
-## Estado atual (Fase 1 em andamento)
+## Estado atual (Fase 1 concluída — 2026-07-16)
 
-Concluído e verificado de ponta a ponta (backend com testes de integração, RLS
-validado no Postgres real e fluxo e2e no navegador):
+Os 10 itens da ordem recomendada da Fase 1 (`docs/fases_MVP.md`) estão
+implementados de ponta a ponta, cada um com testes de integração, RLS validado
+no Postgres real e fluxo e2e no navegador:
 
 1. **Fundação** — multi-tenancy (Global Query Filter + RLS), auth JWT com
    refresh token httpOnly, cadastro/login, CI.
@@ -33,10 +34,14 @@ validado no Postgres real e fluxo e2e no navegador):
 9. **Dashboard essencial** — painel com KPIs da operação (OS abertas,
    agendamentos do dia, atrasos, bancada, prontos, faturamento do mês),
    "Radar do dia" acionável e comparativo mês a mês (módulo 12).
+10. **Onboarding guiado** — wizard de ativação em `/bem-vindo` (loja, horários,
+    serviços sugeridos, peças, dados de exemplo removíveis), checklist de
+    ativação derivado e redirecionamento no primeiro acesso (módulo 0).
 
-Suíte de testes do backend: 85/85 verdes. Próxima etapa da ordem recomendada
-(`docs/fases_MVP.md`): **Onboarding guiado** (módulo 13) — fecha a Fase 1.
-Detalhes, decisões e evidências em `docs/progresso.md`.
+Suíte de testes do backend: 90/90 verdes. **Fase 1 do MVP completa.** Os
+próximos passos são de produção (GitHub/CI, provisionamento em Render/Vercel,
+contas externas) e depois a Fase 2. Detalhes, decisões e evidências em
+`docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 

@@ -38,10 +38,39 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **85 testes xUnit verdes** (GQF por convenção,
+Suíte de testes do back-end: **90 testes xUnit verdes** (GQF por convenção,
 TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
-financeiro, comunicação e dashboard — integração via WebApplicationFactory +
-Sqlite em memória).
+financeiro, comunicação, dashboard e onboarding — integração via
+WebApplicationFactory + Sqlite em memória).
+
+> **Fase 1 do MVP concluída em 2026-07-16.** Os 10 itens da ordem recomendada
+> (`docs/fases_MVP.md`) estão implementados de ponta a ponta, cada um com
+> testes de integração, RLS verificado no Postgres real e evidência e2e no
+> navegador. O critério de pronto da Fase 1 — "a loja se cadastra, configura
+> serviços e peças, recebe um agendamento, gera uma OS, move até a entrega,
+> baixa estoque, registra pagamento, notifica o cliente e vê o estado no
+> dashboard, sem intervenção manual do fundador" — está atendido.
+
+### Etapa Onboarding guiado concluída em 2026-07-16 (fecha a Fase 1)
+
+Módulo 0/13 — item 10 da ordem recomendada. O wizard encapsula os fluxos reais
+já construídos (reusa horários/serviços/peças). Plano e decisões em
+`docs/superpowers/plans/2026-07-16-onboarding-guiado.md`.
+Evidência e2e (Playwright + Edge, 2026-07-16):
+
+```json
+{
+  "redirecionaParaWizardNoPrimeiroAcesso": true,
+  "servicosCadastradosNoWizard": true,
+  "finalizaEVaiParaDashboard": true,
+  "cardAtivacaoEDadosExemploVisiveis": true,
+  "osExemploNoKanban": true,
+  "removeDadosExemplo": true,
+  "onboardingConcluido": true,
+  "semDadosExemploAposRemover": true,
+  "servicoContaComoPasso": true
+}
+```
 
 ### Etapa Dashboard essencial concluída em 2026-07-16
 
@@ -542,6 +571,26 @@ docker compose up -d --build
   radar no topo, KPIs clicáveis (levam a Kanban/Agenda/OS) e faturamento com
   tendência. Isolamento testado (dashboard de A zerado para B).
 
+### Onboarding guiado (módulo 0 — encapsula os fluxos reais)
+
+- **Wizard `/bem-vindo`** (5 passos): dados da loja (nome + slug editável),
+  horários (setup rápido: dias abertos + um horário), serviços com **sugestões
+  pré-preenchidas editáveis** (troca de tela/bateria/conector/limpeza/película),
+  peças opcionais, e dados de exemplo + conclusão. Cada passo chama os
+  endpoints já existentes — o backend do onboarding é só o entorno.
+- **Redirecionamento no primeiro acesso**: `Empresa.OnboardingConcluidoEm`
+  (nulo) → o dashboard leva ao wizard; "pular" ou concluir marca o carimbo e
+  não redireciona mais.
+- **Checklist de ativação derivado dos dados** (sempre exato, sem estado novo):
+  loja, horários, serviço, peça, cliente — "X de 5". Card no dashboard com os
+  passos pendentes (links) até completar.
+- **Dados de exemplo removíveis** (decisão 2026-07-16): coluna `Exemplo` em
+  `clientes`/`servicos`/`ordens_servico`; carregar cria um cliente + serviço +
+  OS fictícios (direto, sem disparar notificações), remover limpa respeitando
+  as FKs. Idempotente. Não contam como passos reais do checklist.
+- **Deferidos com registro**: logo da loja (depende do Cloudflare R2) e convite
+  de equipe (o doc coloca como Fase 2 no módulo 13; exige fluxo de convite).
+
 ### Front-end
 
 - Next.js 16 (App Router, TS estrito, Tailwind 4, shadcn/ui sobre Radix,
@@ -678,17 +727,23 @@ docker compose up -d --build
 ## Próximos passos sugeridos
 
 1. Publicar o repositório no GitHub e ver o CI verde no primeiro push.
-2. Fase 1 na **ordem recomendada** do docs/fases_MVP.md: próximo é o
-   **Onboarding guiado** (módulo 13 — wizard inicial: dados da loja, sugestões
-   de serviços comuns editáveis, checklist de ativação com progresso). Fecha o
-   escopo funcional da Fase 1. Horários de funcionamento já cobertos pela tela
-   de configurações da agenda; dados da loja (nome/slug) já existem.
-3. Pendências de infra externa para ligar a comunicação de verdade: instância
-   Evolution (WhatsApp) + `WHATSAPP_PROVEDOR=evolution`; domínio verificado no
-   Resend + `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
-4. Melhorias anotadas para a Fase 2: radar "peça que chegou libera reparo"
-   (depende de entradas de estoque); notificações imediatas em background
-   (Hangfire); comparativos avançados no dashboard (margem, ticket médio).
+2. **Fase 1 concluída.** Antes de abrir a Fase 2, os próximos passos naturais
+   são de **operação/produção**, não de código de produto:
+   - Publicar o repositório no GitHub e ver o CI verde (job front + back).
+   - Provisionar produção conforme o doc de stack: Render (API + Postgres),
+     Vercel (front), e as contas externas (Cloudflare R2, Meta/Resend/Evolution,
+     Sentry). Rodar as migrations como passo de deploy (não automático).
+   - Ligar a comunicação de verdade: instância Evolution (WhatsApp) +
+     `WHATSAPP_PROVEDOR=evolution`; domínio verificado no Resend +
+     `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
+3. **Fase 2** (doc de módulos): app do técnico (React Native/Expo, offline —
+   o schema/sync já está pronto), financeiro com margem, avaliações, aprovação
+   de orçamento item a item, importação de contatos, LGPD visível
+   (exportação/anonimização), central de mensagens unificada.
+4. Melhorias anotadas para a Fase 2 surgidas nesta fase: radar "peça que chegou
+   libera reparo" (depende de entradas de estoque); notificações imediatas em
+   background (Hangfire); comparativos avançados no dashboard (margem, ticket
+   médio); logo da loja e convite de equipe no onboarding.
 4. Confirmação de e-mail e recuperação de senha (Identity já suporta; falta
    provedor de e-mail — Resend, seção 7 do doc de stack).
 5. Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,

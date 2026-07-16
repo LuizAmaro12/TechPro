@@ -373,7 +373,7 @@ Os grupos de rota entre parênteses `(portal-cliente)`, `(empreendedor)`, `(tecn
 - [x] Definir nome de domínio e registrar.
 - [x] Montar o `docker-compose.yml` local (API + Postgres) antes de escrever a primeira feature.
 - [x] Desenhar o schema inicial com `tenant_id` em toda tabela relevante e políticas de RLS já no primeiro migration — não como retrofit.
-- [ ] No primeiro migration das entidades do fluxo de campo do técnico (OS, Kanban, anexos), já usar PK em UUID e incluir `updated_at`/`deleted_at` — groundwork para o app mobile offline-first da Fase 2 (seção 4), não como retrofit depois.
+- [x] No primeiro migration das entidades do fluxo de campo do técnico (OS, Kanban, anexos), já usar PK em UUID e incluir `updated_at`/`deleted_at` — groundwork para o app mobile offline-first da Fase 2 (seção 4), não como retrofit depois. *(Feito na etapa OS/Kanban, 2026-07-15: `ordens_servico`, `ordem_servico_historico_etapas` e `ordem_servico_pecas` com UUID + `updated_at`/`deleted_at` + endpoint `/sync` por delta + `Idempotency-Key`. Anexos/fotos ficam para quando o R2 existir.)*
 - [x] Configurar o pipeline de CI mínimo (lint + build + testes) antes do primeiro merge em `main`.
 
 Este documento assume que o próximo passo é detalhar o schema de banco de dados (entidades, relacionamentos) módulo a módulo — posso montar isso em seguida, se fizer sentido.
