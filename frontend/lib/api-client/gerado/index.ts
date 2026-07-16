@@ -350,6 +350,49 @@ export interface ConfiguracaoAgendaResponse {
   slug?: string | null;
 }
 
+export interface OsAtrasadaResponse {
+  id?: string;
+  numero?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  /** @nullable */
+  servicoNome?: string | null;
+  prazoEstimado?: string;
+  diasAtraso?: number;
+}
+
+export interface OrcamentoPendenteResponse {
+  id?: string;
+  numero?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  total?: number;
+  enviadoEm?: string;
+  diasAguardando?: number;
+}
+
+export interface RadarResponse {
+  /** @nullable */
+  osAtrasadas?: OsAtrasadaResponse[] | null;
+  totalOsAtrasadas?: number;
+  /** @nullable */
+  orcamentosPendentes?: OrcamentoPendenteResponse[] | null;
+  totalOrcamentosPendentes?: number;
+}
+
+export interface DashboardResponse {
+  osAbertas?: number;
+  agendamentosHoje?: number;
+  servicosEmAtraso?: number;
+  aparelhosEmReparo?: number;
+  prontosParaRetirada?: number;
+  faturamentoMes?: number;
+  faturamentoMesAnterior?: number;
+  /** @nullable */
+  variacaoFaturamentoPct?: number | null;
+  radar?: RadarResponse;
+}
+
 export interface DisponibilidadeResponse {
   data?: string;
   servicoId?: number;
@@ -3865,6 +3908,113 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteApiClientesIdMutationOptions(options), queryClient);
     }
+
+export type getApiDashboardResponse200 = {
+  data: DashboardResponse
+  status: 200
+}
+
+export type getApiDashboardResponseSuccess = (getApiDashboardResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiDashboardResponse = (getApiDashboardResponseSuccess)
+
+export const getGetApiDashboardUrl = () => {
+
+
+
+
+  return `/api/dashboard`
+}
+
+export const getApiDashboard = async ( options?: RequestInit): Promise<getApiDashboardResponse> => {
+
+  return apiFetch<getApiDashboardResponse>(getGetApiDashboardUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiDashboardQueryKey = () => {
+    return [
+    `/api/dashboard`
+    ] as const;
+    }
+
+
+export const getGetApiDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getApiDashboard>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiDashboardQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiDashboard>>> = ({ signal }) => getApiDashboard({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiDashboardQueryResult = NonNullable<Awaited<ReturnType<typeof getApiDashboard>>>
+export type GetApiDashboardQueryError = unknown
+
+
+export function useGetApiDashboard<TData = Awaited<ReturnType<typeof getApiDashboard>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getApiDashboard>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiDashboard<TData = Awaited<ReturnType<typeof getApiDashboard>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof getApiDashboard>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiDashboard<TData = Awaited<ReturnType<typeof getApiDashboard>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiDashboard<TData = Awaited<ReturnType<typeof getApiDashboard>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiDashboard>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiDashboardQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type getApiEquipeResponse200 = {
   data: EquipeMembroResponse[]
