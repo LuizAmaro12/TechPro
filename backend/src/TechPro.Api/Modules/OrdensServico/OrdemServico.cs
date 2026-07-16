@@ -104,5 +104,8 @@ public class OrdemServico : ITenantEntity, IEntidadeSincronizavel
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
 
+    /// <summary>Registro fictício de onboarding (dados de exemplo removíveis).</summary>
+    public bool Exemplo { get; set; }
+
     public List<OrdemServicoHistoricoEtapa> Historico { get; set; } = [];
 }

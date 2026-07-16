@@ -16,4 +16,10 @@ public class Empresa
     public required string Slug { get; set; }
 
     public DateTimeOffset CriadoEm { get; set; }
+
+    /// <summary>
+    /// Marca quando o dono concluiu (ou pulou) o wizard de onboarding. Nulo =
+    /// primeiro acesso → o front redireciona para /bem-vindo.
+    /// </summary>
+    public DateTimeOffset? OnboardingConcluidoEm { get; set; }
 }

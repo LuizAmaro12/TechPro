@@ -20,6 +20,9 @@ public class Servico : ITenantEntity
     // Desativar em vez de apagar: o serviço pode estar referenciado por OS futuras.
     public bool Ativo { get; set; } = true;
     public DateTimeOffset CriadoEm { get; set; }
+
+    /// <summary>Registro fictício de onboarding (dados de exemplo removíveis).</summary>
+    public bool Exemplo { get; set; }
     public List<ServicoPeca> Pecas { get; set; } = [];
     public List<ServicoChecklistItem> Checklist { get; set; } = [];
 }

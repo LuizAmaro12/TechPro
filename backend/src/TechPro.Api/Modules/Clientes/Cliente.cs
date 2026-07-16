@@ -34,5 +34,8 @@ public class Cliente : ITenantEntity
     public DateTimeOffset? ConsentimentoEm { get; set; }
 
     public DateTimeOffset CriadoEm { get; set; }
+
+    /// <summary>Registro fictício de onboarding (dados de exemplo removíveis).</summary>
+    public bool Exemplo { get; set; }
     public List<Aparelho> Aparelhos { get; set; } = [];
 }

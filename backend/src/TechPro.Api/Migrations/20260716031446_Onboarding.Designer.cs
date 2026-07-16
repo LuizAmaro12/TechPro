@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TechPro.Api.Shared.Persistence;
@@ -11,9 +12,11 @@ using TechPro.Api.Shared.Persistence;
 namespace TechPro.Api.Migrations
 {
     [DbContext(typeof(TechProDbContext))]
-    partial class TechProDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716031446_Onboarding")]
+    partial class Onboarding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
