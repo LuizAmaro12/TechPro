@@ -1880,6 +1880,53 @@
         }
       }
     },
+    "/api/financeiro": {
+      "get": {
+        "tags": [
+          "FinanceiroRelatorio"
+        ],
+        "parameters": [
+          {
+            "name": "de",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinanceiroRelatorioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/fornecedores": {
       "get": {
         "tags": [
@@ -4034,6 +4081,68 @@
         ],
         "type": "string"
       },
+      "FinanceiroRelatorioResponse": {
+        "type": "object",
+        "properties": {
+          "de": {
+            "type": "string",
+            "format": "date"
+          },
+          "ate": {
+            "type": "string",
+            "format": "date"
+          },
+          "faturamento": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidadeOsPagas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ticketMedio": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidadeTransacoes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transacoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransacaoResponse"
+            },
+            "nullable": true
+          },
+          "porForma": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TotalPorFormaResponse"
+            },
+            "nullable": true
+          },
+          "aReceber": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidadePendentes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendentes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendenteResponse"
+            },
+            "nullable": true
+          },
+          "projecao": {
+            "$ref": "#/components/schemas/ProjecaoCaixaResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "FormaPagamento": {
         "enum": [
           "Dinheiro",
@@ -5046,6 +5155,36 @@
         },
         "additionalProperties": false
       },
+      "PendenteResponse": {
+        "type": "object",
+        "properties": {
+          "ordemServicoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "pago": {
+            "type": "number",
+            "format": "double"
+          },
+          "saldo": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "PrioridadeOrdemServico": {
         "enum": [
           "Baixa",
@@ -5080,6 +5219,24 @@
           }
         },
         "additionalProperties": { }
+      },
+      "ProjecaoCaixaResponse": {
+        "type": "object",
+        "properties": {
+          "aprovadosAReceber": {
+            "type": "number",
+            "format": "double"
+          },
+          "agendamentosProximos7Dias": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
       },
       "RadarResponse": {
         "type": "object",
@@ -5436,6 +5593,56 @@
         ],
         "type": "string"
       },
+      "TotalPorFormaResponse": {
+        "type": "object",
+        "properties": {
+          "forma": {
+            "$ref": "#/components/schemas/FormaPagamento"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TransacaoResponse": {
+        "type": "object",
+        "properties": {
+          "pagamentoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ordemServicoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "numero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "forma": {
+            "$ref": "#/components/schemas/FormaPagamento"
+          },
+          "valor": {
+            "type": "number",
+            "format": "double"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "UsuarioResponse": {
         "type": "object",
         "properties": {
@@ -5542,6 +5749,9 @@
     },
     {
       "name": "Financeiro"
+    },
+    {
+      "name": "FinanceiroRelatorio"
     },
     {
       "name": "Fornecedores"

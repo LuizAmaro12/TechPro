@@ -426,6 +426,57 @@ export const FormaPagamento = {
   Outro: 'Outro',
 } as const;
 
+export interface TransacaoResponse {
+  pagamentoId?: number;
+  ordemServicoId?: string;
+  numero?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  forma?: FormaPagamento;
+  valor?: number;
+  criadoEm?: string;
+}
+
+export interface TotalPorFormaResponse {
+  forma?: FormaPagamento;
+  total?: number;
+  quantidade?: number;
+}
+
+export interface PendenteResponse {
+  ordemServicoId?: string;
+  numero?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  total?: number;
+  pago?: number;
+  saldo?: number;
+}
+
+export interface ProjecaoCaixaResponse {
+  aprovadosAReceber?: number;
+  agendamentosProximos7Dias?: number;
+  total?: number;
+}
+
+export interface FinanceiroRelatorioResponse {
+  de?: string;
+  ate?: string;
+  faturamento?: number;
+  quantidadeOsPagas?: number;
+  ticketMedio?: number;
+  quantidadeTransacoes?: number;
+  /** @nullable */
+  transacoes?: TransacaoResponse[] | null;
+  /** @nullable */
+  porForma?: TotalPorFormaResponse[] | null;
+  aReceber?: number;
+  quantidadePendentes?: number;
+  /** @nullable */
+  pendentes?: PendenteResponse[] | null;
+  projecao?: ProjecaoCaixaResponse;
+}
+
 export interface FornecedorRequest {
   /** @nullable */
   nome?: string | null;
@@ -984,6 +1035,11 @@ somenteVip?: boolean;
 incluirInativos?: boolean;
 pagina?: number;
 tamanhoPagina?: number;
+};
+
+export type GetApiFinanceiroParams = {
+de?: string;
+ate?: string;
 };
 
 export type GetApiOrdensServicoParams = {
@@ -4673,6 +4729,127 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteApiOrdensServicoOrdemIdPagamentosPagamentoIdMutationOptions(options), queryClient);
     }
+
+export type getApiFinanceiroResponse200 = {
+  data: FinanceiroRelatorioResponse
+  status: 200
+}
+
+export type getApiFinanceiroResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type getApiFinanceiroResponseSuccess = (getApiFinanceiroResponse200) & {
+  headers: Headers;
+};
+export type getApiFinanceiroResponseError = (getApiFinanceiroResponse400) & {
+  headers: Headers;
+};
+
+export type getApiFinanceiroResponse = (getApiFinanceiroResponseSuccess | getApiFinanceiroResponseError)
+
+export const getGetApiFinanceiroUrl = (params?: GetApiFinanceiroParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/financeiro?${stringifiedParams}` : `/api/financeiro`
+}
+
+export const getApiFinanceiro = async (params?: GetApiFinanceiroParams, options?: RequestInit): Promise<getApiFinanceiroResponse> => {
+
+  return apiFetch<getApiFinanceiroResponse>(getGetApiFinanceiroUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiFinanceiroQueryKey = (params?: GetApiFinanceiroParams,) => {
+    return [
+    `/api/financeiro`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiFinanceiroQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinanceiro>>, TError = ProblemDetails>(params?: GetApiFinanceiroParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinanceiroQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinanceiro>>> = ({ signal }) => getApiFinanceiro(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFinanceiroQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinanceiro>>>
+export type GetApiFinanceiroQueryError = ProblemDetails
+
+
+export function useGetApiFinanceiro<TData = Awaited<ReturnType<typeof getApiFinanceiro>>, TError = ProblemDetails>(
+ params: undefined |  GetApiFinanceiroParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinanceiro>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinanceiro>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinanceiro<TData = Awaited<ReturnType<typeof getApiFinanceiro>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinanceiro>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinanceiro>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinanceiro<TData = Awaited<ReturnType<typeof getApiFinanceiro>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiFinanceiro<TData = Awaited<ReturnType<typeof getApiFinanceiro>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiro>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFinanceiroQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type getApiFornecedoresResponse200 = {
   data: FornecedorResponse[]
