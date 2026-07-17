@@ -62,6 +62,17 @@ export interface OrcamentoPublicoResponse {
   respondidoEm?: string | null;
 }
 
+export interface LojaContatoResponse {
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  politicas?: string | null;
+}
+
 export interface AcompanhamentoResponse {
   /** @nullable */
   nomeLoja?: string | null;
@@ -73,6 +84,7 @@ export interface AcompanhamentoResponse {
   prazoEstimado?: string | null;
   atualizadoEm?: string;
   orcamento?: OrcamentoPublicoResponse;
+  contato?: LojaContatoResponse;
 }
 
 export interface AgendamentoPublicoRequest {
@@ -350,6 +362,11 @@ export interface ConfiguracaoAgendaResponse {
   slug?: string | null;
 }
 
+export interface ContaRequest {
+  /** @nullable */
+  nome?: string | null;
+}
+
 export interface OsAtrasadaResponse {
   id?: string;
   numero?: number;
@@ -558,8 +575,37 @@ export interface LojaPublicaResponse {
   nome?: string | null;
   /** @nullable */
   slug?: string | null;
+  contato?: LojaContatoResponse;
   /** @nullable */
   servicos?: ServicoPublicoResponse[] | null;
+}
+
+export interface LojaRequest {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  politicas?: string | null;
+}
+
+export interface LojaResponse {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  slug?: string | null;
+  /** @nullable */
+  telefone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  endereco?: string | null;
+  /** @nullable */
+  politicas?: string | null;
 }
 
 export interface MeResponse {
@@ -594,6 +640,7 @@ export const StatusMensagem = {
   Enviada: 'Enviada',
   Simulada: 'Simulada',
   Suprimida: 'Suprimida',
+  Desativada: 'Desativada',
   Falhou: 'Falhou',
 } as const;
 
@@ -903,6 +950,22 @@ export interface PecaUsadaRequest {
   quantidade?: number;
 }
 
+export interface PreferenciaItem {
+  tipoEvento?: TipoEventoComunicacao;
+  canal?: CanalNotificacao;
+  ativo?: boolean;
+}
+
+export interface PreferenciasNotificacaoRequest {
+  /** @nullable */
+  itens?: PreferenciaItem[] | null;
+}
+
+export interface PreferenciasNotificacaoResponse {
+  /** @nullable */
+  itens?: PreferenciaItem[] | null;
+}
+
 export interface ProblemDetails {
   /** @nullable */
   type?: string | null;
@@ -990,6 +1053,13 @@ export interface ServicoResponsePaginaResponse {
   total?: number;
   pagina?: number;
   tamanhoPagina?: number;
+}
+
+export interface TrocarSenhaRequest {
+  /** @nullable */
+  senhaAtual?: string | null;
+  /** @nullable */
+  novaSenha?: string | null;
 }
 
 /**
@@ -3979,6 +4049,556 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiClientesIdMutationOptions(options), queryClient);
+    }
+
+export type getApiConfiguracoesLojaResponse200 = {
+  data: LojaResponse
+  status: 200
+}
+
+export type getApiConfiguracoesLojaResponseSuccess = (getApiConfiguracoesLojaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiConfiguracoesLojaResponse = (getApiConfiguracoesLojaResponseSuccess)
+
+export const getGetApiConfiguracoesLojaUrl = () => {
+
+
+
+
+  return `/api/configuracoes/loja`
+}
+
+export const getApiConfiguracoesLoja = async ( options?: RequestInit): Promise<getApiConfiguracoesLojaResponse> => {
+
+  return apiFetch<getApiConfiguracoesLojaResponse>(getGetApiConfiguracoesLojaUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiConfiguracoesLojaQueryKey = () => {
+    return [
+    `/api/configuracoes/loja`
+    ] as const;
+    }
+
+
+export const getGetApiConfiguracoesLojaQueryOptions = <TData = Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiConfiguracoesLojaQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>> = ({ signal }) => getApiConfiguracoesLoja({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiConfiguracoesLojaQueryResult = NonNullable<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>>
+export type GetApiConfiguracoesLojaQueryError = unknown
+
+
+export function useGetApiConfiguracoesLoja<TData = Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesLoja>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesLoja>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesLoja<TData = Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesLoja>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesLoja>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesLoja<TData = Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiConfiguracoesLoja<TData = Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesLoja>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiConfiguracoesLojaQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiConfiguracoesLojaResponse200 = {
+  data: LojaResponse
+  status: 200
+}
+
+export type putApiConfiguracoesLojaResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiConfiguracoesLojaResponseSuccess = (putApiConfiguracoesLojaResponse200) & {
+  headers: Headers;
+};
+export type putApiConfiguracoesLojaResponseError = (putApiConfiguracoesLojaResponse400) & {
+  headers: Headers;
+};
+
+export type putApiConfiguracoesLojaResponse = (putApiConfiguracoesLojaResponseSuccess | putApiConfiguracoesLojaResponseError)
+
+export const getPutApiConfiguracoesLojaUrl = () => {
+
+
+
+
+  return `/api/configuracoes/loja`
+}
+
+export const putApiConfiguracoesLoja = async (lojaRequest?: LojaRequest, options?: RequestInit): Promise<putApiConfiguracoesLojaResponse> => {
+
+  return apiFetch<putApiConfiguracoesLojaResponse>(getPutApiConfiguracoesLojaUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(lojaRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiConfiguracoesLojaMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesLoja>>, TError,{data?: LojaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesLoja>>, TError,{data?: LojaRequest}, TContext> => {
+
+const mutationKey = ['putApiConfiguracoesLoja'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiConfiguracoesLoja>>, {data?: LojaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiConfiguracoesLoja(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiConfiguracoesLojaMutationResult = NonNullable<Awaited<ReturnType<typeof putApiConfiguracoesLoja>>>
+    export type PutApiConfiguracoesLojaMutationBody = LojaRequest | undefined
+    export type PutApiConfiguracoesLojaMutationError = ValidationProblemDetails
+
+    export const usePutApiConfiguracoesLoja = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesLoja>>, TError,{data?: LojaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiConfiguracoesLoja>>,
+        TError,
+        {data?: LojaRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiConfiguracoesLojaMutationOptions(options), queryClient);
+    }
+
+export type getApiConfiguracoesNotificacoesResponse200 = {
+  data: PreferenciasNotificacaoResponse
+  status: 200
+}
+
+export type getApiConfiguracoesNotificacoesResponseSuccess = (getApiConfiguracoesNotificacoesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiConfiguracoesNotificacoesResponse = (getApiConfiguracoesNotificacoesResponseSuccess)
+
+export const getGetApiConfiguracoesNotificacoesUrl = () => {
+
+
+
+
+  return `/api/configuracoes/notificacoes`
+}
+
+export const getApiConfiguracoesNotificacoes = async ( options?: RequestInit): Promise<getApiConfiguracoesNotificacoesResponse> => {
+
+  return apiFetch<getApiConfiguracoesNotificacoesResponse>(getGetApiConfiguracoesNotificacoesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiConfiguracoesNotificacoesQueryKey = () => {
+    return [
+    `/api/configuracoes/notificacoes`
+    ] as const;
+    }
+
+
+export const getGetApiConfiguracoesNotificacoesQueryOptions = <TData = Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiConfiguracoesNotificacoesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>> = ({ signal }) => getApiConfiguracoesNotificacoes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiConfiguracoesNotificacoesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>>
+export type GetApiConfiguracoesNotificacoesQueryError = unknown
+
+
+export function useGetApiConfiguracoesNotificacoes<TData = Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesNotificacoes<TData = Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesNotificacoes<TData = Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiConfiguracoesNotificacoes<TData = Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesNotificacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiConfiguracoesNotificacoesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiConfiguracoesNotificacoesResponse200 = {
+  data: PreferenciasNotificacaoResponse
+  status: 200
+}
+
+export type putApiConfiguracoesNotificacoesResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiConfiguracoesNotificacoesResponseSuccess = (putApiConfiguracoesNotificacoesResponse200) & {
+  headers: Headers;
+};
+export type putApiConfiguracoesNotificacoesResponseError = (putApiConfiguracoesNotificacoesResponse400) & {
+  headers: Headers;
+};
+
+export type putApiConfiguracoesNotificacoesResponse = (putApiConfiguracoesNotificacoesResponseSuccess | putApiConfiguracoesNotificacoesResponseError)
+
+export const getPutApiConfiguracoesNotificacoesUrl = () => {
+
+
+
+
+  return `/api/configuracoes/notificacoes`
+}
+
+export const putApiConfiguracoesNotificacoes = async (preferenciasNotificacaoRequest?: PreferenciasNotificacaoRequest, options?: RequestInit): Promise<putApiConfiguracoesNotificacoesResponse> => {
+
+  return apiFetch<putApiConfiguracoesNotificacoesResponse>(getPutApiConfiguracoesNotificacoesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(preferenciasNotificacaoRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiConfiguracoesNotificacoesMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>, TError,{data?: PreferenciasNotificacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>, TError,{data?: PreferenciasNotificacaoRequest}, TContext> => {
+
+const mutationKey = ['putApiConfiguracoesNotificacoes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>, {data?: PreferenciasNotificacaoRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiConfiguracoesNotificacoes(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiConfiguracoesNotificacoesMutationResult = NonNullable<Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>>
+    export type PutApiConfiguracoesNotificacoesMutationBody = PreferenciasNotificacaoRequest | undefined
+    export type PutApiConfiguracoesNotificacoesMutationError = ValidationProblemDetails
+
+    export const usePutApiConfiguracoesNotificacoes = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>, TError,{data?: PreferenciasNotificacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiConfiguracoesNotificacoes>>,
+        TError,
+        {data?: PreferenciasNotificacaoRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiConfiguracoesNotificacoesMutationOptions(options), queryClient);
+    }
+
+export type putApiContaResponse204 = {
+  data: void
+  status: 204
+}
+
+export type putApiContaResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type putApiContaResponseSuccess = (putApiContaResponse204) & {
+  headers: Headers;
+};
+export type putApiContaResponseError = (putApiContaResponse400) & {
+  headers: Headers;
+};
+
+export type putApiContaResponse = (putApiContaResponseSuccess | putApiContaResponseError)
+
+export const getPutApiContaUrl = () => {
+
+
+
+
+  return `/api/conta`
+}
+
+export const putApiConta = async (contaRequest?: ContaRequest, options?: RequestInit): Promise<putApiContaResponse> => {
+
+  return apiFetch<putApiContaResponse>(getPutApiContaUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(contaRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiContaMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConta>>, TError,{data?: ContaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiConta>>, TError,{data?: ContaRequest}, TContext> => {
+
+const mutationKey = ['putApiConta'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiConta>>, {data?: ContaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiConta(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiContaMutationResult = NonNullable<Awaited<ReturnType<typeof putApiConta>>>
+    export type PutApiContaMutationBody = ContaRequest | undefined
+    export type PutApiContaMutationError = ValidationProblemDetails
+
+    export const usePutApiConta = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConta>>, TError,{data?: ContaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiConta>>,
+        TError,
+        {data?: ContaRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiContaMutationOptions(options), queryClient);
+    }
+
+export type postApiContaSenhaResponse204 = {
+  data: void
+  status: 204
+}
+
+export type postApiContaSenhaResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiContaSenhaResponseSuccess = (postApiContaSenhaResponse204) & {
+  headers: Headers;
+};
+export type postApiContaSenhaResponseError = (postApiContaSenhaResponse400) & {
+  headers: Headers;
+};
+
+export type postApiContaSenhaResponse = (postApiContaSenhaResponseSuccess | postApiContaSenhaResponseError)
+
+export const getPostApiContaSenhaUrl = () => {
+
+
+
+
+  return `/api/conta/senha`
+}
+
+export const postApiContaSenha = async (trocarSenhaRequest?: TrocarSenhaRequest, options?: RequestInit): Promise<postApiContaSenhaResponse> => {
+
+  return apiFetch<postApiContaSenhaResponse>(getPostApiContaSenhaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(trocarSenhaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiContaSenhaMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiContaSenha>>, TError,{data?: TrocarSenhaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiContaSenha>>, TError,{data?: TrocarSenhaRequest}, TContext> => {
+
+const mutationKey = ['postApiContaSenha'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiContaSenha>>, {data?: TrocarSenhaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiContaSenha(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiContaSenhaMutationResult = NonNullable<Awaited<ReturnType<typeof postApiContaSenha>>>
+    export type PostApiContaSenhaMutationBody = TrocarSenhaRequest | undefined
+    export type PostApiContaSenhaMutationError = ProblemDetails
+
+    export const usePostApiContaSenha = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiContaSenha>>, TError,{data?: TrocarSenhaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiContaSenha>>,
+        TError,
+        {data?: TrocarSenhaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiContaSenhaMutationOptions(options), queryClient);
     }
 
 export type getApiDashboardResponse200 = {
