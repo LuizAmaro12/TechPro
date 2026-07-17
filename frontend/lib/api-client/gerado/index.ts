@@ -73,6 +73,11 @@ export interface LojaContatoResponse {
   politicas?: string | null;
 }
 
+export interface EtapaAlcancadaResponse {
+  etapa?: EtapaOrdemServico;
+  alcancadaEm?: string;
+}
+
 export interface AcompanhamentoResponse {
   /** @nullable */
   nomeLoja?: string | null;
@@ -85,6 +90,8 @@ export interface AcompanhamentoResponse {
   atualizadoEm?: string;
   orcamento?: OrcamentoPublicoResponse;
   contato?: LojaContatoResponse;
+  /** @nullable */
+  linhaDoTempo?: EtapaAlcancadaResponse[] | null;
 }
 
 export interface AgendamentoPublicoRequest {

@@ -213,7 +213,9 @@ export default function PaginaAcompanharOs() {
 
         {!cancelada && (
           <ol className="mt-6 space-y-2">
-            {ETAPAS_OS.filter((e) => e.valor !== "Cancelado").map((etapa, i) => (
+            {ETAPAS_OS.filter((e) => e.valor !== "Cancelado").map((etapa, i) => {
+              const alcancada = (os.linhaDoTempo ?? []).find((t) => t.etapa === etapa.valor);
+              return (
               <li key={etapa.valor} className="flex items-center gap-3 text-sm">
                 <span
                   className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
@@ -227,18 +229,29 @@ export default function PaginaAcompanharOs() {
                   {i < indiceAtual ? "✓" : i + 1}
                 </span>
                 <span
-                  className={
+                  className={`flex-1 ${
                     i === indiceAtual
                       ? "font-semibold text-[#14162B]"
                       : i < indiceAtual
                         ? "text-[#6B7280]"
                         : "text-[#8B8D98]"
-                  }
+                  }`}
                 >
                   {etapa.rotulo}
                 </span>
+                {alcancada && (
+                  <span className="shrink-0 text-xs text-[#8B8D98]">
+                    {new Date(alcancada.alcancadaEm ?? "").toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                )}
               </li>
-            ))}
+              );
+            })}
           </ol>
         )}
 

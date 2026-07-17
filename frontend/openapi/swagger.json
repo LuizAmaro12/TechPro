@@ -3622,6 +3622,13 @@
           },
           "contato": {
             "$ref": "#/components/schemas/LojaContatoResponse"
+          },
+          "linhaDoTempo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EtapaAlcancadaResponse"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4287,6 +4294,19 @@
           "email": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EtapaAlcancadaResponse": {
+        "type": "object",
+        "properties": {
+          "etapa": {
+            "$ref": "#/components/schemas/EtapaOrdemServico"
+          },
+          "alcancadaEm": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
