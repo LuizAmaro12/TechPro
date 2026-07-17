@@ -79,6 +79,29 @@ Evidência e2e (Playwright + Edge, 2026-07-16):
 > Cloudflare R2) e convite de equipe (o doc coloca equipe/permissões na
 > Fase 2).
 
+## Fase 2 (recorte WEB) — em andamento
+
+O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está em
+`docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
+permanece a última etapa do projeto — não iniciado.**
+
+### Linha do tempo visual da OS — concluída em 2026-07-17
+
+1º item web da Fase 2 (portal do cliente). O acompanhamento público
+(`/acompanhar/{slug}/{codigo}`) passou a mostrar a **jornada real** do aparelho:
+cada etapa percorrida com data/hora, a atual em destaque, as futuras esmaecidas.
+Reforça o diferencial de transparência com o dado que já existia
+(`ordem_servico_historico_etapas`) — sem entidade nova, sem migração.
+
+- **Backend**: `AcompanhamentoResponse.LinhaDoTempo` — projeção **client-safe**
+  (`{ etapa, alcancadaEm }`), 1ª vez que cada etapa foi alcançada, **sem**
+  usuário nem motivo internos. A loja continua vendo a trilha completa (com
+  usuário/motivo) no detalhe da OS.
+- **Evidência e2e** (Playwright + Edge, 2026-07-17): carimbo de hora presente
+  nas etapas alcançadas, ausente nas futuras; API com 4 etapas e sem dado
+  interno. **105/105 testes de back-end.**
+- Sem RLS novo (só leitura do histórico já isolado por tenant).
+
 ## Auditoria de vulnerabilidades web (OWASP básico, 2026-07-17)
 
 Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.**
