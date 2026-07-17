@@ -206,8 +206,13 @@ public class ComunicacaoService(
 
             if (!destinatario.Consentiu)
             {
-                // LGPD: não envia, mas registra a supressão (auditoria).
+                // Gate 1 — LGPD: não envia, mas registra a supressão (auditoria).
                 registro.Status = StatusMensagem.Suprimida;
+            }
+            else if (!await LojaQuerNotificarAsync(evento, canal))
+            {
+                // Gate 2 — a loja desligou este evento/canal nas preferências.
+                registro.Status = StatusMensagem.Desativada;
             }
             else
             {
@@ -271,6 +276,20 @@ public class ComunicacaoService(
             ag.TelefoneContato ?? cliente?.Telefone,
             ag.EmailContato ?? cliente?.Email,
             cliente?.ConsentiuComunicacoes ?? true);
+    }
+
+    private List<PreferenciaNotificacao>? _preferencias;
+
+    /// <summary>
+    /// Preferências da loja (evento × canal). Ausência de linha = ativo, então
+    /// um tenant sem nenhuma configuração notifica tudo. Carregado uma vez por
+    /// instância.
+    /// </summary>
+    private async Task<bool> LojaQuerNotificarAsync(TipoEventoComunicacao evento, CanalNotificacao canal)
+    {
+        _preferencias ??= await db.PreferenciasNotificacao.ToListAsync();
+        return _preferencias
+            .FirstOrDefault(p => p.TipoEvento == evento && p.Canal == canal)?.Ativo ?? true;
     }
 
     private string? _loja;

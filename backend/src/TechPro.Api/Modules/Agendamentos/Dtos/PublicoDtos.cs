@@ -12,9 +12,17 @@ public record ServicoPublicoResponse(
     int? PrazoMedioDias,
     bool ExigeDiagnostico);
 
+/// <summary>Contato e políticas da loja exibidos ao cliente final (módulo 13).</summary>
+public record LojaContatoResponse(
+    string? Telefone,
+    string? Email,
+    string? Endereco,
+    string? Politicas);
+
 public record LojaPublicaResponse(
     string Nome,
     string Slug,
+    LojaContatoResponse Contato,
     List<ServicoPublicoResponse> Servicos);
 
 public record AgendamentoPublicoRequest(

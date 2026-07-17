@@ -14,6 +14,7 @@ using TechPro.Api.Modules.Agendamentos;
 using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.Comunicacao.Canais;
+using TechPro.Api.Modules.Configuracoes;
 using TechPro.Api.Modules.Dashboard;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.Onboarding;
@@ -82,6 +83,7 @@ builder.Services.AddScoped<FinanceiroService>();
 builder.Services.AddScoped<FinanceiroRelatorioService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<OnboardingService>();
+builder.Services.AddScoped<ConfiguracoesService>();
 
 // --- Comunicação (módulo 9): provedor abstraído, adaptador log por padrão ---
 builder.Services.AddScoped<ComunicacaoService>();

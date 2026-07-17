@@ -22,4 +22,14 @@ public class Empresa
     /// primeiro acesso → o front redireciona para /bem-vindo.
     /// </summary>
     public DateTimeOffset? OnboardingConcluidoEm { get; set; }
+
+    // --- Dados da loja (módulo 13). Opcionais; exibidos ao cliente final nas
+    // páginas públicas quando preenchidos. O logo depende do R2 (Fase 2).
+
+    public string? Telefone { get; set; }
+    public string? Email { get; set; }
+    public string? Endereco { get; set; }
+
+    /// <summary>Políticas da loja (garantia, prazo de retirada...) em texto livre.</summary>
+    public string? Politicas { get; set; }
 }

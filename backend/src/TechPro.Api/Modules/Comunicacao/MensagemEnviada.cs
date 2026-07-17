@@ -34,6 +34,12 @@ public enum StatusMensagem
     /// <summary>Cliente sem consentimento — não enviada, mas registrada (LGPD).</summary>
     Suprimida,
 
+    /// <summary>
+    /// A loja desligou este evento/canal nas preferências — não enviada, mas
+    /// registrada (responde "por que meu cliente não recebeu?").
+    /// </summary>
+    Desativada,
+
     /// <summary>Provedor real recusou/falhou — a ação que disparou não é afetada.</summary>
     Falhou,
 }

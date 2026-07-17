@@ -47,7 +47,12 @@ public class PublicoController(
                 s.PrazoMedioDias, s.ExigeDiagnostico))
             .ToListAsync();
 
-        return Ok(new LojaPublicaResponse(empresa.Nome, empresa.Slug, servicos));
+        return Ok(new LojaPublicaResponse(
+            empresa.Nome,
+            empresa.Slug,
+            new LojaContatoResponse(
+                empresa.Telefone, empresa.Email, empresa.Endereco, empresa.Politicas),
+            servicos));
     }
 
     [HttpGet("disponibilidade")]

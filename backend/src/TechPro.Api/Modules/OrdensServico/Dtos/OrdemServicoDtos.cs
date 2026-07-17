@@ -133,4 +133,5 @@ public record AcompanhamentoResponse(
     EtapaOrdemServico Etapa,
     DateOnly? PrazoEstimado,
     DateTimeOffset AtualizadoEm,
-    Financeiro.Dtos.OrcamentoPublicoResponse? Orcamento);
+    Financeiro.Dtos.OrcamentoPublicoResponse? Orcamento,
+    Agendamentos.Dtos.LojaContatoResponse Contato);

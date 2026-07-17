@@ -41,6 +41,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<OrcamentoEvento> OrcamentoEventos => Set<OrcamentoEvento>();
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
     public DbSet<MensagemEnviada> MensagensEnviadas => Set<MensagemEnviada>();
+    public DbSet<PreferenciaNotificacao> PreferenciasNotificacao => Set<PreferenciaNotificacao>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,6 +52,10 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.ToTable("empresas");
             e.Property(x => x.Nome).HasMaxLength(200);
             e.Property(x => x.Slug).HasMaxLength(80);
+            e.Property(x => x.Telefone).HasMaxLength(20);
+            e.Property(x => x.Email).HasMaxLength(256);
+            e.Property(x => x.Endereco).HasMaxLength(300);
+            e.Property(x => x.Politicas).HasMaxLength(2000);
             e.HasIndex(x => x.Slug).IsUnique();
             // A Empresa é a raiz do tenant: o filtro usa o próprio Id.
             // Fail-closed: sem tenant no contexto, nenhuma empresa é visível.
@@ -341,6 +346,15 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.TenantId);
             e.HasIndex(x => x.OrdemServicoId);
             e.HasIndex(x => x.ClienteId);
+        });
+
+        builder.Entity<PreferenciaNotificacao>(e =>
+        {
+            e.ToTable("preferencias_notificacao");
+            e.Property(x => x.TipoEvento).HasConversion<string>().HasMaxLength(40);
+            e.Property(x => x.Canal).HasConversion<string>().HasMaxLength(20);
+            // Uma linha por evento × canal; ausência = ativo.
+            e.HasIndex(x => new { x.TenantId, x.TipoEvento, x.Canal }).IsUnique();
         });
 
         AplicarFiltroDeTenantPorConvencao(builder);

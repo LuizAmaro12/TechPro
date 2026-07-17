@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using TechPro.Api.Modules.Agendamentos.Dtos;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.Financeiro.Dtos;
 using TechPro.Api.Modules.OrdensServico.Dtos;
@@ -41,13 +42,15 @@ public class AcompanhamentoController(
         }
 
         return Ok(new AcompanhamentoResponse(
-            _nomeLoja!,
+            _empresa!.Nome,
             ordem.Numero,
             ordem.Servico!.Nome,
             ordem.Etapa,
             ordem.PrazoEstimado,
             ordem.UpdatedAt,
-            await financeiro.ObterOrcamentoPublicoAsync(ordem.Id)));
+            await financeiro.ObterOrcamentoPublicoAsync(ordem.Id),
+            new LojaContatoResponse(
+                _empresa.Telefone, _empresa.Email, _empresa.Endereco, _empresa.Politicas)));
     }
 
     /// <summary>Aprovação binária pelo cliente final (módulo 1, Fase 1) — com trilha.</summary>
@@ -95,7 +98,7 @@ public class AcompanhamentoController(
         return Ok(await financeiro.ObterOrcamentoPublicoAsync(ordem.Id));
     }
 
-    private string? _nomeLoja;
+    private Empresa? _empresa;
 
     /// <summary>
     /// Slug resolve o tenant (ignora o GQF da Empresa de propósito — ainda não
@@ -112,7 +115,7 @@ public class AcompanhamentoController(
         }
 
         tenantAmbiente.TenantIdFixado = empresa.Id;
-        _nomeLoja = empresa.Nome;
+        _empresa = empresa;
 
         return await db.OrdensServico
             .Include(o => o.Servico)
