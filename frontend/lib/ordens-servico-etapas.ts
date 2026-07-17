@@ -66,5 +66,6 @@ export const ROTULOS_STATUS_MENSAGEM: Record<string, string> = {
   Enviada: "enviada",
   Simulada: "simulada",
   Suprimida: "suprimida (sem consentimento)",
+  Desativada: "desativada nas configurações",
   Falhou: "falhou",
 };

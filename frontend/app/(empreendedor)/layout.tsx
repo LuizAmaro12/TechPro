@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/financeiro", rotulo: "Financeiro" },
   { href: "/servicos", rotulo: "Serviços" },
   { href: "/pecas", rotulo: "Peças" },
+  { href: "/configuracoes", rotulo: "Configurações" },
 ];
 
 /**

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { ContatoDaLoja } from "@/components/portal/contato-da-loja";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,6 +153,8 @@ export default function PaginaAgendarPublico() {
       <p className="mt-1 text-sm text-[#6B7280]">
         Agende seu atendimento em poucos passos — sem cadastro, sem senha.
       </p>
+
+      <ContatoDaLoja contato={loja.contato} />
 
       {/* Indicador de progresso */}
       <ol className="mt-6 flex flex-wrap gap-2">

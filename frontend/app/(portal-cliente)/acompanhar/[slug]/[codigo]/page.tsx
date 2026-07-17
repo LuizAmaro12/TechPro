@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ContatoDaLoja } from "@/components/portal/contato-da-loja";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api-client/fetcher";
@@ -252,6 +253,8 @@ export default function PaginaAcompanharOs() {
           . Dúvidas? Fale direto com a loja.
         </p>
       </div>
+
+      <ContatoDaLoja contato={os.contato} />
     </div>
   );
 }
