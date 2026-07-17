@@ -221,6 +221,24 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+// Headers de segurança em toda resposta (defesa contra clickjacking, MIME
+// sniffing e vazamento de referer). O CSP restringe as origens; a API só serve
+// JSON/Swagger, então uma política enxuta basta — o front (Next/Vercel) tem o
+// seu próprio CSP. Em Development afrouxamos o CSP para o Swagger UI funcionar.
+app.Use(async (contexto, next) =>
+{
+    var headers = contexto.Response.Headers;
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["X-Frame-Options"] = "DENY";
+    headers["Referrer-Policy"] = "no-referrer";
+    headers["Cross-Origin-Opener-Policy"] = "same-origin";
+    headers["Content-Security-Policy"] = app.Environment.IsDevelopment()
+        // Swagger UI usa estilos/scripts inline.
+        ? "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
+        : "default-src 'none'; frame-ancestors 'none'";
+    await next();
+});
+
 app.UseCors("frontend");
 app.UseRateLimiter();
 app.UseAuthentication();

@@ -79,6 +79,31 @@ Evidência e2e (Playwright + Edge, 2026-07-16):
 > Cloudflare R2) e convite de equipe (o doc coloca equipe/permissões na
 > Fase 2).
 
+## Auditoria de vulnerabilidades web (OWASP básico, 2026-07-17)
+
+Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.**
+
+| # | Classe | Resultado |
+|---|---|---|
+| 1 | **SQL Injection** | ✅ Seguro. Zero SQL raw/interpolado no código de produção — tudo via EF Core (LINQ parametrizado). Migrations usam SQL literal fixo (RLS), sem input do usuário. |
+| 2 | **XSS** | ✅ Seguro. Zero `dangerouslySetInnerHTML` no front; React escapa por padrão. O único HTML montado é no adaptador Resend (e-mail server-side, não é página web). |
+| 3 | **CSRF** | ✅ Mitigado por design. Access token viaja em header `Authorization: Bearer` (o browser não o envia sozinho → imune a CSRF). Mutações não dependem de cookie. O cookie de refresh é `HttpOnly`+`Secure`+`SameSite=Lax`, `Path=/api/auth`. |
+| 4 | **Validação de input** | ✅ Dupla camada. 7 validators FluentValidation (backend, fonte de verdade) + 10 telas com zodResolver (front). O backend valida sempre, independente do front. |
+| 5 | **Headers de segurança** | ❌→✅ **Estavam ausentes; adicionados nesta etapa.** |
+
+### Correção: headers de segurança
+
+- **Front (Next `next.config.ts` → `headers()`):** `Content-Security-Policy`
+  (default-src 'self'; connect-src libera a API; frame-ancestors 'none';
+  base-uri/form-action 'self'; `unsafe-eval` só fora de produção por causa do
+  Turbopack dev), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
+  (camera/mic/geo desligados). **Conferido ao vivo** na resposta de `/login`.
+- **API (middleware no `Program.cs`):** mesmos headers, CSP enxuto
+  (`default-src 'none'; frame-ancestors 'none'` em produção; afrouxado em
+  Development só para o Swagger UI). A API só serve JSON.
+- Sem regressão: front build de produção OK e backend 104/104 verdes.
+
 ## Auditoria pré-produção (2026-07-17)
 
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
