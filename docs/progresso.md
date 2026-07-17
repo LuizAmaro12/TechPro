@@ -79,6 +79,49 @@ Evidência e2e (Playwright + Edge, 2026-07-16):
 > Cloudflare R2) e convite de equipe (o doc coloca equipe/permissões na
 > Fase 2).
 
+## Auditoria pré-produção (2026-07-17)
+
+Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
+— os resultados abaixo são a verificação, não uma promessa.
+
+### Isolamento entre empresas: 18/18 tabelas cobertas
+
+Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
+`ITenantEntity` do código: **todas as 18** tabelas de tenant têm
+`relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
+`agendamentos`, `aparelhos`, `bloqueios_agenda`, `clientes`, `fornecedores`,
+`horarios_funcionamento`, `mensagens_enviadas`, `orcamento_eventos`,
+`orcamentos`, `ordem_servico_historico_etapas`, `ordem_servico_pecas`,
+`ordens_servico`, `pagamentos`, `pecas`, `preferencias_notificacao`,
+`servico_checklist_itens`, `servico_pecas`, `servicos`.
+
+`usuarios` e `refresh_tokens` seguem fora por decisão documentada (plano de
+controle: são consultados antes de existir tenant). **Como não têm rede de
+proteção (nem GQF, nem RLS), auditei os 5 acessos a `db.Users` no código: todos
+filtram por `TenantId` explicitamente** (FinanceiroService ×2,
+OrdemServicoService ×2, EquipeController). Os testes cobrem a fronteira
+(responsável técnico de outra empresa → 400; equipe isolada por tenant).
+**Invariante frágil e consciente**: qualquer query nova em `usuarios` precisa
+do filtro manual — não há compilador nem banco para avisar.
+
+### CI verificado localmente (passaria verde)
+
+Os dois caminhos que o `.github/workflows/ci.yml` executa e que o dev server
+não cobre foram rodados de verdade:
+
+- **Front-end**: `npm run lint` (0 erros), `npx tsc --noEmit` (limpo) e
+  **`npm run build` de produção** — 17 rotas geradas.
+- **Back-end**: `dotnet build --configuration Release` (0 erros/warnings) e
+  **`dotnet test --configuration Release` → 104/104**.
+
+### Correção de documentação
+
+O `progresso.md` listava "publicar o repositório no GitHub" como pendente. O
+repositório **já existe** em `origin` (GitHub) — o que falta é dar push nos
+commits locais (o branch está à frente). Item corrigido nos próximos passos.
+
+---
+
 ### Etapa Configurações e conta concluída em 2026-07-17 (fecha o módulo 13 e a Fase 1)
 
 Última lacuna do escopo por módulo. Plano e decisões em
@@ -832,8 +875,9 @@ e, depois, Fase 2.
 
 ### 1. Operação e produção (fora do código de produto)
 
-- Publicar o repositório no GitHub e ver o CI verde no primeiro push
-  (job front + back já configurados).
+- **Push dos commits locais** para o `origin` (o repositório já existe no
+  GitHub; o branch local está à frente) e conferir o CI verde. A auditoria de
+  2026-07-17 rodou os mesmos passos do workflow localmente e todos passaram.
 - Provisionar produção conforme o doc de stack: Render (API + Postgres),
   Vercel (front). Migrations como passo de deploy, nunca automático.
 - Contas externas (checklist da seção 19): Cloudflare R2, Meta/WhatsApp,
