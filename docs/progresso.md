@@ -38,7 +38,7 @@ Evidência da verificação (Playwright + Edge, 2026-07-05):
 Durante a própria verificação o rate limiter respondeu `429` a partir da 11ª
 chamada de auth no mesmo minuto — o limite de 10/min/IP funcionando ao vivo.
 
-Suíte de testes do back-end: **97 testes xUnit verdes** (GQF por convenção,
+Suíte de testes do back-end: **104 testes xUnit verdes** (GQF por convenção,
 TokenService, fluxo de auth, catálogo, clientes, agenda, OS, estoque,
 financeiro, comunicação, dashboard e onboarding — integração via
 WebApplicationFactory + Sqlite em memória).
@@ -70,31 +70,42 @@ Evidência e2e (Playwright + Edge, 2026-07-16):
 > e vê o estado no dashboard, sem intervenção manual do fundador" — está
 > atendido de ponta a ponta.
 >
-> **Correção registrada em 2026-07-16:** um resumo anterior declarou "Fase 1
-> completa". Isso valia para a *ordem recomendada* (10 itens), mas **não** para
-> o *escopo por módulo* da Fase 1, que tinha duas lacunas reais. O **módulo 8
-> (Financeiro básico)** foi fechado em 2026-07-16 (ver etapa abaixo); resta o
-> **módulo 13 (Configurações e equipe básica)**. A Fase 1 **não** está fechada
-> enquanto ele não for entregue.
+> **Fase 1 completa por módulo em 2026-07-17.** A auditoria de 2026-07-16
+> encontrou duas lacunas no *escopo por módulo* (um resumo anterior tinha
+> declarado a fase completa olhando só para a ordem recomendada — correção
+> registrada). Ambas foram fechadas: **módulo 8 (Financeiro básico)** em
+> 2026-07-16 e **módulo 13 (Configurações e equipe básica)** em 2026-07-17.
+> Ficam fora, com registro e justificativa: logo da loja (depende do
+> Cloudflare R2) e convite de equipe (o doc coloca equipe/permissões na
+> Fase 2).
 
-## Lacunas conhecidas da Fase 1 (a fazer)
+### Etapa Configurações e conta concluída em 2026-07-17 (fecha o módulo 13 e a Fase 1)
 
-Levantadas na auditoria de 2026-07-16, conferindo o *escopo por módulo* de
-`docs/fases_MVP.md` contra o código. **Módulo 8 resolvido em 2026-07-16.**
+Última lacuna do escopo por módulo. Plano e decisões em
+`docs/superpowers/plans/2026-07-16-configuracoes-e-conta.md`.
+Evidência e2e (Playwright + Edge, 2026-07-17):
 
-### Módulo 13 — Configurações e equipe básica (majoritariamente pendente)
+```json
+{
+  "dadosDaLojaSalvos": true,
+  "matrizNotificacoesSalva": true,
+  "nomeDaContaAtualizado": true,
+  "gateDesativaSoOCanalEscolhido": true,
+  "auditoriaMostraDesativada": true,
+  "contatoEPoliticasNoAgendar": true,
+  "contatoEPoliticasNoAcompanhar": true,
+  "trocaDeSenhaFunciona": true
+}
+```
 
-| Item do escopo | Status |
-|---|---|
-| Horários da loja | ✅ em `/agenda/configuracoes` |
-| Endereço público (slug) | ✅ em `/agenda/configuracoes` |
-| Dados da loja: nome editável, contatos, políticas | ❌ nome só é definido no cadastro |
-| Logo da loja | ❌ bloqueado por Cloudflare R2 (não provisionado) |
-| Conta do usuário (perfil, troca de senha) | ❌ |
-| Preferências básicas de notificação | ❌ |
-| Convite de equipe | ❌ deferido (o doc põe permissões granulares na Fase 2) |
+O `gateDesativaSoOCanalEscolhido` prova a matriz de ponta a ponta: com "OS
+criada" desligado só no e-mail, o WhatsApp sai (`Simulada`) e o e-mail fica
+registrado como `Desativada`. A verificação da troca de senha exigiu aguardar
+a janela do rate limiter de auth (10/min/IP) — o 429 no meio do e2e era o
+limite funcionando, não um bug. RLS conferido: `preferencias_notificacao` com
+`relrowsecurity = t` e `relforcerowsecurity = t`; fail-closed sem tenant.
 
-### Etapa Onboarding guiado concluída em 2026-07-16 (fecha a Fase 1)
+### Etapa Onboarding guiado concluída em 2026-07-16
 
 Módulo 0/13 — item 10 da ordem recomendada. O wizard encapsula os fluxos reais
 já construídos (reusa horários/serviços/peças). Plano e decisões em
@@ -614,6 +625,31 @@ docker compose up -d --build
   radar no topo, KPIs clicáveis (levam a Kanban/Agenda/OS) e faturamento com
   tendência. Isolamento testado (dashboard de A zerado para B).
 
+### Configurações e conta (módulo 13)
+
+- **Dados da loja** (`GET|PUT /api/configuracoes/loja` + tela `/configuracoes`):
+  nome editável, telefone, e-mail, endereço e políticas (texto livre). Os
+  **contatos e políticas aparecem para o cliente final** nas páginas públicas
+  `/agendar/{slug}` e `/acompanhar/{slug}/{codigo}` (decisão 2026-07-16 — dado
+  vivo, não campo morto).
+- **Preferências de notificação: matriz evento × canal** (decisão do usuário
+  2026-07-16, *diferente da recomendação de toggles só por evento*; o doc pede
+  "preferências básicas", a matriz vai além mas dá controle fino, ex.: lembrete
+  por WhatsApp sim, por e-mail não). Tabela `preferencias_notificacao`
+  (RLS ENABLE+FORCE) com **ausência de linha = ativo** — tenant novo já nasce
+  notificando tudo, sem seed.
+- **Gate de preferência no despacho** (`ComunicacaoService`), na ordem:
+  1) consentimento LGPD → `Suprimida`; 2) preferência da loja → **novo status
+  `Desativada`**; 3) envio pelo adaptador. O registro fica na auditoria da OS
+  ("desativada nas configurações") — responde "por que meu cliente não recebeu?".
+- **Conta do usuário**: editar o próprio nome (`PUT /api/conta`) e trocar a
+  senha (`POST /api/conta/senha`, via `UserManager.ChangePasswordAsync`, que já
+  exige a senha atual). **Troca de e-mail ficou de fora**: é o login, é único
+  globalmente e exige confirmação por e-mail — depende do provedor não ligado.
+- **Slug e horários seguem em `/api/agenda/*`** (já existiam e funcionam); a
+  tela de configurações linka para lá em vez de duplicar a regra.
+- Isolamento testado (dados/preferências de A não vazam para B).
+
 ### Financeiro básico (módulo 8 — visão de caixa)
 
 - **`GET /api/financeiro?de&ate`** + tela **`/financeiro`** (a rota prevista na
@@ -790,14 +826,11 @@ docker compose up -d --build
 
 ## Próximos passos sugeridos
 
-### 1. Fechar a última lacuna da Fase 1 (código de produto)
+**A Fase 1 está completa por módulo (2026-07-17).** As lacunas dos módulos 8 e
+13 foram fechadas; o código de produto da fase acabou. O que segue é operação
+e, depois, Fase 2.
 
-- **Módulo 13 — Configurações e equipe básica**: dados da loja editáveis
-  (nome, contatos, políticas), conta do usuário (perfil + troca de senha) e
-  preferências básicas de notificação. Logo depende do R2.
-- ~~Módulo 8 — Financeiro básico~~ ✅ concluído em 2026-07-16.
-
-### 2. Operação e produção (fora do código de produto)
+### 1. Operação e produção (fora do código de produto)
 
 - Publicar o repositório no GitHub e ver o CI verde no primeiro push
   (job front + back já configurados).
@@ -812,7 +845,7 @@ docker compose up -d --build
 - Dashboard do Hangfire (`/hangfire`) precisa de filtro de autorização real
   antes de ir a produção (hoje é permissivo e só sobe em Development).
 
-### 3. Fase 2 (doc de módulos)
+### 2. Fase 2 (doc de módulos)
 
 App/Portal do técnico (React Native/Expo, offline-first — o schema/sync já
 está pronto), financeiro com margem e rentabilidade, avaliações e reputação,
@@ -820,7 +853,7 @@ aprovação de orçamento item a item, linha do tempo visual da OS, evidência
 fotográfica, importação de contatos, LGPD visível (exportação/anonimização),
 central de mensagens unificada, kits de serviço, previsão de reposição.
 
-### 4. Melhorias anotadas ao longo da Fase 1
+### 3. Melhorias anotadas ao longo da Fase 1
 
 - Radar "peça que chegou libera reparo parado" (depende de entradas de estoque).
 - Notificações imediatas em background via Hangfire (hoje são síncronas).

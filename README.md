@@ -2,13 +2,13 @@
 
 SaaS de gestão operacional especializado em assistência técnica de celular e eletrônicos portáteis: agendamento, ordem de serviço, Kanban, estoque, comunicação e financeiro — multi-tenant com isolamento por empresa desde a fundação (LGPD).
 
-## Estado atual (Fase 1 — ordem recomendada 10/10, dois módulos com lacunas)
+## Estado atual (Fase 1 do MVP completa — 2026-07-17)
 
-Os 10 itens da **ordem recomendada** da Fase 1 (`docs/fases_MVP.md`) estão
-implementados de ponta a ponta, cada um com testes de integração, RLS validado
-no Postgres real e fluxo e2e no navegador. O critério de conclusão da fase
-(cadastrar → agendar → OS → entrega → estoque → pagamento → notificar →
-dashboard) está atendido:
+A Fase 1 (`docs/fases_MVP.md`) está implementada de ponta a ponta — ordem
+recomendada 10/10 **e** escopo por módulo —, cada etapa com testes de
+integração, RLS validado no Postgres real e fluxo e2e no navegador. O critério
+de conclusão da fase (cadastrar → agendar → OS → entrega → estoque → pagamento
+→ notificar → dashboard) está atendido:
 
 1. **Fundação** — multi-tenancy (Global Query Filter + RLS), auth JWT com
    refresh token httpOnly, cadastro/login, CI.
@@ -43,13 +43,16 @@ dashboard) está atendido:
 11. **Financeiro básico** — tela `/financeiro` com faturamento por período,
     transações, composição por forma de pagamento, ticket médio, "a receber"
     (orçamentos aprovados com saldo) e projeção de caixa (módulo 8).
+12. **Configurações e conta** — dados da loja (contato e políticas visíveis ao
+    cliente no portal), matriz de notificações por evento × canal e conta do
+    usuário com troca de senha (módulo 13).
 
-Suíte de testes do backend: 97/97 verdes.
+Suíte de testes do backend: 104/104 verdes.
 
-**Lacuna conhecida da Fase 1** (auditoria de 2026-07-16 contra o escopo por
-módulo): o **módulo 13 (Configurações e equipe)** está majoritariamente
-pendente — dados da loja editáveis, conta do usuário e preferências de
-notificação. Detalhes, decisões e evidências em `docs/progresso.md`.
+Fora da Fase 1, com registro: logo da loja (depende do Cloudflare R2) e
+convite de equipe/permissões (Fase 2). Os próximos passos são de operação
+(GitHub/CI, Render/Vercel, contas externas) e depois a Fase 2 — detalhes,
+decisões e evidências em `docs/progresso.md`.
 
 ## Como rodar (desenvolvimento local)
 
