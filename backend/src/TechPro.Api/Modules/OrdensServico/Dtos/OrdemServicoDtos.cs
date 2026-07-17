@@ -126,6 +126,10 @@ public record EquipeMembroResponse(Guid Id, string Nome, string Email);
 
 // --- Acompanhamento público (portal do cliente, sem login) --------------------
 
+/// <summary>Etapa percorrida pela OS e quando foi alcançada — projeção
+/// client-safe do histórico (sem usuário nem motivo internos).</summary>
+public record EtapaAlcancadaResponse(EtapaOrdemServico Etapa, DateTimeOffset AlcancadaEm);
+
 public record AcompanhamentoResponse(
     string NomeLoja,
     int Numero,
@@ -134,4 +138,5 @@ public record AcompanhamentoResponse(
     DateOnly? PrazoEstimado,
     DateTimeOffset AtualizadoEm,
     Financeiro.Dtos.OrcamentoPublicoResponse? Orcamento,
-    Agendamentos.Dtos.LojaContatoResponse Contato);
+    Agendamentos.Dtos.LojaContatoResponse Contato,
+    List<EtapaAlcancadaResponse> LinhaDoTempo);

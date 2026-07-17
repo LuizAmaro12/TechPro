@@ -176,5 +176,42 @@ public class OsIsolamentoEPublicoTests(TechProApiFactory fabrica) : IClassFixtur
             $"/api/publico/{slugA}/acompanhar/{os.CodigoAcompanhamento}");
         status = await acompanhar.Content.ReadFromJsonAsync<AcompanhamentoResponse>();
         Assert.Equal(EtapaOrdemServico.EmReparo, status!.Etapa);
+
+        // Linha do tempo (Fase 2): as etapas percorridas, em ordem, cada uma
+        // com o instante em que foi alcançada. A OS nasceu em CheckInRealizado
+        // e foi movida para EmReparo.
+        Assert.Equal(
+            new[] { EtapaOrdemServico.CheckInRealizado, EtapaOrdemServico.EmReparo },
+            status.LinhaDoTempo.Select(e => e.Etapa).ToArray());
+        Assert.True(status.LinhaDoTempo[0].AlcancadaEm <= status.LinhaDoTempo[1].AlcancadaEm);
+    }
+
+    [Fact]
+    public async Task LinhaDoTempoRegistraPrimeiraVezDeCadaEtapa()
+    {
+        var (token, slug) = await RegistrarEmpresaAsync("os.timeline@exemplo.com");
+        var os = await CriarOsCompletaAsync(token);
+
+        // Vai e volta: NaFila → EmReparo → NaFila (correção). A linha do tempo
+        // guarda a 1ª vez que NaFila foi alcançada (não a revisita).
+        foreach (var etapa in new[] { "NaFila", "EmReparo", "NaFila" })
+        {
+            Assert.Equal(HttpStatusCode.OK,
+                (await EnviarAsync(HttpMethod.Post, $"/api/ordens-servico/{os.Id}/etapa",
+                    token, new { paraEtapa = etapa, motivo = (string?)null })).StatusCode);
+        }
+
+        var resposta = await _cliente.GetAsync(
+            $"/api/publico/{slug}/acompanhar/{os.CodigoAcompanhamento}");
+        var status = await resposta.Content.ReadFromJsonAsync<AcompanhamentoResponse>();
+        // Etapas distintas (sem duplicar NaFila), na ordem da 1ª ocorrência.
+        Assert.Equal(
+            new[]
+            {
+                EtapaOrdemServico.CheckInRealizado,
+                EtapaOrdemServico.NaFila,
+                EtapaOrdemServico.EmReparo,
+            },
+            status!.LinhaDoTempo.Select(e => e.Etapa).ToArray());
     }
 }

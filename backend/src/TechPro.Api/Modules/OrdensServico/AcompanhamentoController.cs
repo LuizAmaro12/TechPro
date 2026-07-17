@@ -41,6 +41,18 @@ public class AcompanhamentoController(
             return NotFound();
         }
 
+        // Linha do tempo client-safe: cada etapa percorrida com a 1ª vez que foi
+        // alcançada. Sem usuário/motivo (podem ter nota interna). Ordenação em
+        // memória — Sqlite (testes) não ordena DateTimeOffset no servidor.
+        var linhaDoTempo = (await db.HistoricosEtapaOrdemServico
+                .Where(h => h.OrdemServicoId == ordem.Id && h.DeletedAt == null)
+                .Select(h => new { h.ParaEtapa, h.CriadoEm })
+                .ToListAsync())
+            .GroupBy(h => h.ParaEtapa)
+            .Select(g => new EtapaAlcancadaResponse(g.Key, g.Min(h => h.CriadoEm)))
+            .OrderBy(e => e.AlcancadaEm)
+            .ToList();
+
         return Ok(new AcompanhamentoResponse(
             _empresa!.Nome,
             ordem.Numero,
@@ -50,7 +62,8 @@ public class AcompanhamentoController(
             ordem.UpdatedAt,
             await financeiro.ObterOrcamentoPublicoAsync(ordem.Id),
             new LojaContatoResponse(
-                _empresa.Telefone, _empresa.Email, _empresa.Endereco, _empresa.Politicas)));
+                _empresa.Telefone, _empresa.Email, _empresa.Endereco, _empresa.Politicas),
+            linhaDoTempo));
     }
 
     /// <summary>Aprovação binária pelo cliente final (módulo 1, Fase 1) — com trilha.</summary>
