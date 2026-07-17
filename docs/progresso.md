@@ -104,6 +104,30 @@ OrdemServicoService ×2, EquipeController). Os testes cobrem a fronteira
 **Invariante frágil e consciente**: qualquer query nova em `usuarios` precisa
 do filtro manual — não há compilador nem banco para avisar.
 
+### Endurecimento para produção: já estava de pé (verificado)
+
+Os guards de produção foram construídos desde a fundação e foram conferidos um
+a um nesta auditoria — **nenhum ajuste crítico foi necessário**:
+
+| Guard | Estado |
+|---|---|
+| Cookie de refresh | `HttpOnly` + `Secure` + `SameSite=Lax` (Secure fixo, não depende do ambiente) |
+| Swagger | só em Development |
+| `Database.Migrate()` no startup | só em Development (produção: passo de deploy) |
+| Dashboard do Hangfire | só em Development |
+| `Jwt:Key` ausente | a API **falha ao subir** (fail-closed), sem default silencioso |
+| CORS | restrito à origem configurada |
+| Rate limiting | políticas `auth` (10/min/IP) e `publico` (30/min/IP) |
+| Segredos | só no `.env` (gitignored); nada versionado |
+
+**Único ajuste feito (defesa em profundidade):** o filtro do dashboard do
+Hangfire retornava `true` incondicionalmente. Era inofensivo hoje (o mount já é
+condicional a Development), mas se alguém removesse essa condição o dashboard
+ficaria aberto em produção. Agora o filtro é `DashboardSomenteEmDesenvolvimento`
+e **nega fora de Development por conta própria** — duas guardas independentes.
+Expor o dashboard de verdade continua exigindo um filtro que valide
+autenticação + papel gestor (anotado como pendência).
+
 ### CI verificado localmente (passaria verde)
 
 Os dois caminhos que o `.github/workflows/ci.yml` executa e que o dev server
@@ -886,8 +910,11 @@ e, depois, Fase 2.
   `WHATSAPP_PROVEDOR=evolution`; domínio verificado no Resend +
   `EMAIL_PROVEDOR=resend`. Hoje ambos rodam em modo `log`.
 - **Rotacionar a API key do Resend** (foi compartilhada em chat).
-- Dashboard do Hangfire (`/hangfire`) precisa de filtro de autorização real
-  antes de ir a produção (hoje é permissivo e só sobe em Development).
+- Dashboard do Hangfire (`/hangfire`): hoje tem duas guardas fail-closed (mount
+  só em Development + filtro que nega fora de Development). **Se um dia for
+  exposto em produção**, precisa antes de um filtro que exija autenticação e
+  papel gestor — o dashboard não é coberto pelo JWT bearer da API (navegação de
+  browser não manda o header), então exigiria cookie de sessão ou proxy próprio.
 
 ### 2. Fase 2 (doc de módulos)
 

@@ -226,13 +226,15 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Dashboard do Hangfire só em Development (filtro permissivo local; produção
-// exige um filtro de autorização real — anotado no plano da etapa).
+// Dashboard do Hangfire: duas guardas independentes (defesa em profundidade) —
+// só é montado em Development E o próprio filtro nega fora de Development. Se
+// alguém remover a condição do mount, o dashboard continua fechado em produção.
+// Expor de verdade exige antes um filtro de autorização real (papel gestor).
 if (hangfireHabilitado && app.Environment.IsDevelopment())
 {
     app.UseHangfireDashboard("/hangfire", new DashboardOptions
     {
-        Authorization = [new DashboardPermitirTudo()],
+        Authorization = [new DashboardSomenteEmDesenvolvimento(app.Environment)],
     });
 }
 
@@ -241,10 +243,16 @@ app.MapHealthChecks("/health");
 
 app.Run();
 
-/// <summary>Filtro do dashboard Hangfire para uso local (Development apenas).</summary>
-internal sealed class DashboardPermitirTudo : Hangfire.Dashboard.IDashboardAuthorizationFilter
+/// <summary>
+/// Filtro do dashboard Hangfire: fail-closed fora de Development. É a segunda
+/// guarda — a primeira é o mount condicional. Produção só deve expor o
+/// dashboard com um filtro que exija autenticação e papel gestor.
+/// </summary>
+internal sealed class DashboardSomenteEmDesenvolvimento(IWebHostEnvironment ambiente)
+    : Hangfire.Dashboard.IDashboardAuthorizationFilter
 {
-    public bool Authorize(Hangfire.Dashboard.DashboardContext context) => true;
+    public bool Authorize(Hangfire.Dashboard.DashboardContext context) =>
+        ambiente.IsDevelopment();
 }
 
 // Exposto para o WebApplicationFactory dos testes de integração.
