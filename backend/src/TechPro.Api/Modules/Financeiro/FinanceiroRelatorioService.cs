@@ -57,6 +57,91 @@ public class FinanceiroRelatorioService(TechProDbContext db)
                 aReceber + esperadoAgendamentos));
     }
 
+    /// <summary>
+    /// Margem realizada: OS **entregues** no período (decisão 2026-07-18).
+    /// Receita = total do orçamento; custo = peças com o custo congelado no uso
+    /// — por isso a margem é histórica e não muda se o catálogo mudar depois.
+    /// </summary>
+    public async Task<RentabilidadeResponse> ObterRentabilidadeAsync(DateOnly de, DateOnly ate)
+    {
+        var inicio = new DateTimeOffset(de.Year, de.Month, de.Day, 0, 0, 0, TimeSpan.Zero);
+        var fim = new DateTimeOffset(ate.Year, ate.Month, ate.Day, 0, 0, 0, TimeSpan.Zero).AddDays(1);
+
+        // 1ª transição para Entregue de cada OS (agrupamento em memória — o
+        // Sqlite dos testes não agrega DateTimeOffset no servidor).
+        var entregasNoPeriodo = (await db.HistoricosEtapaOrdemServico
+                .Where(h => h.ParaEtapa == EtapaOrdemServico.Entregue && h.DeletedAt == null)
+                .Select(h => new { h.OrdemServicoId, h.CriadoEm })
+                .ToListAsync())
+            .GroupBy(h => h.OrdemServicoId)
+            .Select(g => new { OrdemServicoId = g.Key, EntregueEm = g.Min(h => h.CriadoEm) })
+            .Where(e => e.EntregueEm >= inicio && e.EntregueEm < fim)
+            .Select(e => e.OrdemServicoId)
+            .ToList();
+
+        if (entregasNoPeriodo.Count == 0)
+        {
+            return new RentabilidadeResponse(de, ate, 0, 0, 0m, 0m, 0m, 0m, []);
+        }
+
+        // Só conta se a OS ainda está Entregue (se voltou atrás, não conta).
+        var ordens = await db.OrdensServico
+            .Where(o => entregasNoPeriodo.Contains(o.Id)
+                && o.DeletedAt == null
+                && o.Etapa == EtapaOrdemServico.Entregue)
+            .Select(o => new { o.Id, o.ServicoId, ServicoNome = o.Servico!.Nome })
+            .ToListAsync();
+
+        var ids = ordens.Select(o => o.Id).ToList();
+
+        var receitaPorOs = (await db.Orcamentos
+                .Where(o => ids.Contains(o.OrdemServicoId))
+                .Select(o => new
+                {
+                    o.OrdemServicoId,
+                    Total = o.ValorMaoDeObra + o.ValorPecas - o.Desconto,
+                })
+                .ToListAsync())
+            .ToDictionary(o => o.OrdemServicoId, o => o.Total);
+
+        var custoPorOs = (await db.OrdensServicoPecas
+                .Where(p => ids.Contains(p.OrdemServicoId) && p.DeletedAt == null)
+                .Select(p => new { p.OrdemServicoId, p.CustoUnitarioNoUso, p.Quantidade })
+                .ToListAsync())
+            .GroupBy(p => p.OrdemServicoId)
+            .ToDictionary(g => g.Key, g => g.Sum(p => p.CustoUnitarioNoUso * p.Quantidade));
+
+        var porServico = ordens
+            .GroupBy(o => new { o.ServicoId, o.ServicoNome })
+            .Select(g =>
+            {
+                var receita = g.Sum(o => receitaPorOs.GetValueOrDefault(o.Id, 0m));
+                var custo = g.Sum(o => custoPorOs.GetValueOrDefault(o.Id, 0m));
+                return new RentabilidadePorServicoResponse(
+                    g.Key.ServicoId, g.Key.ServicoNome, g.Count(),
+                    receita, custo, receita - custo, Margem(receita - custo, receita));
+            })
+            .OrderByDescending(s => s.LucroBruto)
+            .ToList();
+
+        var receitaTotal = porServico.Sum(s => s.Receita);
+        var custoTotal = porServico.Sum(s => s.CustoPecas);
+
+        return new RentabilidadeResponse(
+            de,
+            ate,
+            ordens.Count,
+            ordens.Count(o => !receitaPorOs.ContainsKey(o.Id)),
+            receitaTotal,
+            custoTotal,
+            receitaTotal - custoTotal,
+            Margem(receitaTotal - custoTotal, receitaTotal),
+            porServico);
+    }
+
+    private static decimal Margem(decimal lucro, decimal receita) =>
+        receita > 0 ? Math.Round(lucro / receita * 100, 1) : 0m;
+
     private async Task<List<TransacaoResponse>> CarregarTransacoesAsync(
         DateTimeOffset inicio, DateTimeOffset fim)
     {

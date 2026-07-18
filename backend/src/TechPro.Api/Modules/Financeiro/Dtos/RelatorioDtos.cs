@@ -30,6 +30,32 @@ public record ProjecaoCaixaResponse(
     decimal AgendamentosProximos7Dias,
     decimal Total);
 
+// --- Rentabilidade (Fase 2): "quanto sobrou" -----------------------------------
+
+public record RentabilidadePorServicoResponse(
+    int ServicoId,
+    string ServicoNome,
+    int QuantidadeOs,
+    decimal Receita,
+    decimal CustoPecas,
+    decimal LucroBruto,
+    decimal MargemPercentual);
+
+/// <summary>
+/// Margem realizada das OS entregues no período (competência na entrega),
+/// distinta do faturamento da Fase 1 que é caixa recebido.
+/// </summary>
+public record RentabilidadeResponse(
+    DateOnly De,
+    DateOnly Ate,
+    int QuantidadeOs,
+    int OsSemOrcamento,
+    decimal ReceitaTotal,
+    decimal CustoPecas,
+    decimal LucroBruto,
+    decimal MargemPercentual,
+    List<RentabilidadePorServicoResponse> PorServico);
+
 public record FinanceiroRelatorioResponse(
     DateOnly De,
     DateOnly Ate,
