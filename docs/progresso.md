@@ -85,6 +85,34 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Financeiro Fase 2 — margem e rentabilidade — concluída em 2026-07-18
+
+3º item web da Fase 2 (módulo 8 avançado). Entrega o **"quanto sobrou"** que o
+branding define como diferencial central. Plano em
+`docs/superpowers/plans/2026-07-18-financeiro-margem.md`.
+
+- **`GET /api/financeiro/rentabilidade?de&ate`**: lucro bruto, custo de peças,
+  receita, margem % e a quebra **por serviço** (mais lucrativos primeiro).
+- **Base = OS entregues no período** (decisão do usuário): 1ª transição para
+  `Entregue` dentro do período **e** a OS ainda está `Entregue` (se voltou
+  atrás, sai da margem). É a margem *realizada*, sem ruído de OS em andamento.
+- **Custo congelado**: usa `ordem_servico_pecas.CustoUnitarioNoUso`, então a
+  margem é histórica — encarecer a peça no catálogo depois **não** altera o
+  resultado passado. Há teste específico para isso.
+- **Duas visões coexistem de propósito**: faturamento da Fase 1 é **caixa**
+  (pagamentos recebidos); rentabilidade é **competência na entrega**. A UI diz
+  isso explicitamente para não confundir os números.
+- **OS entregue sem orçamento** entra com receita 0 (o custo de peça é real) e
+  é sinalizada em `osSemOrcamento` — o número fica explicável e sugere à loja
+  registrar o orçamento.
+- **Deferidos com justificativa**: comissão automática por técnico (exige config
+  de % por técnico — sub-projeto que mistura rentabilidade com folha);
+  relatórios exportáveis (item próprio); split de pagamento (o doc põe na
+  Fase 3, com cautela explícita).
+- **Evidência**: 5 testes de integração → **114/114**; e2e 5/5 (KPIs, só
+  entregues contam, ordenação por lucro, conferência via API).
+- Sem entidade nova, sem migração — o dado já existia.
+
 ### LGPD visível (exportação + anonimização) — concluída em 2026-07-18
 
 2º item web da Fase 2 (módulo 14). Operacionaliza os dois direitos prometidos
