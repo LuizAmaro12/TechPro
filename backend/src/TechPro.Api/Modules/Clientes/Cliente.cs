@@ -35,6 +35,13 @@ public class Cliente : ITenantEntity
 
     public DateTimeOffset CriadoEm { get; set; }
 
+    /// <summary>
+    /// Direito de exclusão LGPD: quando preenchido, os dados pessoais foram
+    /// substituídos por marcadores genéricos (o registro estrutural da OS é
+    /// preservado). Irreversível.
+    /// </summary>
+    public DateTimeOffset? AnonimizadoEm { get; set; }
+
     /// <summary>Registro fictício de onboarding (dados de exemplo removíveis).</summary>
     public bool Exemplo { get; set; }
     public List<Aparelho> Aparelhos { get; set; } = [];

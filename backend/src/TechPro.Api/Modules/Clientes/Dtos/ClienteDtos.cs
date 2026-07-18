@@ -27,7 +27,8 @@ public record ClienteResponse(
     VinculoResponse? ClientePrincipal,
     bool ConsentiuComunicacoes,
     DateTimeOffset? ConsentimentoEm,
-    int QuantidadeAparelhos);
+    int QuantidadeAparelhos,
+    DateTimeOffset? AnonimizadoEm);
 
 public record ClienteDetalheResponse(
     int Id,
@@ -42,4 +43,25 @@ public record ClienteDetalheResponse(
     VinculoResponse? ClientePrincipal,
     bool ConsentiuComunicacoes,
     DateTimeOffset? ConsentimentoEm,
+    DateTimeOffset? AnonimizadoEm,
     IReadOnlyList<AparelhoResponse> Aparelhos);
+
+// --- Exportação LGPD (portabilidade) ------------------------------------------
+
+public record DadosPessoaisResponse(
+    ClienteDetalheResponse Cliente,
+    IReadOnlyList<AgendamentoExportado> Agendamentos,
+    IReadOnlyList<OrdemServicoExportada> OrdensServico,
+    IReadOnlyList<MensagemExportada> Mensagens,
+    DateTimeOffset GeradoEm);
+
+public record AgendamentoExportado(
+    int Id, string ServicoNome, DateOnly Data, TimeOnly HoraInicio, string Status,
+    string NomeContato, string TelefoneContato, string? EmailContato);
+
+public record OrdemServicoExportada(
+    int Numero, string ServicoNome, string Etapa,
+    string? AparelhoMarca, string? AparelhoModelo, DateTimeOffset CriadoEm);
+
+public record MensagemExportada(
+    string Canal, string TipoEvento, string Destino, string Status, DateTimeOffset CriadoEm);

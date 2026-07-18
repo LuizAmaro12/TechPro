@@ -67,7 +67,7 @@ public class ClienteService(TechProDbContext db, ITenantProvider tenantProvider)
         return new ClienteDetalheResponse(
             resumo.Id, resumo.Nome, resumo.Telefone, resumo.Email, resumo.Cpf, resumo.Endereco,
             resumo.Observacoes, resumo.Vip, resumo.Ativo, resumo.ClientePrincipal,
-            resumo.ConsentiuComunicacoes, resumo.ConsentimentoEm,
+            resumo.ConsentiuComunicacoes, resumo.ConsentimentoEm, resumo.AnonimizadoEm,
             cliente.Aparelhos
                 .OrderBy(a => a.Id)
                 .Select(ParaAparelhoResponse)
@@ -233,7 +233,7 @@ public class ClienteService(TechProDbContext db, ITenantProvider tenantProvider)
     private static ClienteResponse ParaResponse(Cliente c, int quantidadeAparelhos) => new(
         c.Id, c.Nome, c.Telefone, c.Email, c.Cpf, c.Endereco, c.Observacoes, c.Vip, c.Ativo,
         c.ClientePrincipal is null ? null : new VinculoResponse(c.ClientePrincipal.Id, c.ClientePrincipal.Nome),
-        c.ConsentiuComunicacoes, c.ConsentimentoEm, quantidadeAparelhos);
+        c.ConsentiuComunicacoes, c.ConsentimentoEm, quantidadeAparelhos, c.AnonimizadoEm);
 
     internal static AparelhoResponse ParaAparelhoResponse(Aparelho a) => new(
         a.Id, a.Marca, a.Modelo, a.Imei, a.SenhaDesbloqueio, a.Observacoes, a.Ativo);

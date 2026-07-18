@@ -74,6 +74,7 @@ builder.Services.AddScoped<PecaService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<AparelhoService>();
+builder.Services.AddScoped<LgpdService>();
 builder.Services.AddScoped<AgendaService>();
 builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
