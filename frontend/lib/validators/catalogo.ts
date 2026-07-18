@@ -63,6 +63,13 @@ export const esquemaServico = z.object({
     .number({ message: "Informe a capacidade." })
     .int("Use um número inteiro.")
     .min(1, "A capacidade deve ser de pelo menos 1."),
+  // Espelha a regra do back (1h a 90 dias); vazio = serviço sem SLA.
+  slaHoras: z
+    .number()
+    .int("Use um número inteiro.")
+    .min(1, "O SLA deve ser de pelo menos 1 hora.")
+    .max(2160, "O SLA pode ser de no máximo 90 dias (2160 horas).")
+    .optional(),
   checklist: z.array(
     z.object({
       descricao: z

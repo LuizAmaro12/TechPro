@@ -17,6 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiError } from "@/lib/api-client/fetcher";
 import {
+  BORDA_SLA,
+  ROTULO_SLA,
+  formatarTempoNaEtapa,
+  situacaoSla,
+} from "@/lib/sla";
+import {
   useGetApiAgendamentos,
   useGetApiOrdensServico,
   usePostApiAgendamentosIdCheckin,
@@ -129,6 +135,8 @@ export default function PaginaKanban() {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
       id: `os:${ordem.id}`,
     });
+    const sla = situacaoSla(ordem.horasNaEtapa, ordem.slaHoras);
+    const tempo = formatarTempoNaEtapa(ordem.horasNaEtapa);
     return (
       <div
         ref={setNodeRef}
@@ -139,9 +147,14 @@ export default function PaginaKanban() {
             ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
             : undefined
         }
-        className={`cursor-grab rounded-xl border border-[#14162B]/8 bg-white p-3 text-sm shadow-sm ${
-          isDragging ? "z-50 opacity-80 shadow-lg" : ""
-        }`}
+        title={
+          sla === "sem-sla"
+            ? `Nesta etapa há ${tempo}`
+            : `Nesta etapa há ${tempo} (limite de ${ordem.slaHoras}h)`
+        }
+        className={`cursor-grab rounded-xl border border-l-4 border-[#14162B]/8 bg-white p-3 text-sm shadow-sm ${
+          BORDA_SLA[sla]
+        } ${isDragging ? "z-50 opacity-80 shadow-lg" : ""}`}
       >
         <div className="flex items-center justify-between gap-2">
           <span className="font-semibold text-[#14162B]">#{ordem.numero}</span>
@@ -159,6 +172,18 @@ export default function PaginaKanban() {
           </p>
         )}
         <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-[#8B8D98]">
+          {/* Só avisa quando importa: card no prazo não vira ruído. */}
+          {(sla === "atencao" || sla === "estourado") && (
+            <span
+              className={`rounded-full px-1.5 py-0.5 font-semibold ${
+                sla === "estourado"
+                  ? "bg-[#E8536B]/10 text-[#E8536B]"
+                  : "bg-amber-100 text-amber-700"
+              }`}
+            >
+              {ROTULO_SLA[sla]} · {tempo}
+            </span>
+          )}
           {ordem.prazoEstimado && <span>prazo {formatarDataCurta(ordem.prazoEstimado)}</span>}
           {ordem.responsavelTecnicoNome && <span>· {ordem.responsavelTecnicoNome}</span>}
           {ordem.statusAprovacao === "Aprovado" && (

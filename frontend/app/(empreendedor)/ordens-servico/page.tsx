@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { InteracoesOs } from "@/components/os/interacoes-os";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -127,6 +128,11 @@ export default function PaginaOrdensServico() {
 
   function invalidar() {
     queryClient.invalidateQueries({ queryKey: ["/api/ordens-servico"] });
+  }
+
+  function invalidarDetalhe() {
+    invalidar();
+    queryClient.invalidateQueries({ queryKey: [`/api/ordens-servico/${editandoId}`] });
   }
 
   function invalidarPecas() {
@@ -665,6 +671,18 @@ export default function PaginaOrdensServico() {
               </ul>
             </div>
           )}
+
+          {/* key por OS: o formulário nasce com o responsável certo, sem
+              precisar de efeito para sincronizar estado. */}
+          <InteracoesOs
+            key={detalhe.ordem?.id}
+            ordemId={detalhe.ordem?.id ?? ""}
+            responsavelAtualId={detalhe.ordem?.responsavelTecnicoId ?? null}
+            comentarios={detalhe.comentarios ?? []}
+            reatribuicoes={detalhe.reatribuicoes ?? []}
+            equipe={equipe}
+            aoMudar={invalidarDetalhe}
+          />
         </div>
       )}
 

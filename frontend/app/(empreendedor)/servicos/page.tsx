@@ -40,6 +40,7 @@ const VALORES_INICIAIS: ValoresServico = {
   exigeDiagnostico: false,
   agendavelOnline: true,
   capacidadeSimultanea: 1,
+  slaHoras: undefined,
   checklist: [],
   pecas: [],
 };
@@ -99,6 +100,7 @@ export default function PaginaServicos() {
       exigeDiagnostico: servico.exigeDiagnostico ?? false,
       agendavelOnline: servico.agendavelOnline ?? true,
       capacidadeSimultanea: servico.capacidadeSimultanea ?? 1,
+      slaHoras: servico.slaHoras ?? undefined,
       checklist: (servico.checklist ?? []).map((descricao) => ({ descricao })),
       pecas: (servico.pecas ?? []).map((p) => ({
         pecaId: String(p.pecaId),
@@ -118,6 +120,7 @@ export default function PaginaServicos() {
       exigeDiagnostico: valores.exigeDiagnostico,
       agendavelOnline: valores.agendavelOnline,
       capacidadeSimultanea: valores.capacidadeSimultanea,
+      slaHoras: valores.slaHoras ?? null,
       ativo: true,
       checklist: valores.checklist.map((item) => item.descricao),
       pecas: valores.pecas.map((p) => ({
@@ -278,6 +281,27 @@ export default function PaginaServicos() {
               )}
               <p className="mt-1 text-xs text-[#8B8D98]">
                 Quantos atendimentos deste serviço a agenda aceita ao mesmo tempo.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="slaHoras">SLA por etapa (horas)</Label>
+              <Input
+                id="slaHoras"
+                type="number"
+                min="1"
+                placeholder="sem SLA"
+                className="mt-1 h-11"
+                aria-invalid={!!errors.slaHoras}
+                {...register("slaHoras", {
+                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                })}
+              />
+              {errors.slaHoras && (
+                <p className="mt-1 text-sm text-destructive">{errors.slaHoras.message}</p>
+              )}
+              <p className="mt-1 text-xs text-[#8B8D98]">
+                Horas que a OS pode ficar parada em uma etapa antes do card do
+                Kanban alertar. Deixe vazio para não acompanhar prazo.
               </p>
             </div>
             <label className="flex items-center gap-2 text-sm text-[#14162B]">
