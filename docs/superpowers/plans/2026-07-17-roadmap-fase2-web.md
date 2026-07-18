@@ -27,9 +27,9 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
 - **Financeiro Fase 2 (margem)**: lucro bruto, custo de peças, receita por
   serviço, serviços mais lucrativos, margem média. Os custos/preços já ficam
   congelados na peça da OS — a base existe.
-- **OS/Kanban profundidade**: SLA visual por etapa (limite configurável por
-  serviço + cor do card por tempo na etapa), comentários internos,
-  reatribuição de técnico com histórico e motivo.
+- **OS/Kanban profundidade** ✅ (concluído em 2026-07-18): SLA visual por etapa
+  (limite configurável por serviço + cor do card por tempo na etapa),
+  comentários internos, reatribuição de técnico com histórico e motivo.
 - **Catálogo/estoque**: kits de serviço, peça compatível/equivalente, histórico
   de movimentação de estoque, previsão de reposição, lista de compra
   consolidada, histórico de preço por fornecedor.

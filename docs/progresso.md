@@ -85,6 +85,42 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### OS/Kanban em profundidade — concluída em 2026-07-18
+
+4º item web da Fase 2 (módulo 3 avançado). Transforma o Kanban de quadro de
+status em ferramenta de gestão diária. Plano em
+`docs/superpowers/plans/2026-07-18-os-kanban-profundidade.md`.
+
+- **SLA visual por etapa**: `Servico.SlaHoras` (nulo = sem SLA) + a nova
+  `OrdemServico.EtapaDesde`. O servidor devolve `horasNaEtapa` e `slaHoras` já
+  calculados; o card ganha faixa lateral verde/âmbar/vermelha (faixas fixas:
+  atenção em 70% do limite) e só exibe tag quando há algo a avisar.
+- **O relógio reinicia em toda transição** porque o carimbo mora no
+  `RegistrarHistoricoEtapa`, ponto único por onde passam criação, mudança de
+  etapa e o envio de orçamento (que vem do módulo Financeiro).
+- **Etapa final não tem SLA**: OS `Entregue`/`Cancelado` volta o `slaHoras`
+  nulo — parar ali é o fim esperado do fluxo, não atraso. Sem isso o quadro
+  ficaria vermelho de OS concluídas.
+- **`EtapaDesde` é anulável de propósito**: OS anteriores caem para `CriadoEm`,
+  o que dispensa backfill — e backfill em tabela com FORCE RLS é justamente a
+  armadilha que já nos custou uma migração (ver "Desvios e notas conscientes").
+- **Comentários internos** (`ordem_servico_comentarios`) entram no **escopo
+  offline** (UUID + `updated_at`/`deleted_at` + `/sync`), como o doc de stack
+  manda para entidades do fluxo de campo — desde o primeiro migration, não como
+  retrofit. Remoção é soft-delete: a lápide chega ao app do técnico.
+- **São internos de verdade**: há teste de backend e asserção de e2e provando
+  que não vazam no acompanhamento público.
+- **Reatribuição de técnico** (`ordem_servico_reatribuicoes`, append-only) com
+  **motivo obrigatório** — é o registro que responde "quem mexeu no aparelho".
+  Valida o técnico contra o tenant à mão (`usuarios` não tem GQF): há teste
+  anti-IDOR usando o dono de outra empresa.
+- **RLS `ENABLE`+`FORCE` conferido no Postgres** nas duas tabelas novas →
+  **20/20 tabelas de tenant**.
+- **Evidência**: 10 testes de integração → **124/124**; e2e **16/16** (SLA
+  verde/vermelho no card com OS envelhecida no banco, tooltip com o limite,
+  comentário criado/removido, lápide no `/sync`, trilha de reatribuição, troca
+  bloqueada sem motivo, comentário não vaza no portal).
+
 ### Financeiro Fase 2 — margem e rentabilidade — concluída em 2026-07-18
 
 3º item web da Fase 2 (módulo 8 avançado). Entrega o **"quanto sobrou"** que o
@@ -181,22 +217,23 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 18/18 tabelas cobertas
+### Isolamento entre empresas: 20/20 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 18** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 20** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `bloqueios_agenda`, `clientes`, `fornecedores`,
 `horarios_funcionamento`, `mensagens_enviadas`, `orcamento_eventos`,
-`orcamentos`, `ordem_servico_historico_etapas`, `ordem_servico_pecas`,
-`ordens_servico`, `pagamentos`, `pecas`, `preferencias_notificacao`,
+`orcamentos`, `ordem_servico_comentarios`, `ordem_servico_historico_etapas`,
+`ordem_servico_pecas`, `ordem_servico_reatribuicoes`, `ordens_servico`,
+`pagamentos`, `pecas`, `preferencias_notificacao`,
 `servico_checklist_itens`, `servico_pecas`, `servicos`.
 
 `usuarios` e `refresh_tokens` seguem fora por decisão documentada (plano de
 controle: são consultados antes de existir tenant). **Como não têm rede de
 proteção (nem GQF, nem RLS), auditei os 5 acessos a `db.Users` no código: todos
 filtram por `TenantId` explicitamente** (FinanceiroService ×2,
-OrdemServicoService ×2, EquipeController). Os testes cobrem a fronteira
+OrdemServicoService ×2, OrdemServicoInteracaoService ×2, EquipeController). Os testes cobrem a fronteira
 (responsável técnico de outra empresa → 400; equipe isolada por tenant).
 **Invariante frágil e consciente**: qualquer query nova em `usuarios` precisa
 do filtro manual — não há compilador nem banco para avisar.

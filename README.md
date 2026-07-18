@@ -47,7 +47,7 @@ de conclusão da fase (cadastrar → agendar → OS → entrega → estoque → 
     cliente no portal), matriz de notificações por evento × canal e conta do
     usuário com troca de senha (módulo 13).
 
-Suíte de testes do backend: 104/104 verdes.
+Suíte de testes do backend: 124/124 verdes.
 
 Fora da Fase 1, com registro: logo da loja (depende do Cloudflare R2) e
 convite de equipe/permissões (Fase 2). Os próximos passos são de operação
