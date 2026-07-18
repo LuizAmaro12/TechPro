@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useGetApiFinanceiro } from "@/lib/api-client/gerado";
+import {
+  useGetApiFinanceiro,
+  useGetApiFinanceiroRentabilidade,
+} from "@/lib/api-client/gerado";
 import { formatarDataCurta, hojeIso, somarDias } from "@/lib/agenda-datas";
 import { formatarBRL } from "@/lib/formatadores";
 import { ROTULOS_FORMA_PAGAMENTO } from "@/lib/ordens-servico-etapas";
@@ -37,6 +40,9 @@ export default function PaginaFinanceiro() {
 
   const { data: resposta, isLoading } = useGetApiFinanceiro({ de, ate });
   const rel = resposta?.status === 200 ? resposta.data : undefined;
+
+  const { data: respostaRent } = useGetApiFinanceiroRentabilidade({ de, ate });
+  const rent = respostaRent?.status === 200 ? respostaRent.data : undefined;
 
   const presetAtivo = PRESETS.find((p) => {
     const periodo = p.periodo();
@@ -221,9 +227,103 @@ export default function PaginaFinanceiro() {
         </section>
       )}
 
+      {/* --- Rentabilidade (margem realizada) ------------------------------- */}
+      <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-[#14162B]">Quanto sobrou (margem)</h2>
+          <span className="text-xs text-[#8B8D98]">
+            {rent?.quantidadeOs ?? 0} OS entregue(s) no período
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-[#8B8D98]">
+          Base: OS <strong>entregues</strong> no período, com o custo da peça
+          congelado no momento do uso — diferente do faturamento acima, que é o
+          caixa recebido.
+        </p>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div>
+            <p className="text-2xl font-bold text-[#14162B]">
+              {formatarBRL(rent?.lucroBruto ?? 0)}
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">Lucro bruto</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[#14162B]">
+              {rent?.margemPercentual ?? 0}%
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">Margem média</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[#14162B]">
+              {formatarBRL(rent?.receitaTotal ?? 0)}
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">Receita das entregas</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[#14162B]">
+              {formatarBRL(rent?.custoPecas ?? 0)}
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">Custo de peças</p>
+          </div>
+        </div>
+
+        {(rent?.osSemOrcamento ?? 0) > 0 && (
+          <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            {rent?.osSemOrcamento} OS entregue(s) sem orçamento registrado — o
+            custo da peça entra, mas a receita não, o que puxa a margem para
+            baixo.
+          </p>
+        )}
+
+        {(rent?.porServico?.length ?? 0) > 0 && (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-xs tracking-wide text-[#8B8D98] uppercase">
+                <tr>
+                  <th className="py-2">Serviço</th>
+                  <th className="py-2 text-right">OS</th>
+                  <th className="py-2 text-right">Receita</th>
+                  <th className="py-2 text-right">Custo peças</th>
+                  <th className="py-2 text-right">Lucro</th>
+                  <th className="py-2 text-right">Margem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rent?.porServico?.map((s) => (
+                  <tr key={s.servicoId} className="border-t border-[#14162B]/6">
+                    <td className="py-2.5 text-[#14162B]">{s.servicoNome}</td>
+                    <td className="py-2.5 text-right text-[#6B7280]">{s.quantidadeOs}</td>
+                    <td className="py-2.5 text-right text-[#6B7280]">
+                      {formatarBRL(s.receita ?? 0)}
+                    </td>
+                    <td className="py-2.5 text-right text-[#6B7280]">
+                      {formatarBRL(s.custoPecas ?? 0)}
+                    </td>
+                    <td className="py-2.5 text-right font-medium text-[#14162B]">
+                      {formatarBRL(s.lucroBruto ?? 0)}
+                    </td>
+                    <td className="py-2.5 text-right text-[#6B7280]">
+                      {s.margemPercentual}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {(rent?.quantidadeOs ?? 0) === 0 && (
+          <p className="mt-3 text-sm text-[#8B8D98]">
+            Nenhuma OS entregue no período — a margem aparece aqui quando os
+            reparos forem concluídos.
+          </p>
+        )}
+      </section>
+
       {/* --- Transações ----------------------------------------------------- */}
       <section className="mt-6">
         <h2 className="text-sm font-semibold text-[#14162B]">Transações do período</h2>
+        <span className="sr-only">Lista dos pagamentos recebidos no período.</span>
         <div className="mt-3 overflow-x-auto rounded-2xl border border-[#14162B]/8">
           <table className="w-full text-left text-sm">
             <thead className="bg-[#F7F7F9] text-xs tracking-wide text-[#8B8D98] uppercase">

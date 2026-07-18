@@ -2139,6 +2139,53 @@
         }
       }
     },
+    "/api/financeiro/rentabilidade": {
+      "get": {
+        "tags": [
+          "FinanceiroRelatorio"
+        ],
+        "parameters": [
+          {
+            "name": "de",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentabilidadeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/fornecedores": {
       "get": {
         "tags": [
@@ -5868,6 +5915,85 @@
           },
           "senha": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RentabilidadePorServicoResponse": {
+        "type": "object",
+        "properties": {
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantidadeOs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receita": {
+            "type": "number",
+            "format": "double"
+          },
+          "custoPecas": {
+            "type": "number",
+            "format": "double"
+          },
+          "lucroBruto": {
+            "type": "number",
+            "format": "double"
+          },
+          "margemPercentual": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RentabilidadeResponse": {
+        "type": "object",
+        "properties": {
+          "de": {
+            "type": "string",
+            "format": "date"
+          },
+          "ate": {
+            "type": "string",
+            "format": "date"
+          },
+          "quantidadeOs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "osSemOrcamento": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receitaTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "custoPecas": {
+            "type": "number",
+            "format": "double"
+          },
+          "lucroBruto": {
+            "type": "number",
+            "format": "double"
+          },
+          "margemPercentual": {
+            "type": "number",
+            "format": "double"
+          },
+          "porServico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentabilidadePorServicoResponse"
+            },
             "nullable": true
           }
         },

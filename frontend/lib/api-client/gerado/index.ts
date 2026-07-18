@@ -1054,6 +1054,30 @@ export interface RegistrarRequest {
   senha?: string | null;
 }
 
+export interface RentabilidadePorServicoResponse {
+  servicoId?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  quantidadeOs?: number;
+  receita?: number;
+  custoPecas?: number;
+  lucroBruto?: number;
+  margemPercentual?: number;
+}
+
+export interface RentabilidadeResponse {
+  de?: string;
+  ate?: string;
+  quantidadeOs?: number;
+  osSemOrcamento?: number;
+  receitaTotal?: number;
+  custoPecas?: number;
+  lucroBruto?: number;
+  margemPercentual?: number;
+  /** @nullable */
+  porServico?: RentabilidadePorServicoResponse[] | null;
+}
+
 export interface RespostaOrcamentoRequest {
   /** @nullable */
   motivo?: string | null;
@@ -1171,6 +1195,11 @@ tamanhoPagina?: number;
 };
 
 export type GetApiFinanceiroParams = {
+de?: string;
+ate?: string;
+};
+
+export type GetApiFinanceiroRentabilidadeParams = {
 de?: string;
 ate?: string;
 };
@@ -5522,6 +5551,127 @@ export function useGetApiFinanceiro<TData = Awaited<ReturnType<typeof getApiFina
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiFinanceiroQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiFinanceiroRentabilidadeResponse200 = {
+  data: RentabilidadeResponse
+  status: 200
+}
+
+export type getApiFinanceiroRentabilidadeResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type getApiFinanceiroRentabilidadeResponseSuccess = (getApiFinanceiroRentabilidadeResponse200) & {
+  headers: Headers;
+};
+export type getApiFinanceiroRentabilidadeResponseError = (getApiFinanceiroRentabilidadeResponse400) & {
+  headers: Headers;
+};
+
+export type getApiFinanceiroRentabilidadeResponse = (getApiFinanceiroRentabilidadeResponseSuccess | getApiFinanceiroRentabilidadeResponseError)
+
+export const getGetApiFinanceiroRentabilidadeUrl = (params?: GetApiFinanceiroRentabilidadeParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/financeiro/rentabilidade?${stringifiedParams}` : `/api/financeiro/rentabilidade`
+}
+
+export const getApiFinanceiroRentabilidade = async (params?: GetApiFinanceiroRentabilidadeParams, options?: RequestInit): Promise<getApiFinanceiroRentabilidadeResponse> => {
+
+  return apiFetch<getApiFinanceiroRentabilidadeResponse>(getGetApiFinanceiroRentabilidadeUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiFinanceiroRentabilidadeQueryKey = (params?: GetApiFinanceiroRentabilidadeParams,) => {
+    return [
+    `/api/financeiro/rentabilidade`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiFinanceiroRentabilidadeQueryOptions = <TData = Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError = ProblemDetails>(params?: GetApiFinanceiroRentabilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFinanceiroRentabilidadeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>> = ({ signal }) => getApiFinanceiroRentabilidade(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFinanceiroRentabilidadeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>>
+export type GetApiFinanceiroRentabilidadeQueryError = ProblemDetails
+
+
+export function useGetApiFinanceiroRentabilidade<TData = Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError = ProblemDetails>(
+ params: undefined |  GetApiFinanceiroRentabilidadeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinanceiroRentabilidade<TData = Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroRentabilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFinanceiroRentabilidade<TData = Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroRentabilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiFinanceiroRentabilidade<TData = Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError = ProblemDetails>(
+ params?: GetApiFinanceiroRentabilidadeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFinanceiroRentabilidade>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFinanceiroRentabilidadeQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
