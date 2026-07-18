@@ -10,11 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError } from "@/lib/api-client/fetcher";
 import {
+  getApiClientesClienteIdDadosPessoais,
   useDeleteApiClientesClienteIdAparelhosId,
   useDeleteApiClientesId,
   useGetApiClientes,
   useGetApiClientesId,
   usePostApiClientes,
+  usePostApiClientesClienteIdAnonimizar,
   usePostApiClientesClienteIdAparelhos,
   usePutApiClientesClienteIdAparelhosId,
   usePutApiClientesId,
@@ -79,6 +81,48 @@ export default function PaginaClientes() {
   const criarAparelho = usePostApiClientesClienteIdAparelhos();
   const atualizarAparelho = usePutApiClientesClienteIdAparelhosId();
   const desativarAparelho = useDeleteApiClientesClienteIdAparelhosId();
+  const anonimizar = usePostApiClientesClienteIdAnonimizar();
+
+  // Exportação LGPD: baixa o JSON dos dados pessoais do cliente.
+  async function aoExportarDados() {
+    if (editandoId === null) return;
+    try {
+      const resposta = await getApiClientesClienteIdDadosPessoais(editandoId);
+      if (resposta.status !== 200) return;
+      const blob = new Blob([JSON.stringify(resposta.data, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dados-cliente-${editandoId}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Dados exportados.");
+    } catch {
+      toast.error("Não foi possível exportar os dados.");
+    }
+  }
+
+  async function aoAnonimizar() {
+    if (editandoId === null) return;
+    if (
+      !window.confirm(
+        "Anonimizar apaga os dados pessoais deste cliente de forma irreversível " +
+          "(nome, telefone, e-mail, IMEI...), preservando o histórico de OS. Continuar?",
+      )
+    ) {
+      return;
+    }
+    try {
+      await anonimizar.mutateAsync({ clienteId: editandoId });
+      toast.success("Dados do cliente anonimizados.");
+      invalidar();
+      queryClient.invalidateQueries({ queryKey: [`/api/clientes/${editandoId}`] });
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao anonimizar.");
+    }
+  }
 
   const formCliente = useForm<ValoresCliente>({
     resolver: zodResolver(esquemaCliente),
@@ -500,6 +544,47 @@ export default function PaginaClientes() {
                     </Button>
                   </div>
                 </form>
+              )}
+            </div>
+          )}
+
+          {editandoId !== null && detalhe && (
+            <div className="mt-8 border-t border-[#14162B]/8 pt-6">
+              <h3 className="text-sm font-semibold text-[#14162B]">
+                Dados pessoais (LGPD)
+              </h3>
+              {detalhe.anonimizadoEm ? (
+                <p className="mt-2 text-sm text-[#8B8D98]">
+                  Cliente anonimizado em{" "}
+                  {new Date(detalhe.anonimizadoEm).toLocaleDateString("pt-BR")}. Os
+                  dados pessoais foram removidos; o histórico de OS foi preservado.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm text-[#6B7280]">
+                    Direitos do titular: exporte os dados (portabilidade) ou
+                    anonimize (exclusão, irreversível).
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9"
+                      onClick={aoExportarDados}
+                    >
+                      Exportar dados
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-9 text-[#E8536B] hover:text-[#E8536B]"
+                      disabled={anonimizar.isPending}
+                      onClick={aoAnonimizar}
+                    >
+                      Anonimizar (excluir dados)
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
           )}

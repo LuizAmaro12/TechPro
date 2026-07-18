@@ -94,6 +94,22 @@ export interface AcompanhamentoResponse {
   linhaDoTempo?: EtapaAlcancadaResponse[] | null;
 }
 
+export interface AgendamentoExportado {
+  id?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  data?: string;
+  horaInicio?: string;
+  /** @nullable */
+  status?: string | null;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+}
+
 export interface AgendamentoPublicoRequest {
   servicoId?: number;
   data?: string;
@@ -305,6 +321,8 @@ export interface ClienteDetalheResponse {
   /** @nullable */
   consentimentoEm?: string | null;
   /** @nullable */
+  anonimizadoEm?: string | null;
+  /** @nullable */
   aparelhos?: AparelhoResponse[] | null;
 }
 
@@ -349,6 +367,8 @@ export interface ClienteResponse {
   /** @nullable */
   consentimentoEm?: string | null;
   quantidadeAparelhos?: number;
+  /** @nullable */
+  anonimizadoEm?: string | null;
 }
 
 export interface ClienteResponsePaginaResponse {
@@ -372,6 +392,42 @@ export interface ConfiguracaoAgendaResponse {
 export interface ContaRequest {
   /** @nullable */
   nome?: string | null;
+}
+
+export interface OrdemServicoExportada {
+  numero?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  /** @nullable */
+  etapa?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  criadoEm?: string;
+}
+
+export interface MensagemExportada {
+  /** @nullable */
+  canal?: string | null;
+  /** @nullable */
+  tipoEvento?: string | null;
+  /** @nullable */
+  destino?: string | null;
+  /** @nullable */
+  status?: string | null;
+  criadoEm?: string;
+}
+
+export interface DadosPessoaisResponse {
+  cliente?: ClienteDetalheResponse;
+  /** @nullable */
+  agendamentos?: AgendamentoExportado[] | null;
+  /** @nullable */
+  ordensServico?: OrdemServicoExportada[] | null;
+  /** @nullable */
+  mensagens?: MensagemExportada[] | null;
+  geradoEm?: string;
 }
 
 export interface OsAtrasadaResponse {
@@ -5846,6 +5902,204 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiFornecedoresIdMutationOptions(options), queryClient);
+    }
+
+export type getApiClientesClienteIdDadosPessoaisResponse200 = {
+  data: DadosPessoaisResponse
+  status: 200
+}
+
+export type getApiClientesClienteIdDadosPessoaisResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiClientesClienteIdDadosPessoaisResponseSuccess = (getApiClientesClienteIdDadosPessoaisResponse200) & {
+  headers: Headers;
+};
+export type getApiClientesClienteIdDadosPessoaisResponseError = (getApiClientesClienteIdDadosPessoaisResponse404) & {
+  headers: Headers;
+};
+
+export type getApiClientesClienteIdDadosPessoaisResponse = (getApiClientesClienteIdDadosPessoaisResponseSuccess | getApiClientesClienteIdDadosPessoaisResponseError)
+
+export const getGetApiClientesClienteIdDadosPessoaisUrl = (clienteId: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/dados-pessoais`
+}
+
+export const getApiClientesClienteIdDadosPessoais = async (clienteId: number, options?: RequestInit): Promise<getApiClientesClienteIdDadosPessoaisResponse> => {
+
+  return apiFetch<getApiClientesClienteIdDadosPessoaisResponse>(getGetApiClientesClienteIdDadosPessoaisUrl(clienteId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiClientesClienteIdDadosPessoaisQueryKey = (clienteId: number,) => {
+    return [
+    `/api/clientes/${clienteId}/dados-pessoais`
+    ] as const;
+    }
+
+
+export const getGetApiClientesClienteIdDadosPessoaisQueryOptions = <TData = Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError = ProblemDetails>(clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiClientesClienteIdDadosPessoaisQueryKey(clienteId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>> = ({ signal }) => getApiClientesClienteIdDadosPessoais(clienteId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: clienteId !== null && clienteId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiClientesClienteIdDadosPessoaisQueryResult = NonNullable<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>>
+export type GetApiClientesClienteIdDadosPessoaisQueryError = ProblemDetails
+
+
+export function useGetApiClientesClienteIdDadosPessoais<TData = Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError = ProblemDetails>(
+ clienteId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdDadosPessoais<TData = Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError = ProblemDetails>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdDadosPessoais<TData = Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError = ProblemDetails>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiClientesClienteIdDadosPessoais<TData = Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError = ProblemDetails>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdDadosPessoais>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiClientesClienteIdDadosPessoaisQueryOptions(clienteId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiClientesClienteIdAnonimizarResponse200 = {
+  data: ClienteDetalheResponse
+  status: 200
+}
+
+export type postApiClientesClienteIdAnonimizarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiClientesClienteIdAnonimizarResponseSuccess = (postApiClientesClienteIdAnonimizarResponse200) & {
+  headers: Headers;
+};
+export type postApiClientesClienteIdAnonimizarResponseError = (postApiClientesClienteIdAnonimizarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiClientesClienteIdAnonimizarResponse = (postApiClientesClienteIdAnonimizarResponseSuccess | postApiClientesClienteIdAnonimizarResponseError)
+
+export const getPostApiClientesClienteIdAnonimizarUrl = (clienteId: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/anonimizar`
+}
+
+export const postApiClientesClienteIdAnonimizar = async (clienteId: number, options?: RequestInit): Promise<postApiClientesClienteIdAnonimizarResponse> => {
+
+  return apiFetch<postApiClientesClienteIdAnonimizarResponse>(getPostApiClientesClienteIdAnonimizarUrl(clienteId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiClientesClienteIdAnonimizarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>, TError,{clienteId: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>, TError,{clienteId: number}, TContext> => {
+
+const mutationKey = ['postApiClientesClienteIdAnonimizar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>, {clienteId: number}> = (props) => {
+          const {clienteId} = props ?? {};
+
+          return  postApiClientesClienteIdAnonimizar(clienteId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiClientesClienteIdAnonimizarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>>
+
+    export type PostApiClientesClienteIdAnonimizarMutationError = ProblemDetails
+
+    export const usePostApiClientesClienteIdAnonimizar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>, TError,{clienteId: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiClientesClienteIdAnonimizar>>,
+        TError,
+        {clienteId: number},
+        TContext
+      > => {
+      return useMutation(getPostApiClientesClienteIdAnonimizarMutationOptions(options), queryClient);
     }
 
 export type getApiOrdensServicoOrdemIdMensagensResponse200 = {

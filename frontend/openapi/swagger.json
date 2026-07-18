@@ -2317,6 +2317,86 @@
         }
       }
     },
+    "/api/clientes/{clienteId}/dados-pessoais": {
+      "get": {
+        "tags": [
+          "Lgpd"
+        ],
+        "parameters": [
+          {
+            "name": "clienteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DadosPessoaisResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clientes/{clienteId}/anonimizar": {
+      "post": {
+        "tags": [
+          "Lgpd"
+        ],
+        "parameters": [
+          {
+            "name": "clienteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClienteDetalheResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ordens-servico/{ordemId}/mensagens": {
       "get": {
         "tags": [
@@ -3633,6 +3713,44 @@
         },
         "additionalProperties": false
       },
+      "AgendamentoExportado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "time"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "nomeContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefoneContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AgendamentoPublicoRequest": {
         "type": "object",
         "properties": {
@@ -4034,6 +4152,11 @@
             "format": "date-time",
             "nullable": true
           },
+          "anonimizadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "aparelhos": {
             "type": "array",
             "items": {
@@ -4139,6 +4262,11 @@
           "quantidadeAparelhos": {
             "type": "integer",
             "format": "int32"
+          },
+          "anonimizadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4194,6 +4322,40 @@
           "nome": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DadosPessoaisResponse": {
+        "type": "object",
+        "properties": {
+          "cliente": {
+            "$ref": "#/components/schemas/ClienteDetalheResponse"
+          },
+          "agendamentos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgendamentoExportado"
+            },
+            "nullable": true
+          },
+          "ordensServico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrdemServicoExportada"
+            },
+            "nullable": true
+          },
+          "mensagens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MensagemExportada"
+            },
+            "nullable": true
+          },
+          "geradoEm": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -4713,6 +4875,32 @@
         },
         "additionalProperties": false
       },
+      "MensagemExportada": {
+        "type": "object",
+        "properties": {
+          "canal": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoEvento": {
+            "type": "string",
+            "nullable": true
+          },
+          "destino": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "MudancaEtapaRequest": {
         "type": "object",
         "properties": {
@@ -4971,6 +5159,36 @@
           },
           "pagamentos": {
             "$ref": "#/components/schemas/ResumoPagamentosResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OrdemServicoExportada": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "etapa": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -6143,6 +6361,9 @@
     },
     {
       "name": "Fornecedores"
+    },
+    {
+      "name": "Lgpd"
     },
     {
       "name": "Mensagens"
