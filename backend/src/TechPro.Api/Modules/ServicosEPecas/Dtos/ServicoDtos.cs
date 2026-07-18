@@ -11,6 +11,8 @@ public record ServicoRequest(
     bool ExigeDiagnostico,
     bool AgendavelOnline,
     int CapacidadeSimultanea,
+    /// <summary>Horas por etapa antes do card do Kanban alertar; nulo = sem SLA.</summary>
+    int? SlaHoras,
     bool Ativo,
     IReadOnlyList<string> Checklist,
     IReadOnlyList<ServicoPecaRequest> Pecas);
@@ -27,6 +29,8 @@ public record ServicoResponse(
     bool ExigeDiagnostico,
     bool AgendavelOnline,
     int CapacidadeSimultanea,
+    /// <summary>Horas por etapa antes do card do Kanban alertar; nulo = sem SLA.</summary>
+    int? SlaHoras,
     bool Ativo,
     IReadOnlyList<string> Checklist,
     IReadOnlyList<ServicoPecaResponse> Pecas);

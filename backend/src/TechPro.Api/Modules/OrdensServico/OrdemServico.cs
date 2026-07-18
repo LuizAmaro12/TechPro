@@ -80,6 +80,14 @@ public class OrdemServico : ITenantEntity, IEntidadeSincronizavel
     public Agendamento? Agendamento { get; set; }
 
     public EtapaOrdemServico Etapa { get; set; } = EtapaOrdemServico.CheckInRealizado;
+
+    /// <summary>
+    /// Quando a OS entrou na etapa atual — base do SLA visual do Kanban.
+    /// Denormalização consciente do histórico: evita uma varredura da trilha a
+    /// cada listagem. Nulo nas OS anteriores à Fase 2 (o cálculo cai para
+    /// <see cref="CriadoEm"/>), o que dispensa backfill na migração.
+    /// </summary>
+    public DateTimeOffset? EtapaDesde { get; set; }
     public PrioridadeOrdemServico Prioridade { get; set; } = PrioridadeOrdemServico.Normal;
     public DateOnly? PrazoEstimado { get; set; }
 

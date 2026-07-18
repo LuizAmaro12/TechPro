@@ -37,6 +37,8 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
+    public DbSet<OrdemServicoComentario> OrdensServicoComentarios => Set<OrdemServicoComentario>();
+    public DbSet<OrdemServicoReatribuicao> OrdensServicoReatribuicoes => Set<OrdemServicoReatribuicao>();
     public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
     public DbSet<OrcamentoEvento> OrcamentoEventos => Set<OrcamentoEvento>();
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
@@ -289,6 +291,23 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.UpdatedAt);
             e.HasOne<OrdemServico>().WithMany(o => o.Historico)
                 .HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        builder.Entity<OrdemServicoComentario>(e =>
+        {
+            e.ToTable("ordem_servico_comentarios");
+            e.Property(x => x.Texto).HasMaxLength(2000);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.UpdatedAt);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        builder.Entity<OrdemServicoReatribuicao>(e =>
+        {
+            e.ToTable("ordem_servico_reatribuicoes");
+            e.Property(x => x.Motivo).HasMaxLength(500);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
         });
 
         // --- Financeiro (módulos 8/11): orçamento com trilha e pagamentos --------

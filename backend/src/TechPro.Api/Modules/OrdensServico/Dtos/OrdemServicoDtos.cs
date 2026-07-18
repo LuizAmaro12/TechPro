@@ -54,7 +54,11 @@ public record OrdemServicoResponse(
     string CodigoAcompanhamento,
     int? AgendamentoId,
     DateTimeOffset CriadoEm,
-    DateTimeOffset UpdatedAt);
+    DateTimeOffset UpdatedAt,
+    /// <summary>Horas na etapa atual — o servidor calcula, o Kanban só compara.</summary>
+    decimal HorasNaEtapa,
+    /// <summary>Limite do serviço; nulo em etapa final (OS parada de propósito não é atraso).</summary>
+    int? SlaHoras);
 
 public record HistoricoEtapaResponse(
     EtapaOrdemServico? DeEtapa,
@@ -68,7 +72,34 @@ public record OrdemServicoDetalheResponse(
     List<HistoricoEtapaResponse> Historico,
     List<PecaUsadaResponse> Pecas,
     Financeiro.Dtos.OrcamentoResponse? Orcamento,
-    Financeiro.Dtos.ResumoPagamentosResponse? Pagamentos);
+    Financeiro.Dtos.ResumoPagamentosResponse? Pagamentos,
+    List<ComentarioResponse> Comentarios,
+    List<ReatribuicaoResponse> Reatribuicoes);
+
+// --- Comentários internos e reatribuição (Fase 2) -----------------------------
+
+public record ComentarioRequest(string Texto);
+
+/// <summary>Nunca sai no portal do cliente — é registro interno da loja.</summary>
+public record ComentarioResponse(
+    Guid Id,
+    string Texto,
+    Guid? AutorUsuarioId,
+    string? AutorNome,
+    DateTimeOffset CriadoEm);
+
+/// <summary>Motivo é obrigatório: o valor do recurso é a rastreabilidade.</summary>
+public record ReatribuicaoRequest(Guid? ResponsavelTecnicoId, string Motivo);
+
+public record ReatribuicaoResponse(
+    int Id,
+    Guid? DeUsuarioId,
+    string? DeNome,
+    Guid? ParaUsuarioId,
+    string? ParaNome,
+    string Motivo,
+    string? PorNome,
+    DateTimeOffset CriadoEm);
 
 // --- Peças utilizadas (baixa automática, módulo 7) -----------------------------
 
@@ -114,10 +145,22 @@ public record PecaUsadaSyncItem(
     DateTimeOffset UpdatedAt,
     DateTimeOffset? DeletedAt);
 
+/// <summary>Comentário no delta: o técnico comenta em campo, então entra no
+/// escopo offline desde o primeiro migration (regra do doc de stack).</summary>
+public record ComentarioSyncItem(
+    Guid Id,
+    Guid OrdemServicoId,
+    string Texto,
+    Guid? AutorUsuarioId,
+    DateTimeOffset CriadoEm,
+    DateTimeOffset UpdatedAt,
+    DateTimeOffset? DeletedAt);
+
 public record OrdensServicoSyncResponse(
     List<OrdemServicoSyncItem> Ordens,
     List<HistoricoSyncItem> Historico,
     List<PecaUsadaSyncItem> PecasUtilizadas,
+    List<ComentarioSyncItem> Comentarios,
     DateTimeOffset Agora);
 
 // --- Equipe (responsável técnico) ---------------------------------------------

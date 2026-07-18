@@ -46,6 +46,27 @@ public class PecaUsadaRequestValidator : AbstractValidator<PecaUsadaRequest>
     }
 }
 
+public class ComentarioRequestValidator : AbstractValidator<ComentarioRequest>
+{
+    public ComentarioRequestValidator()
+    {
+        RuleFor(c => c.Texto)
+            .NotEmpty().WithMessage("Escreva o comentário.")
+            .MaximumLength(2000).WithMessage("O comentário pode ter no máximo 2000 caracteres.");
+    }
+}
+
+public class ReatribuicaoRequestValidator : AbstractValidator<ReatribuicaoRequest>
+{
+    public ReatribuicaoRequestValidator()
+    {
+        // Motivo obrigatório: sem ele a trilha não responde "por que trocou".
+        RuleFor(r => r.Motivo)
+            .NotEmpty().WithMessage("Informe o motivo da troca de responsável.")
+            .MaximumLength(500).WithMessage("O motivo pode ter no máximo 500 caracteres.");
+    }
+}
+
 public class MudancaEtapaRequestValidator : AbstractValidator<MudancaEtapaRequest>
 {
     public MudancaEtapaRequestValidator()

@@ -21,6 +21,7 @@ public class OrdemServicoService(
     ITenantProvider tenantProvider,
     ClienteService clientes,
     OrdemServicoPecaService pecas,
+    OrdemServicoInteracaoService interacoes,
     Financeiro.FinanceiroService financeiro,
     Comunicacao.ComunicacaoService comunicacao)
 {
@@ -100,7 +101,9 @@ public class OrdemServicoService(
                 h.CriadoEm)).ToList(),
             await pecas.CarregarLinhasAsync(id),
             await financeiro.ObterOrcamentoAsync(id),
-            await financeiro.ObterResumoPagamentosAsync(id));
+            await financeiro.ObterResumoPagamentosAsync(id),
+            await interacoes.CarregarComentariosAsync(id),
+            await interacoes.CarregarReatribuicoesAsync(id));
     }
 
     public async Task<CatalogoResultado<OrdemServicoResponse>> CriarAsync(
@@ -283,11 +286,13 @@ public class OrdemServicoService(
         var queryOrdens = QueryCompleta();
         var queryHistorico = db.HistoricosEtapaOrdemServico.AsQueryable();
         var queryPecas = db.OrdensServicoPecas.AsQueryable();
+        var queryComentarios = db.OrdensServicoComentarios.AsQueryable();
         if (since is { } marca)
         {
             queryOrdens = queryOrdens.Where(o => o.UpdatedAt > marca);
             queryHistorico = queryHistorico.Where(h => h.UpdatedAt > marca);
             queryPecas = queryPecas.Where(p => p.UpdatedAt > marca);
+            queryComentarios = queryComentarios.Where(c => c.UpdatedAt > marca);
         }
 
         var ordens = (await queryOrdens.ToListAsync())
@@ -299,6 +304,9 @@ public class OrdemServicoService(
         var pecasUtilizadas = (await queryPecas.ToListAsync())
             .OrderBy(p => p.UpdatedAt)
             .ToList();
+        var comentarios = (await queryComentarios.ToListAsync())
+            .OrderBy(c => c.UpdatedAt)
+            .ToList();
 
         return new OrdensServicoSyncResponse(
             ordens.Select(o => new OrdemServicoSyncItem(ParaResponse(o), o.DeletedAt)).ToList(),
@@ -309,6 +317,9 @@ public class OrdemServicoService(
                 p.Id, p.OrdemServicoId, p.PecaId, p.Quantidade,
                 p.CustoUnitarioNoUso, p.PrecoVendaNoUso,
                 p.CriadoEm, p.UpdatedAt, p.DeletedAt)).ToList(),
+            comentarios.Select(c => new ComentarioSyncItem(
+                c.Id, c.OrdemServicoId, c.Texto, c.AutorUsuarioId,
+                c.CriadoEm, c.UpdatedAt, c.DeletedAt)).ToList(),
             agora);
     }
 
@@ -365,6 +376,11 @@ public class OrdemServicoService(
         Guid? usuarioId,
         string? motivo)
     {
+        // Ponto único por onde passa toda transição (inclusive a criação e o
+        // envio de orçamento, no módulo Financeiro): é aqui que o relógio do
+        // SLA reinicia.
+        ordem.EtapaDesde = DateTimeOffset.UtcNow;
+
         db.HistoricosEtapaOrdemServico.Add(new OrdemServicoHistoricoEtapa
         {
             Id = Guid.NewGuid(),
@@ -384,7 +400,19 @@ public class OrdemServicoService(
     private async Task<OrdemServicoResponse> CarregarResponseAsync(Guid id) =>
         ParaResponse(await QueryCompleta().SingleAsync(o => o.Id == id));
 
-    private static OrdemServicoResponse ParaResponse(OrdemServico o) => new(
+    /// <summary>Etapas em que a OS repousa de propósito — parar nelas não é
+    /// atraso, então o SLA não se aplica e o card fica neutro.</summary>
+    private static bool EtapaFinal(EtapaOrdemServico etapa) =>
+        etapa is EtapaOrdemServico.Entregue or EtapaOrdemServico.Cancelado;
+
+    private static OrdemServicoResponse ParaResponse(OrdemServico o)
+    {
+        // OS anteriores à Fase 2 não têm marca de entrada na etapa — nesses
+        // casos o relógio corre desde a criação (ver EtapaDesde na entidade).
+        var desde = o.EtapaDesde ?? o.CriadoEm;
+        var horas = Math.Round((decimal)(DateTimeOffset.UtcNow - desde).TotalHours, 1);
+
+        return new OrdemServicoResponse(
         o.Id,
         o.Numero,
         o.Etapa,
@@ -408,7 +436,10 @@ public class OrdemServicoService(
         o.CodigoAcompanhamento,
         o.AgendamentoId,
         o.CriadoEm,
-        o.UpdatedAt);
+        o.UpdatedAt,
+        horas,
+        EtapaFinal(o.Etapa) ? null : o.Servico!.SlaHoras);
+    }
 
     private static string? Normalizar(string? valor) =>
         string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();

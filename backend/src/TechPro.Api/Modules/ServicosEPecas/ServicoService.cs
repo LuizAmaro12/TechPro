@@ -121,6 +121,7 @@ public class ServicoService(TechProDbContext db, ITenantProvider tenantProvider)
         servico.ExigeDiagnostico = request.ExigeDiagnostico;
         servico.AgendavelOnline = request.AgendavelOnline;
         servico.CapacidadeSimultanea = request.CapacidadeSimultanea;
+        servico.SlaHoras = request.SlaHoras;
         servico.Ativo = request.Ativo;
         servico.Checklist.Clear();
         servico.Checklist.AddRange(request.Checklist.Select((descricao, indice) => new ServicoChecklistItem
@@ -153,7 +154,7 @@ public class ServicoService(TechProDbContext db, ITenantProvider tenantProvider)
 
     private static ServicoResponse ParaResponse(Servico s) => new(
         s.Id, s.Nome, s.Categoria, s.PrecoBase, s.DuracaoEstimadaMinutos, s.PrazoMedioDias,
-        s.ExigeDiagnostico, s.AgendavelOnline, s.CapacidadeSimultanea, s.Ativo,
+        s.ExigeDiagnostico, s.AgendavelOnline, s.CapacidadeSimultanea, s.SlaHoras, s.Ativo,
         s.Checklist.OrderBy(i => i.Ordem).Select(i => i.Descricao).ToList(),
         s.Pecas.Select(p => new ServicoPecaResponse(p.PecaId, p.Peca?.Nome ?? "", p.QuantidadePadrao)).ToList());
 }

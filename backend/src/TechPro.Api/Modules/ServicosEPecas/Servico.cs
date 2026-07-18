@@ -17,6 +17,12 @@ public class Servico : ITenantEntity
     /// <summary>Atendimentos simultâneos que a agenda aceita para este serviço (módulo 2, "desde o início").</summary>
     public int CapacidadeSimultanea { get; set; } = 1;
 
+    /// <summary>
+    /// Limite de horas que uma OS deste serviço pode passar em **uma** etapa
+    /// antes do card do Kanban virar vermelho (Fase 2). Nulo = sem SLA.
+    /// </summary>
+    public int? SlaHoras { get; set; }
+
     // Desativar em vez de apagar: o serviço pode estar referenciado por OS futuras.
     public bool Ativo { get; set; } = true;
     public DateTimeOffset CriadoEm { get; set; }

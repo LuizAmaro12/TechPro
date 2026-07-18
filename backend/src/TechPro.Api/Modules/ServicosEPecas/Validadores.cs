@@ -33,6 +33,9 @@ public class ServicoRequestValidator : AbstractValidator<ServicoRequest>
             .WithMessage("O prazo médio deve ser de pelo menos 1 dia.");
         RuleFor(x => x.CapacidadeSimultanea)
             .GreaterThan(0).WithMessage("A capacidade simultânea deve ser de pelo menos 1.");
+        RuleFor(x => x.SlaHoras)
+            .InclusiveBetween(1, 2160).When(x => x.SlaHoras.HasValue)
+            .WithMessage("O SLA deve ficar entre 1 hora e 90 dias.");
         RuleFor(x => x.Checklist)
             .NotNull().WithMessage("Envie o checklist (pode ser vazio).");
         RuleForEach(x => x.Checklist)

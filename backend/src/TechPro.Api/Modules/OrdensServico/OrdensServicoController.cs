@@ -15,10 +15,13 @@ namespace TechPro.Api.Modules.OrdensServico;
 public class OrdensServicoController(
     OrdemServicoService service,
     OrdemServicoPecaService pecasService,
+    OrdemServicoInteracaoService interacoes,
     IValidator<OrdemServicoRequest> validadorCriacao,
     IValidator<OrdemServicoAtualizacaoRequest> validadorAtualizacao,
     IValidator<MudancaEtapaRequest> validadorEtapa,
-    IValidator<PecaUsadaRequest> validadorPecaUsada) : ControllerBase
+    IValidator<PecaUsadaRequest> validadorPecaUsada,
+    IValidator<ComentarioRequest> validadorComentario,
+    IValidator<ReatribuicaoRequest> validadorReatribuicao) : ControllerBase
 {
     private Guid? UsuarioId =>
         Guid.TryParse(User.FindFirstValue("sub"), out var id) ? id : null;
@@ -171,6 +174,71 @@ public class OrdensServicoController(
         }
 
         return NoContent();
+    }
+
+    // --- Comentários internos (Fase 2) -----------------------------------------
+
+    [HttpGet("{id:guid}/comentarios")]
+    [ProducesResponseType<List<ComentarioResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarComentarios(Guid id) =>
+        await interacoes.ListarComentariosAsync(id) is { } lista ? Ok(lista) : NotFound();
+
+    [HttpPost("{id:guid}/comentarios")]
+    [ProducesResponseType<ComentarioResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Comentar(Guid id, ComentarioRequest request)
+    {
+        var validacao = await validadorComentario.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var resultado = await interacoes.ComentarAsync(id, request, UsuarioId);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        return Created($"/api/ordens-servico/{id}/comentarios/{resultado.Valor!.Id}", resultado.Valor);
+    }
+
+    [HttpDelete("{id:guid}/comentarios/{comentarioId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoverComentario(Guid id, Guid comentarioId) =>
+        await interacoes.RemoverComentarioAsync(id, comentarioId) ? NoContent() : NotFound();
+
+    // --- Reatribuição de técnico (Fase 2) ---------------------------------------
+
+    /// <summary>Troca o responsável exigindo motivo e devolve o detalhe já com
+    /// a trilha de reatribuições atualizada.</summary>
+    [HttpPost("{id:guid}/responsavel")]
+    [ProducesResponseType<OrdemServicoDetalheResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Reatribuir(Guid id, ReatribuicaoRequest request)
+    {
+        var validacao = await validadorReatribuicao.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var resultado = await interacoes.ReatribuirAsync(id, request, UsuarioId);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return Ok(await service.ObterAsync(id));
     }
 
     private IActionResult TraduzirResultado(CatalogoResultado<OrdemServicoResponse>? resultado)

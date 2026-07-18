@@ -80,6 +80,7 @@ builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
+builder.Services.AddScoped<OrdemServicoInteracaoService>();
 builder.Services.AddScoped<FinanceiroService>();
 builder.Services.AddScoped<FinanceiroRelatorioService>();
 builder.Services.AddScoped<DashboardService>();
