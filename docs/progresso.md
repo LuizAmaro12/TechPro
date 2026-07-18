@@ -85,6 +85,27 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### LGPD visível (exportação + anonimização) — concluída em 2026-07-18
+
+2º item web da Fase 2 (módulo 14). Operacionaliza os dois direitos prometidos
+no branding. Plano em `docs/superpowers/plans/2026-07-17-lgpd-visivel.md`.
+
+- **Exportação** (`GET /api/clientes/{id}/dados-pessoais`): JSON com cadastro,
+  aparelhos, agendamentos, OS (resumo estrutural) e mensagens (auditoria). A UI
+  baixa o arquivo.
+- **Anonimização** (`POST /api/clientes/{id}/anonimizar`, `LgpdService`):
+  substitui PII por marcadores no **cliente, aparelhos (IMEI/senha),
+  agendamentos (snapshots de contato) e mensagens (destino/corpo)**; **preserva**
+  OS/pagamentos/orçamentos (integridade referencial e financeira, seção 16 do
+  doc de stack). Marca `Cliente.AnonimizadoEm`, desativa e zera consentimento.
+  **Irreversível e idempotente**.
+- **Deferido com justificativa**: consentimento separado de marketing/reativação
+  — não há feature de reativação; seria campo sem consumidor (YAGNI).
+- **Evidência**: 4 testes de integração (export com dados ligados, anonimização
+  varrendo tudo e preservando a OS, idempotência, isolamento) → **109/109**;
+  e2e 6/6 (exporta baixa JSON, anonimiza varre PII e marca o selo).
+- Migração só adiciona `clientes.anonimizado_em` (RLS já existe na tabela).
+
 ### Linha do tempo visual da OS — concluída em 2026-07-17
 
 1º item web da Fase 2 (portal do cliente). O acompanhamento público
