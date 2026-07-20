@@ -281,6 +281,20 @@ export default function PaginaAgenda() {
             ⚠ Cliente já faltou {agendamento.clienteFaltas}×
           </p>
         )}
+        {/* Peça em falta: avisar antes de o cliente chegar, para pedir/remarcar. */}
+        {!encerrado && (agendamento.pecasEmFalta?.length ?? 0) > 0 && (
+          <p
+            className="mt-1 text-xs font-semibold text-[#E8536B]"
+            title={agendamento
+              .pecasEmFalta!.map(
+                (p) => `${p.pecaNome}: precisa ${p.necessario}, tem ${p.emEstoque}`,
+              )
+              .join(" · ")}
+          >
+            ⚠ Peça em falta:{" "}
+            {agendamento.pecasEmFalta!.map((p) => p.pecaNome).join(", ")}
+          </p>
+        )}
         {(agendamento.aparelhoMarca || agendamento.aparelhoModelo) && (
           <p className="text-xs text-[#8B8D98]">
             {[agendamento.aparelhoMarca, agendamento.aparelhoModelo]

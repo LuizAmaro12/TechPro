@@ -177,6 +177,14 @@ export const OrigemAgendamento = {
   Portal: 'Portal',
 } as const;
 
+export interface PecaEmFaltaResponse {
+  pecaId?: number;
+  /** @nullable */
+  pecaNome?: string | null;
+  necessario?: number;
+  emEstoque?: number;
+}
+
 export interface AgendamentoResponse {
   id?: number;
   status?: StatusAgendamento;
@@ -209,6 +217,8 @@ export interface AgendamentoResponse {
   /** @nullable */
   motivoCancelamento?: string | null;
   clienteFaltas?: number;
+  /** @nullable */
+  pecasEmFalta?: PecaEmFaltaResponse[] | null;
 }
 
 export interface AparelhoRequest {
