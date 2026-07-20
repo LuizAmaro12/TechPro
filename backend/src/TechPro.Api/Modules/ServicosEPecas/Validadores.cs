@@ -70,3 +70,26 @@ public class PecaRequestValidator : AbstractValidator<PecaRequest>
             .GreaterThanOrEqualTo(0).WithMessage("O estoque mínimo não pode ser negativo.");
     }
 }
+
+public class MovimentacaoRequestValidator : AbstractValidator<MovimentacaoRequest>
+{
+    public MovimentacaoRequestValidator()
+    {
+        // Quantidade chega sempre positiva; o tipo define o sinal.
+        RuleFor(m => m.Quantidade)
+            .GreaterThanOrEqualTo(0).WithMessage("A quantidade não pode ser negativa.")
+            .LessThanOrEqualTo(100000).WithMessage("Quantidade acima do limite aceito.");
+        RuleFor(m => m.Quantidade)
+            .GreaterThan(0).When(m => m.Tipo != TipoMovimentacaoEstoque.Ajuste)
+            .WithMessage("Informe uma quantidade maior que zero.");
+        // Ajuste sem motivo é exatamente o buraco que esta etapa fechou.
+        RuleFor(m => m.Motivo)
+            .NotEmpty().When(m => m.Tipo == TipoMovimentacaoEstoque.Ajuste)
+            .WithMessage("Informe o motivo do ajuste de estoque.");
+        RuleFor(m => m.Motivo)
+            .MaximumLength(300).WithMessage("O motivo pode ter no máximo 300 caracteres.");
+        RuleFor(m => m.CustoUnitario)
+            .GreaterThanOrEqualTo(0).When(m => m.CustoUnitario.HasValue)
+            .WithMessage("O custo não pode ser negativo.");
+    }
+}

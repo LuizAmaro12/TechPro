@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +11,15 @@ namespace TechPro.Api.Modules.ServicosEPecas;
 [Route("api/pecas")]
 [Authorize]
 [Produces("application/json")]
-public class PecasController(PecaService service, IValidator<PecaRequest> validador) : ControllerBase
+public class PecasController(
+    PecaService service,
+    EstoqueService estoque,
+    IValidator<PecaRequest> validador,
+    IValidator<MovimentacaoRequest> validadorMovimentacao) : ControllerBase
 {
+    private Guid? UsuarioId =>
+        Guid.TryParse(User.FindFirstValue("sub"), out var id) ? id : null;
+
     [HttpGet]
     [ProducesResponseType<PaginaResponse<PecaResponse>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(
@@ -42,7 +50,7 @@ public class PecasController(PecaService service, IValidator<PecaRequest> valida
             return this.ProblemaDeValidacao(validacao);
         }
 
-        var resultado = await service.CriarAsync(request);
+        var resultado = await service.CriarAsync(request, UsuarioId);
         if (resultado.Erro is not null)
         {
             return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
@@ -63,7 +71,7 @@ public class PecasController(PecaService service, IValidator<PecaRequest> valida
             return this.ProblemaDeValidacao(validacao);
         }
 
-        var resultado = await service.AtualizarAsync(id, request);
+        var resultado = await service.AtualizarAsync(id, request, UsuarioId);
         if (resultado is null)
         {
             return NotFound();
@@ -82,4 +90,39 @@ public class PecasController(PecaService service, IValidator<PecaRequest> valida
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(int id) =>
         await service.DesativarAsync(id) ? NoContent() : NotFound();
+
+    // --- Movimentação de estoque (Fase 2) ---------------------------------------
+
+    /// <summary>Extrato da peça: como o saldo chegou ao número atual.</summary>
+    [HttpGet("{id:int}/movimentacoes")]
+    [ProducesResponseType<List<MovimentacaoResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarMovimentacoes(int id) =>
+        await estoque.ListarAsync(id) is { } lista ? Ok(lista) : NotFound();
+
+    [HttpPost("{id:int}/movimentacoes")]
+    [ProducesResponseType<MovimentacaoResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Movimentar(int id, MovimentacaoRequest request)
+    {
+        var validacao = await validadorMovimentacao.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var resultado = await estoque.MovimentarAsync(id, request, UsuarioId);
+        if (resultado is null)
+        {
+            return NotFound();
+        }
+
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        return Created($"/api/pecas/{id}/movimentacoes/{resultado.Valor!.Id}", resultado.Valor);
+    }
 }

@@ -37,6 +37,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
+    public DbSet<MovimentacaoEstoque> MovimentacoesEstoque => Set<MovimentacaoEstoque>();
     public DbSet<OrdemServicoComentario> OrdensServicoComentarios => Set<OrdemServicoComentario>();
     public DbSet<OrdemServicoReatribuicao> OrdensServicoReatribuicoes => Set<OrdemServicoReatribuicao>();
     public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
@@ -291,6 +292,17 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.UpdatedAt);
             e.HasOne<OrdemServico>().WithMany(o => o.Historico)
                 .HasForeignKey(x => x.OrdemServicoId);
+        });
+
+        builder.Entity<MovimentacaoEstoque>(e =>
+        {
+            e.ToTable("movimentacoes_estoque");
+            e.Property(x => x.Tipo).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.CustoUnitario).HasPrecision(10, 2);
+            e.Property(x => x.Motivo).HasMaxLength(300);
+            e.HasIndex(x => x.PecaId);
+            e.HasOne(x => x.Peca).WithMany().HasForeignKey(x => x.PecaId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<OrdemServicoComentario>(e =>

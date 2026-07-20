@@ -12,7 +12,10 @@ namespace TechPro.Api.Modules.OrdensServico;
 /// congela custo/preço; remover devolve ao estoque via soft-delete (lápide
 /// sincronizável). OS finalizada não recebe nem devolve peças.
 /// </summary>
-public class OrdemServicoPecaService(TechProDbContext db, ITenantProvider tenantProvider)
+public class OrdemServicoPecaService(
+    TechProDbContext db,
+    ITenantProvider tenantProvider,
+    EstoqueService estoque)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição sem tenant resolvido.");
@@ -118,7 +121,9 @@ public class OrdemServicoPecaService(TechProDbContext db, ITenantProvider tenant
 
         // Lápide (o app offline sincroniza a remoção) + devolução ao estoque.
         linha.DeletedAt = DateTimeOffset.UtcNow;
-        linha.Peca!.QuantidadeEmEstoque += linha.Quantidade;
+        estoque.Registrar(
+            linha.Peca!, TipoMovimentacaoEstoque.EstornoOs, linha.Quantidade,
+            ordemServicoId: ordemId);
         await db.SaveChangesAsync();
         return CatalogoResultado<PecaUsadaResponse>.Ok(ParaResponse(linha, linha.Peca));
     }
@@ -138,7 +143,8 @@ public class OrdemServicoPecaService(TechProDbContext db, ITenantProvider tenant
             PrecoVendaNoUso = peca.PrecoVenda,
             CriadoEm = DateTimeOffset.UtcNow,
         };
-        peca.QuantidadeEmEstoque -= quantidade;
+        estoque.Registrar(
+            peca, TipoMovimentacaoEstoque.ConsumoOs, -quantidade, ordemServicoId: ordem.Id);
         db.OrdensServicoPecas.Add(linha);
         return linha;
     }

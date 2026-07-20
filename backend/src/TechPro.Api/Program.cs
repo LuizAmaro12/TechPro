@@ -79,6 +79,7 @@ builder.Services.AddScoped<AgendaService>();
 builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
 builder.Services.AddScoped<OrdemServicoService>();
+builder.Services.AddScoped<EstoqueService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
 builder.Services.AddScoped<OrdemServicoInteracaoService>();
 builder.Services.AddScoped<FinanceiroService>();

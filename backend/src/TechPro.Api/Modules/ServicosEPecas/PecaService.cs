@@ -6,7 +6,8 @@ using TechPro.Api.Shared.Tenancy;
 
 namespace TechPro.Api.Modules.ServicosEPecas;
 
-public class PecaService(TechProDbContext db, ITenantProvider tenantProvider)
+public class PecaService(
+    TechProDbContext db, ITenantProvider tenantProvider, EstoqueService estoque)
 {
     private Guid TenantId => tenantProvider.TenantId
         ?? throw new InvalidOperationException("Requisição autenticada sem tenant_id.");
@@ -43,7 +44,8 @@ public class PecaService(TechProDbContext db, ITenantProvider tenantProvider)
         return peca is null ? null : ParaResponse(peca);
     }
 
-    public async Task<CatalogoResultado<PecaResponse>> CriarAsync(PecaRequest request)
+    public async Task<CatalogoResultado<PecaResponse>> CriarAsync(
+        PecaRequest request, Guid? usuarioId = null)
     {
         if (!await FornecedorExisteAsync(request.FornecedorId))
         {
@@ -59,10 +61,23 @@ public class PecaService(TechProDbContext db, ITenantProvider tenantProvider)
         Aplicar(peca, request);
         db.Pecas.Add(peca);
         await db.SaveChangesAsync();
+
+        // Estoque inicial também é um movimento: sem isso a razão nasceria
+        // devendo a diferença e nunca reconciliaria com o saldo.
+        if (request.QuantidadeEmEstoque != 0)
+        {
+            peca.QuantidadeEmEstoque = 0;
+            estoque.Registrar(
+                peca, TipoMovimentacaoEstoque.Entrada, request.QuantidadeEmEstoque,
+                "Estoque inicial no cadastro da peça", peca.CustoUnitario, usuarioId: usuarioId);
+            await db.SaveChangesAsync();
+        }
+
         return CatalogoResultado<PecaResponse>.Ok((await ObterAsync(peca.Id))!);
     }
 
-    public async Task<CatalogoResultado<PecaResponse>?> AtualizarAsync(int id, PecaRequest request)
+    public async Task<CatalogoResultado<PecaResponse>?> AtualizarAsync(
+        int id, PecaRequest request, Guid? usuarioId = null)
     {
         var peca = await db.Pecas.SingleOrDefaultAsync(p => p.Id == id);
         if (peca is null)
@@ -75,7 +90,19 @@ public class PecaService(TechProDbContext db, ITenantProvider tenantProvider)
             return CatalogoResultado<PecaResponse>.Falha("Fornecedor não encontrado.");
         }
 
+        // O formulário do catálogo continua aceitando o saldo, mas a diferença
+        // vira um Ajuste registrado — a edição não sobrescreve mais o estoque
+        // em silêncio (era o caminho por onde uma baixa concorrente sumia).
+        var delta = request.QuantidadeEmEstoque - peca.QuantidadeEmEstoque;
         Aplicar(peca, request);
+        if (delta != 0)
+        {
+            peca.QuantidadeEmEstoque -= delta;
+            estoque.Registrar(
+                peca, TipoMovimentacaoEstoque.Ajuste, delta,
+                "Ajuste pela edição da peça no catálogo", usuarioId: usuarioId);
+        }
+
         await db.SaveChangesAsync();
         return CatalogoResultado<PecaResponse>.Ok((await ObterAsync(id))!);
     }
