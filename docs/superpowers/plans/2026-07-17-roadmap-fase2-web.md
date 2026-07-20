@@ -30,9 +30,11 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
 - **OS/Kanban profundidade** ✅ (concluído em 2026-07-18): SLA visual por etapa
   (limite configurável por serviço + cor do card por tempo na etapa),
   comentários internos, reatribuição de técnico com histórico e motivo.
-- **Catálogo/estoque**: kits de serviço, peça compatível/equivalente, histórico
-  de movimentação de estoque, previsão de reposição, lista de compra
-  consolidada, histórico de preço por fornecedor.
+- **Catálogo/estoque**: histórico de movimentação de estoque ✅ e lista de
+  compra consolidada ✅ (concluídos em 2026-07-20; "kits de serviço" já existe
+  como peças padrão do serviço). Restam: peça compatível/equivalente, previsão
+  de reposição e histórico de preço por fornecedor — todos agora com base de
+  dados para existir.
 - **Agendamento**: fila de espera; histórico de comparecimento por cliente;
   sinalização por indisponibilidade de peça (liga com estoque).
 - **Clientes/reputação**: importação CSV; conta vinculada família/empresa com

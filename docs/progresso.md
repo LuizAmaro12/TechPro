@@ -85,6 +85,55 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Estoque com movimentação rastreável — concluída em 2026-07-20
+
+5º item web da Fase 2 (primeira parte do bloco catálogo/estoque). Plano em
+`docs/superpowers/plans/2026-07-18-estoque-movimentacao.md`.
+
+**Motivação — era um débito real, não um recurso novo.** O saldo era alterado
+em três pontos sem registro nenhum (consumo na OS, estorno e edição do
+catálogo), então não havia como responder "por que temos 3 telas se compramos
+10?". Pior: **não existia entrada de estoque** — receber mercadoria era editar
+o número na mão, o que também **apagava em silêncio** qualquer baixa que outro
+usuário tivesse feito no intervalo.
+
+- **`movimentacoes_estoque` append-only** com `Quantidade` **assinada** e
+  `SaldoApos` gravado. `SUM(quantidade)` reconcilia com o saldo, então auditar
+  virou consulta em vez de algoritmo — e é exatamente o que os testes asseguram
+  depois de cada caminho (`AssertReconcilia`).
+- **Funil único** `EstoqueService.Registrar`: as três mutações passam por ele.
+  Um caminho novo que esqueça o razão vira erro de compilação, não bug mudo —
+  mesmo raciocínio do `RegistrarHistoricoEtapa` no SLA.
+- **A edição do catálogo continua aceitando o saldo**, mas grava um `Ajuste`
+  com o delta. Zero regressão de UX e o buraco fechado.
+- **Ajuste manual pede o saldo contado**, não o delta (é como a loja conta
+  prateleira) e **exige motivo**.
+- **Entrada com custo atualiza o custo da peça** — primeiro tijolo do histórico
+  de preço por fornecedor, sem antecipar a tela dele.
+- **`GET /api/estoque/lista-compra`**: peças no/abaixo do mínimo agrupadas por
+  fornecedor (a loja compra por fornecedor), com sugestão e custo estimado.
+  Peça sem fornecedor cai num grupo próprio em vez de sumir da lista.
+- **Estoque negativo continua permitido** (decisão de 2026-07-15) — o razão só
+  passa a registrar como se chegou lá.
+- **Fora do escopo offline** de propósito: o razão é administrativo e derivado;
+  o que o técnico gera em campo é a peça usada na OS, que já sincroniza.
+- **Migração com saldo de abertura**: sem ele o razão nasceria devendo todo o
+  estoque existente e a reconciliação falharia para dados anteriores. O
+  `SELECT` em `pecas` (FORCE RLS, migração sem tenant na sessão) devolveria
+  **zero linhas em silêncio** — o mesmo erro do backfill do slug —, então o RLS
+  é desligado só durante o backfill e restaurado logo em seguida. Conferido no
+  banco: **10 aberturas para 10 peças com saldo e 0 divergências** entre razão
+  e saldo em toda a base.
+- **RLS `ENABLE`+`FORCE`** na tabela nova → **21/21 tabelas de tenant**.
+- **Evidência**: 11 testes de integração → **135/135**; e2e **14/14**
+  (reconciliação, consumo amarrado à OS, saldo de abertura no extrato, entrada
+  atualizando custo, ajuste bloqueado sem motivo, ajuste levando ao saldo
+  contado, agrupamento por fornecedor, peça confortável fora da lista).
+- **Registrado como fora desta etapa**: "kits de serviço" já existe de fato
+  como peças padrão do serviço (`servico_pecas` + `aplicar-padrao`) — renomear
+  sem demanda seria refatoração sem benefício. "Peça equivalente" e "previsão
+  de reposição" dependem de histórico acumulado, que agora passa a existir.
+
 ### OS/Kanban em profundidade — concluída em 2026-07-18
 
 4º item web da Fase 2 (módulo 3 avançado). Transforma o Kanban de quadro de
@@ -217,13 +266,14 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 20/20 tabelas cobertas
+### Isolamento entre empresas: 21/21 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 20** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 21** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `bloqueios_agenda`, `clientes`, `fornecedores`,
-`horarios_funcionamento`, `mensagens_enviadas`, `orcamento_eventos`,
+`horarios_funcionamento`, `mensagens_enviadas`, `movimentacoes_estoque`,
+`orcamento_eventos`,
 `orcamentos`, `ordem_servico_comentarios`, `ordem_servico_historico_etapas`,
 `ordem_servico_pecas`, `ordem_servico_reatribuicoes`, `ordens_servico`,
 `pagamentos`, `pecas`, `preferencias_notificacao`,
@@ -233,7 +283,8 @@ Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
 controle: são consultados antes de existir tenant). **Como não têm rede de
 proteção (nem GQF, nem RLS), auditei os 5 acessos a `db.Users` no código: todos
 filtram por `TenantId` explicitamente** (FinanceiroService ×2,
-OrdemServicoService ×2, OrdemServicoInteracaoService ×2, EquipeController). Os testes cobrem a fronteira
+OrdemServicoService ×2, OrdemServicoInteracaoService ×2, EstoqueService ×1,
+EquipeController). Os testes cobrem a fronteira
 (responsável técnico de outra empresa → 400; equipe isolada por tenant).
 **Invariante frágil e consciente**: qualquer query nova em `usuarios` precisa
 do filtro manual — não há compilador nem banco para avisar.
