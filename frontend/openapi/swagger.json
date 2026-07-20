@@ -835,6 +835,86 @@
         }
       }
     },
+    "/api/agendamentos/{id}/nao-compareceu": {
+      "post": {
+        "tags": [
+          "Agendamentos"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgendamentoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clientes/{clienteId}/comparecimento": {
+      "get": {
+        "tags": [
+          "Agendamentos"
+        ],
+        "parameters": [
+          {
+            "name": "clienteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparecimentoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clientes/{clienteId}/aparelhos": {
       "post": {
         "tags": [
@@ -4346,6 +4426,10 @@
           "motivoCancelamento": {
             "type": "string",
             "nullable": true
+          },
+          "clienteFaltas": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -4761,6 +4845,56 @@
           "deletedAt": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ComparecimentoItemResponse": {
+        "type": "object",
+        "properties": {
+          "agendamentoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "time"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusAgendamento"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ComparecimentoResponse": {
+        "type": "object",
+        "properties": {
+          "compareceu": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "faltou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComparecimentoItemResponse"
+            },
             "nullable": true
           }
         },
@@ -6915,7 +7049,8 @@
         "enum": [
           "Agendado",
           "CheckInRealizado",
-          "Cancelado"
+          "Cancelado",
+          "NaoCompareceu"
         ],
         "type": "string"
       },

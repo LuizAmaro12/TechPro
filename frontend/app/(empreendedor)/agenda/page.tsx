@@ -18,6 +18,7 @@ import {
   usePostApiAgendamentos,
   usePostApiAgendamentosIdCancelar,
   usePostApiAgendamentosIdCheckin,
+  usePostApiAgendamentosIdNaoCompareceu,
   usePutApiAgendamentosId,
   type AgendamentoResponse,
 } from "@/lib/api-client/gerado";
@@ -85,6 +86,7 @@ export default function PaginaAgenda() {
   const atualizar = usePutApiAgendamentosId();
   const fazerCheckin = usePostApiAgendamentosIdCheckin();
   const cancelar = usePostApiAgendamentosIdCancelar();
+  const marcarFalta = usePostApiAgendamentosIdNaoCompareceu();
 
   const {
     register,
@@ -198,6 +200,17 @@ export default function PaginaAgenda() {
     }
   }
 
+  async function aoNaoCompareceu(id: number | undefined) {
+    if (id === undefined) return;
+    try {
+      await marcarFalta.mutateAsync({ id });
+      toast.success("Falta registrada.");
+      invalidar();
+    } catch (erro) {
+      toast.error(erro instanceof ApiError ? erro.message : "Erro ao registrar falta.");
+    }
+  }
+
   async function aoConfirmarCancelamento(id: number) {
     try {
       await cancelar.mutateAsync({ id, data: { motivo: motivoCancelamento || null } });
@@ -218,11 +231,14 @@ export default function PaginaAgenda() {
 
   function CartaoAgendamento({ agendamento }: { agendamento: AgendamentoResponse }) {
     const cancelado = agendamento.status === "Cancelado";
+    const faltou = agendamento.status === "NaoCompareceu";
     const comCheckin = agendamento.status === "CheckInRealizado";
+    // Terminal (cancelado ou faltou) fica esmaecido; só o agendado age.
+    const encerrado = cancelado || faltou;
     return (
       <div
         className={`rounded-xl border p-3 text-sm ${
-          cancelado
+          encerrado
             ? "border-[#14162B]/6 bg-[#F7F7F9] opacity-60"
             : "border-[#14162B]/8 bg-white"
         }`}
@@ -247,12 +263,24 @@ export default function PaginaAgenda() {
                 cancelado
               </span>
             )}
+            {faltou && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
+                faltou
+              </span>
+            )}
           </span>
         </div>
         <p className="mt-1 font-medium text-[#14162B]">{agendamento.servicoNome}</p>
         <p className="text-[#6B7280]">
           {agendamento.nomeContato} · {agendamento.telefoneContato}
         </p>
+        {/* Risco onde a decisão é tomada: só quando há histórico e o
+            agendamento ainda está em aberto. */}
+        {!encerrado && (agendamento.clienteFaltas ?? 0) > 0 && (
+          <p className="mt-1 text-xs font-semibold text-amber-700">
+            ⚠ Cliente já faltou {agendamento.clienteFaltas}×
+          </p>
+        )}
         {(agendamento.aparelhoMarca || agendamento.aparelhoModelo) && (
           <p className="text-xs text-[#8B8D98]">
             {[agendamento.aparelhoMarca, agendamento.aparelhoModelo]
@@ -260,7 +288,7 @@ export default function PaginaAgenda() {
               .join(" ")}
           </p>
         )}
-        {!cancelado && (
+        {!encerrado && (
           <div className="mt-2 flex flex-wrap gap-1">
             {agendamento.status === "Agendado" && (
               <>
@@ -277,6 +305,13 @@ export default function PaginaAgenda() {
                   onClick={() => abrirEdicao(agendamento)}
                 >
                   Editar
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="h-7 px-3 text-xs text-amber-700 hover:text-amber-700"
+                  onClick={() => aoNaoCompareceu(agendamento.id)}
+                >
+                  Não compareceu
                 </Button>
               </>
             )}
@@ -583,7 +618,7 @@ export default function PaginaAgenda() {
                       setVisao("dia");
                     }}
                     className={`block w-full rounded-lg px-1.5 py-1 text-left text-[11px] leading-tight ${
-                      a.status === "Cancelado"
+                      a.status === "Cancelado" || a.status === "NaoCompareceu"
                         ? "bg-[#F7F7F9] text-[#8B8D98] line-through"
                         : "bg-[#14162B]/5 text-[#14162B]"
                     }`}
@@ -610,7 +645,9 @@ export default function PaginaAgenda() {
           <div className="grid grid-cols-7">
             {diasDoMes.map((dia) => {
               const doMes = dia.slice(0, 7) === dataRef.slice(0, 7);
-              const quantidade = porDia(dia).filter((a) => a.status !== "Cancelado").length;
+              const quantidade = porDia(dia).filter(
+                (a) => a.status !== "Cancelado" && a.status !== "NaoCompareceu",
+              ).length;
               return (
                 <button
                   key={dia}

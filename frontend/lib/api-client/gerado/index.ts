@@ -166,6 +166,7 @@ export const StatusAgendamento = {
   Agendado: 'Agendado',
   CheckInRealizado: 'CheckInRealizado',
   Cancelado: 'Cancelado',
+  NaoCompareceu: 'NaoCompareceu',
 } as const;
 
 export type OrigemAgendamento = typeof OrigemAgendamento[keyof typeof OrigemAgendamento];
@@ -207,6 +208,7 @@ export interface AgendamentoResponse {
   canceladoEm?: string | null;
   /** @nullable */
   motivoCancelamento?: string | null;
+  clienteFaltas?: number;
 }
 
 export interface AparelhoRequest {
@@ -406,6 +408,23 @@ export interface ComentarioSyncItem {
   updatedAt?: string;
   /** @nullable */
   deletedAt?: string | null;
+}
+
+export interface ComparecimentoItemResponse {
+  agendamentoId?: number;
+  data?: string;
+  horaInicio?: string;
+  /** @nullable */
+  servicoNome?: string | null;
+  status?: StatusAgendamento;
+}
+
+export interface ComparecimentoResponse {
+  compareceu?: number;
+  faltou?: number;
+  cancelou?: number;
+  /** @nullable */
+  recentes?: ComparecimentoItemResponse[] | null;
 }
 
 export interface ConfiguracaoAgendaRequest {
@@ -3062,6 +3081,202 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiAgendamentosIdCancelarMutationOptions(options), queryClient);
     }
+
+export type postApiAgendamentosIdNaoCompareceuResponse200 = {
+  data: AgendamentoResponse
+  status: 200
+}
+
+export type postApiAgendamentosIdNaoCompareceuResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiAgendamentosIdNaoCompareceuResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiAgendamentosIdNaoCompareceuResponseSuccess = (postApiAgendamentosIdNaoCompareceuResponse200) & {
+  headers: Headers;
+};
+export type postApiAgendamentosIdNaoCompareceuResponseError = (postApiAgendamentosIdNaoCompareceuResponse400 | postApiAgendamentosIdNaoCompareceuResponse404) & {
+  headers: Headers;
+};
+
+export type postApiAgendamentosIdNaoCompareceuResponse = (postApiAgendamentosIdNaoCompareceuResponseSuccess | postApiAgendamentosIdNaoCompareceuResponseError)
+
+export const getPostApiAgendamentosIdNaoCompareceuUrl = (id: number,) => {
+
+
+
+
+  return `/api/agendamentos/${id}/nao-compareceu`
+}
+
+export const postApiAgendamentosIdNaoCompareceu = async (id: number, options?: RequestInit): Promise<postApiAgendamentosIdNaoCompareceuResponse> => {
+
+  return apiFetch<postApiAgendamentosIdNaoCompareceuResponse>(getPostApiAgendamentosIdNaoCompareceuUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiAgendamentosIdNaoCompareceuMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['postApiAgendamentosIdNaoCompareceu'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiAgendamentosIdNaoCompareceu(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAgendamentosIdNaoCompareceuMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>>
+
+    export type PostApiAgendamentosIdNaoCompareceuMutationError = ProblemDetails
+
+    export const usePostApiAgendamentosIdNaoCompareceu = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAgendamentosIdNaoCompareceu>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getPostApiAgendamentosIdNaoCompareceuMutationOptions(options), queryClient);
+    }
+
+export type getApiClientesClienteIdComparecimentoResponse200 = {
+  data: ComparecimentoResponse
+  status: 200
+}
+
+export type getApiClientesClienteIdComparecimentoResponseSuccess = (getApiClientesClienteIdComparecimentoResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiClientesClienteIdComparecimentoResponse = (getApiClientesClienteIdComparecimentoResponseSuccess)
+
+export const getGetApiClientesClienteIdComparecimentoUrl = (clienteId: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/comparecimento`
+}
+
+export const getApiClientesClienteIdComparecimento = async (clienteId: number, options?: RequestInit): Promise<getApiClientesClienteIdComparecimentoResponse> => {
+
+  return apiFetch<getApiClientesClienteIdComparecimentoResponse>(getGetApiClientesClienteIdComparecimentoUrl(clienteId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiClientesClienteIdComparecimentoQueryKey = (clienteId: number,) => {
+    return [
+    `/api/clientes/${clienteId}/comparecimento`
+    ] as const;
+    }
+
+
+export const getGetApiClientesClienteIdComparecimentoQueryOptions = <TData = Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError = unknown>(clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiClientesClienteIdComparecimentoQueryKey(clienteId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>> = ({ signal }) => getApiClientesClienteIdComparecimento(clienteId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: clienteId !== null && clienteId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiClientesClienteIdComparecimentoQueryResult = NonNullable<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>>
+export type GetApiClientesClienteIdComparecimentoQueryError = unknown
+
+
+export function useGetApiClientesClienteIdComparecimento<TData = Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError = unknown>(
+ clienteId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdComparecimento<TData = Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdComparecimento<TData = Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiClientesClienteIdComparecimento<TData = Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdComparecimento>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiClientesClienteIdComparecimentoQueryOptions(clienteId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export type postApiClientesClienteIdAparelhosResponse201 = {
   data: AparelhoResponse
