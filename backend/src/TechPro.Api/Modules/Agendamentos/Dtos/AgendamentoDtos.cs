@@ -41,7 +41,10 @@ public record AgendamentoResponse(
     string? MotivoCancelamento,
     /// <summary>Total de faltas do cliente vinculado (0 sem vínculo) — a agenda
     /// usa para sinalizar risco onde a decisão é tomada.</summary>
-    int clienteFaltas);
+    int clienteFaltas,
+    /// <summary>Peças padrão do serviço em falta no estoque (vazio = abastecido)
+    /// — sinal para pedir/remarcar antes de o cliente chegar.</summary>
+    List<ServicosEPecas.Dtos.PecaEmFaltaResponse> pecasEmFalta);
 
 // --- Histórico de comparecimento por cliente (Fase 2) -------------------------
 

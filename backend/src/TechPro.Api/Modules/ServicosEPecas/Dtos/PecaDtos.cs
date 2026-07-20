@@ -46,6 +46,15 @@ public record MovimentacaoResponse(
     string? UsuarioNome,
     DateTimeOffset CriadoEm);
 
+// --- Disponibilidade de peças por serviço (Fase 2) ----------------------------
+
+/// <summary>Peça padrão de um serviço cujo saldo não cobre o necessário.</summary>
+public record PecaEmFaltaResponse(
+    int PecaId,
+    string PecaNome,
+    int Necessario,
+    int EmEstoque);
+
 // --- Lista de compra ------------------------------------------------------------
 
 public record ItemListaCompraResponse(

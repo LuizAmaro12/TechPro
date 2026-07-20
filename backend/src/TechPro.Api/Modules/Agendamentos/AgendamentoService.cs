@@ -21,6 +21,7 @@ public class AgendamentoService(
     ClienteService clientes,
     OrdensServico.OrdemServicoService ordensServico,
     ComunicacaoService comunicacao,
+    EstoqueService estoque,
     IAgendadorDeLembretes agendadorDeLembretes)
 {
     private Guid TenantId => tenantProvider.TenantId
@@ -70,11 +71,19 @@ public class AgendamentoService(
 
         var faltasPorCliente = await ContarFaltasAsync(
             itens.Where(a => a.ClienteId is not null).Select(a => a.ClienteId!.Value));
+        var pecasEmFalta = await estoque.FaltasPorServicoAsync(itens.Select(a => a.ServicoId));
 
         return itens
-            .Select(a => ParaResponse(a, FaltasDe(faltasPorCliente, a.ClienteId)))
+            .Select(a => ParaResponse(
+                a,
+                FaltasDe(faltasPorCliente, a.ClienteId),
+                PecasEmFaltaDe(pecasEmFalta, a.ServicoId)))
             .ToList();
     }
+
+    private static List<ServicosEPecas.Dtos.PecaEmFaltaResponse> PecasEmFaltaDe(
+        Dictionary<int, List<ServicosEPecas.Dtos.PecaEmFaltaResponse>> mapa, int servicoId) =>
+        mapa.TryGetValue(servicoId, out var lista) ? lista : [];
 
     /// <summary>Faltas por cliente em uma consulta agregada — nunca N+1.</summary>
     private async Task<Dictionary<int, int>> ContarFaltasAsync(IEnumerable<int> clienteIds)
@@ -392,10 +401,15 @@ public class AgendamentoService(
             .Include(a => a.Servico)
             .SingleAsync(a => a.Id == id);
         var faltas = FaltasDe(await ContarFaltasAsync([agendamento.ClienteId ?? 0]), agendamento.ClienteId);
-        return ParaResponse(agendamento, faltas);
+        var pecasEmFalta = PecasEmFaltaDe(
+            await estoque.FaltasPorServicoAsync([agendamento.ServicoId]), agendamento.ServicoId);
+        return ParaResponse(agendamento, faltas, pecasEmFalta);
     }
 
-    private static AgendamentoResponse ParaResponse(Agendamento a, int clienteFaltas) => new(
+    private static AgendamentoResponse ParaResponse(
+        Agendamento a,
+        int clienteFaltas,
+        List<ServicosEPecas.Dtos.PecaEmFaltaResponse> pecasEmFalta) => new(
         a.Id,
         a.Status,
         a.Origem,
@@ -415,7 +429,8 @@ public class AgendamentoService(
         a.ReagendadoEm,
         a.CanceladoEm,
         a.MotivoCancelamento,
-        clienteFaltas);
+        clienteFaltas,
+        pecasEmFalta);
 
     private static string? Normalizar(string? valor) =>
         string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();

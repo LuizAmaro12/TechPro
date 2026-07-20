@@ -155,6 +155,43 @@ public class EstoqueService(TechProDbContext db, ITenantProvider tenantProvider)
             m.CriadoEm)).ToList();
     }
 
+    // --- Disponibilidade de peças por serviço ----------------------------------------
+
+    /// <summary>
+    /// Para cada serviço, as peças padrão cujo saldo não cobre a quantidade
+    /// necessária. Uma consulta em lote (nunca N+1) — a agenda sinaliza a partir
+    /// daqui, e a regra fica no estoque para outros consumidores reusarem.
+    /// Reflete o saldo real: não desconta o que outros agendamentos comprometem
+    /// (reserva de estoque é problema maior, fora do escopo — ver plano).
+    /// </summary>
+    public async Task<Dictionary<int, List<PecaEmFaltaResponse>>> FaltasPorServicoAsync(
+        IEnumerable<int> servicoIds)
+    {
+        var ids = servicoIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        var padroes = await db.Set<ServicoPeca>()
+            .Include(sp => sp.Peca)
+            .Where(sp => ids.Contains(sp.ServicoId)
+                && sp.QuantidadePadrao > 0
+                && sp.Peca!.Ativo
+                && sp.Peca.QuantidadeEmEstoque < sp.QuantidadePadrao)
+            .ToListAsync();
+
+        return padroes
+            .GroupBy(sp => sp.ServicoId)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .Select(sp => new PecaEmFaltaResponse(
+                        sp.PecaId, sp.Peca!.Nome, sp.QuantidadePadrao, sp.Peca.QuantidadeEmEstoque))
+                    .OrderBy(p => p.PecaNome)
+                    .ToList());
+    }
+
     // --- Lista de compra -------------------------------------------------------------
 
     /// <summary>
