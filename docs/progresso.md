@@ -85,6 +85,41 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Não comparecimento e histórico de comparecimento — concluída em 2026-07-20
+
+6º item web da Fase 2 (primeira parte do bloco agendamento). Plano em
+`docs/superpowers/plans/2026-07-20-agenda-comparecimento.md`.
+
+**Motivação — lacuna de regra de negócio.** O agendamento só tinha
+`Agendado / CheckInRealizado / Cancelado`. Um cliente que furou o horário ou
+ficava preso em `Agendado` para sempre, ou era cancelado como se tivesse
+avisado — as duas coisas mentem sobre o que aconteceu, e a loja não tinha como
+saber quem falta.
+
+- **Novo estado terminal `NaoCompareceu`**, distinto de `Cancelado`: cancelar é
+  o cliente avisando, faltar é não aparecer. `POST /api/agendamentos/{id}/nao-compareceu`
+  (só de `Agendado`, como check-in e cancelamento).
+- **Histórico de comparecimento é derivado**, não uma tabela nova:
+  `GET /api/clientes/{id}/comparecimento` agrega compareceu/faltou/cancelou dos
+  próprios agendamentos. Zero migração de dados, zero denormalização a manter.
+- **Sinal de risco onde a decisão é tomada**: a listagem devolve `clienteFaltas`
+  por item (uma **consulta agregada em lote**, nunca N+1) e a agenda mostra
+  "⚠ já faltou N×" no card em aberto; o detalhe do cliente traz o resumo com
+  selo de risco.
+- **Sem mudança de schema**: `Status` é `varchar` sem CHECK, então o novo valor
+  não altera nada — confirmado gerando uma migração de prova com `Up()` **vazio**
+  (descartada, não versionada).
+- **Sem regressão nos outros módulos**: os usos de `StatusAgendamento` em
+  Dashboard, Comunicação, Financeiro e Disponibilidade filtram por `Agendado`
+  ou `Cancelado` específicos — o novo valor não cai em bucket errado. Um no-show
+  continua ocupando o slot (evento passado, não se reagenda), o que é correto.
+- **Evidência**: 5 testes de integração → **140/140**; e2e **7/7** (marca falta
+  só de agendado, histórico agrega cada estado, selo de risco na agenda e no
+  cliente, marca falta pela UI, isolamento entre empresas).
+- **Registrado como fora desta etapa**: fila de espera (superfície de UX
+  própria) e sinalização por indisponibilidade de peça (pertence ao fluxo de
+  check-in/OS, liga com o estoque recém-feito).
+
 ### Estoque com movimentação rastreável — concluída em 2026-07-20
 
 5º item web da Fase 2 (primeira parte do bloco catálogo/estoque). Plano em

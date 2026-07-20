@@ -35,8 +35,9 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   como peças padrão do serviço). Restam: peça compatível/equivalente, previsão
   de reposição e histórico de preço por fornecedor — todos agora com base de
   dados para existir.
-- **Agendamento**: fila de espera; histórico de comparecimento por cliente;
-  sinalização por indisponibilidade de peça (liga com estoque).
+- **Agendamento**: histórico de comparecimento por cliente ✅ + não
+  comparecimento ✅ (concluídos em 2026-07-20). Restam: fila de espera e
+  sinalização por indisponibilidade de peça (liga com o estoque recém-feito).
 - **Clientes/reputação**: importação CSV; conta vinculada família/empresa com
   UI completa; avaliações (nota/comentário, NPS, pedido após entrega,
   fechamento de loop); indicador de risco de inadimplência.
