@@ -85,6 +85,32 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Sinalização de peça em falta na agenda — concluída em 2026-07-20
+
+7º item web da Fase 2 (segunda parte do bloco agendamento) e o **elo com o
+estoque rastreável**. Plano em
+`docs/superpowers/plans/2026-07-20-agenda-pecas-em-falta.md`.
+
+- **A regra mora no estoque**: `EstoqueService.FaltasPorServicoAsync(servicoIds)`
+  devolve, por serviço, as peças padrão (`servico_pecas`) cujo saldo não cobre a
+  `QuantidadePadrao`. Uma consulta em lote (nunca N+1). A agenda consome; a
+  mesma verdade fica pronta para a OS e outros reusarem.
+- **`AgendamentoResponse.pecasEmFalta`** (vazio = abastecido) viaja na listagem
+  e no detalhe — sem endpoint novo. A agenda mostra "⚠ peça em falta" no card em
+  aberto, com tooltip do necessário × em estoque.
+- **Só peça ativa e com `QuantidadePadrao > 0`**; serviço sem peça padrão não
+  sinaliza nada. Há teste de que peça **inativa** zerada é ignorada.
+- **Sinal, não bloqueio** (coerente com "estoque negativo permitido"): nunca
+  impede agendar/dar check-in.
+- **Reflete o saldo real, sem reserva entre OS**: não desconto o que outros
+  agendamentos comprometem — reserva de estoque é problema maior (concorrência
+  entre OS) que o doc não pede agora. Registrado como limite consciente; há
+  teste de que repor a peça faz o sinal sumir.
+- **Sem tabela nem coluna nova** — deriva de `servico_pecas` + `pecas`.
+- **Evidência**: 6 testes de integração → **146/146**; e2e **7/7** (sinaliza
+  falta, não sinaliza abastecido, peça inativa ignorada, cálculo em lote, selo
+  no card certo, sinal some ao repor).
+
 ### Não comparecimento e histórico de comparecimento — concluída em 2026-07-20
 
 6º item web da Fase 2 (primeira parte do bloco agendamento). Plano em
