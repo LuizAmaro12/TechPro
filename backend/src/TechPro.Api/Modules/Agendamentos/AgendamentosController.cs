@@ -89,6 +89,20 @@ public class AgendamentosController(
         return TraduzirResultado(await service.CancelarAsync(id, request));
     }
 
+    /// <summary>Cliente não apareceu — estado terminal distinto de cancelamento.</summary>
+    [HttpPost("{id:int}/nao-compareceu")]
+    [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> NaoCompareceu(int id) =>
+        TraduzirResultado(await service.RegistrarNaoComparecimentoAsync(id));
+
+    /// <summary>Histórico de comparecimento do cliente (rota client-centric).</summary>
+    [HttpGet("/api/clientes/{clienteId:int}/comparecimento")]
+    [ProducesResponseType<ComparecimentoResponse>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Comparecimento(int clienteId) =>
+        Ok(await service.ComparecimentoDoClienteAsync(clienteId));
+
     private IActionResult TraduzirResultado(CatalogoResultado<AgendamentoResponse>? resultado)
     {
         if (resultado is null)

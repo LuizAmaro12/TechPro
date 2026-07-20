@@ -13,6 +13,10 @@ public enum StatusAgendamento
     Agendado,
     CheckInRealizado,
     Cancelado,
+
+    /// <summary>Cliente não apareceu. Distinto de Cancelado: cancelar é avisar,
+    /// faltar é não aparecer — misturar os dois apaga o dado de comparecimento.</summary>
+    NaoCompareceu,
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

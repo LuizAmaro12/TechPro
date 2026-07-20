@@ -67,15 +67,42 @@ public class AgendamentoService(
         var itens = await query
             .OrderBy(a => a.Data).ThenBy(a => a.HoraInicio)
             .ToListAsync();
-        return itens.Select(ParaResponse).ToList();
+
+        var faltasPorCliente = await ContarFaltasAsync(
+            itens.Where(a => a.ClienteId is not null).Select(a => a.ClienteId!.Value));
+
+        return itens
+            .Select(a => ParaResponse(a, FaltasDe(faltasPorCliente, a.ClienteId)))
+            .ToList();
     }
+
+    /// <summary>Faltas por cliente em uma consulta agregada — nunca N+1.</summary>
+    private async Task<Dictionary<int, int>> ContarFaltasAsync(IEnumerable<int> clienteIds)
+    {
+        var ids = clienteIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        return await db.Agendamentos
+            .Where(a => a.ClienteId != null
+                && ids.Contains(a.ClienteId.Value)
+                && a.Status == StatusAgendamento.NaoCompareceu)
+            .GroupBy(a => a.ClienteId!.Value)
+            .Select(g => new { ClienteId = g.Key, Total = g.Count() })
+            .ToDictionaryAsync(x => x.ClienteId, x => x.Total);
+    }
+
+    private static int FaltasDe(Dictionary<int, int> mapa, int? clienteId) =>
+        clienteId is { } id && mapa.TryGetValue(id, out var total) ? total : 0;
 
     public async Task<AgendamentoResponse?> ObterAsync(int id)
     {
         var agendamento = await db.Agendamentos
             .Include(a => a.Servico)
             .FirstOrDefaultAsync(a => a.Id == id);
-        return agendamento is null ? null : ParaResponse(agendamento);
+        return agendamento is null ? null : await CarregarResponseAsync(agendamento.Id);
     }
 
     public async Task<CatalogoResultado<AgendamentoResponse>> CriarManualAsync(AgendamentoRequest request)
@@ -212,6 +239,56 @@ public class AgendamentoService(
         return CatalogoResultado<AgendamentoResponse>.Ok(await CarregarResponseAsync(id));
     }
 
+    /// <summary>
+    /// Marca que o cliente não apareceu. Só de <c>Agendado</c> (como check-in e
+    /// cancelamento): é o estado terminal que preserva o dado de comparecimento.
+    /// </summary>
+    public async Task<CatalogoResultado<AgendamentoResponse>?> RegistrarNaoComparecimentoAsync(int id)
+    {
+        var agendamento = await db.Agendamentos.FirstOrDefaultAsync(a => a.Id == id);
+        if (agendamento is null)
+        {
+            return null;
+        }
+
+        if (agendamento.Status != StatusAgendamento.Agendado)
+        {
+            return CatalogoResultado<AgendamentoResponse>.Falha(
+                "Só é possível marcar falta de agendamento ativo.");
+        }
+
+        agendamento.Status = StatusAgendamento.NaoCompareceu;
+        await db.SaveChangesAsync();
+        return CatalogoResultado<AgendamentoResponse>.Ok(await CarregarResponseAsync(id));
+    }
+
+    /// <summary>
+    /// Histórico de comparecimento do cliente — derivado dos próprios
+    /// agendamentos, sem tabela nem denormalização a manter sincronizada.
+    /// </summary>
+    public async Task<ComparecimentoResponse> ComparecimentoDoClienteAsync(int clienteId)
+    {
+        var agendamentos = await db.Agendamentos
+            .Include(a => a.Servico)
+            .Where(a => a.ClienteId == clienteId)
+            .ToListAsync();
+
+        int Contar(StatusAgendamento s) => agendamentos.Count(a => a.Status == s);
+
+        var recentes = agendamentos
+            .OrderByDescending(a => a.Data).ThenByDescending(a => a.HoraInicio)
+            .Take(10)
+            .Select(a => new ComparecimentoItemResponse(
+                a.Id, a.Data, a.HoraInicio, a.Servico!.Nome, a.Status))
+            .ToList();
+
+        return new ComparecimentoResponse(
+            Contar(StatusAgendamento.CheckInRealizado),
+            Contar(StatusAgendamento.NaoCompareceu),
+            Contar(StatusAgendamento.Cancelado),
+            recentes);
+    }
+
     public async Task<CatalogoResultado<AgendamentoResponse>?> CancelarAsync(int id, CancelamentoRequest request)
     {
         var agendamento = await db.Agendamentos.FirstOrDefaultAsync(a => a.Id == id);
@@ -314,10 +391,11 @@ public class AgendamentoService(
         var agendamento = await db.Agendamentos
             .Include(a => a.Servico)
             .SingleAsync(a => a.Id == id);
-        return ParaResponse(agendamento);
+        var faltas = FaltasDe(await ContarFaltasAsync([agendamento.ClienteId ?? 0]), agendamento.ClienteId);
+        return ParaResponse(agendamento, faltas);
     }
 
-    private static AgendamentoResponse ParaResponse(Agendamento a) => new(
+    private static AgendamentoResponse ParaResponse(Agendamento a, int clienteFaltas) => new(
         a.Id,
         a.Status,
         a.Origem,
@@ -336,7 +414,8 @@ public class AgendamentoService(
         a.CriadoEm,
         a.ReagendadoEm,
         a.CanceladoEm,
-        a.MotivoCancelamento);
+        a.MotivoCancelamento,
+        clienteFaltas);
 
     private static string? Normalizar(string? valor) =>
         string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();

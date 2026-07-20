@@ -38,4 +38,22 @@ public record AgendamentoResponse(
     DateTimeOffset CriadoEm,
     DateTimeOffset? ReagendadoEm,
     DateTimeOffset? CanceladoEm,
-    string? MotivoCancelamento);
+    string? MotivoCancelamento,
+    /// <summary>Total de faltas do cliente vinculado (0 sem vínculo) — a agenda
+    /// usa para sinalizar risco onde a decisão é tomada.</summary>
+    int clienteFaltas);
+
+// --- Histórico de comparecimento por cliente (Fase 2) -------------------------
+
+public record ComparecimentoItemResponse(
+    int AgendamentoId,
+    DateOnly Data,
+    TimeOnly HoraInicio,
+    string ServicoNome,
+    StatusAgendamento Status);
+
+public record ComparecimentoResponse(
+    int Compareceu,
+    int Faltou,
+    int Cancelou,
+    List<ComparecimentoItemResponse> Recentes);
