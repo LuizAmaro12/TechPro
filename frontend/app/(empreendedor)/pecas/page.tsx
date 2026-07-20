@@ -5,6 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { ListaDeCompra } from "@/components/estoque/lista-de-compra";
+import { MovimentacaoPeca } from "@/components/estoque/movimentacao-peca";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +34,8 @@ const VALORES_INICIAIS: ValoresPeca = {
 };
 
 export default function PaginaPecas() {
+  // Extrato/movimentação de uma peça por vez — abre abaixo da tabela.
+  const [movimentandoId, setMovimentandoId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const [formAberto, setFormAberto] = useState(false);
   const [editandoId, setEditandoId] = useState<number | null>(null);
@@ -62,9 +66,24 @@ export default function PaginaPecas() {
     defaultValues: VALORES_INICIAIS,
   });
 
+  const pecaMovimentando =
+    movimentandoId === null
+      ? null
+      : (pecas?.itens ?? []).find((p) => p.id === movimentandoId) ?? null;
+
   function invalidar() {
     queryClient.invalidateQueries({ queryKey: ["/api/pecas"] });
     queryClient.invalidateQueries({ queryKey: ["/api/fornecedores"] });
+  }
+
+  function invalidarEstoque() {
+    invalidar();
+    queryClient.invalidateQueries({ queryKey: ["/api/estoque/lista-compra"] });
+    if (movimentandoId !== null) {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/pecas/${movimentandoId}/movimentacoes`],
+      });
+    }
   }
 
   function abrirCriacao() {
@@ -299,6 +318,8 @@ export default function PaginaPecas() {
         </form>
       )}
 
+      <ListaDeCompra />
+
       <div className="mt-8 flex items-center justify-between">
         <p className="text-sm text-[#6B7280]">
           {pecas ? `${pecas.total} peça(s)` : "Carregando..."}
@@ -359,6 +380,17 @@ export default function PaginaPecas() {
                   <Button
                     variant="ghost"
                     className="h-8 px-3"
+                    onClick={() =>
+                      setMovimentandoId((atual) =>
+                        atual === peca.id ? null : (peca.id ?? null),
+                      )
+                    }
+                  >
+                    Estoque
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-8 px-3"
                     onClick={() => abrirEdicao(peca)}
                   >
                     Editar
@@ -385,6 +417,17 @@ export default function PaginaPecas() {
           </tbody>
         </table>
       </div>
+
+      {pecaMovimentando && (
+        <MovimentacaoPeca
+          key={pecaMovimentando.id}
+          pecaId={pecaMovimentando.id!}
+          pecaNome={pecaMovimentando.nome ?? ""}
+          saldoAtual={pecaMovimentando.quantidadeEmEstoque ?? 0}
+          aoMudar={invalidarEstoque}
+          aoFechar={() => setMovimentandoId(null)}
+        />
+      )}
     </div>
   );
 }

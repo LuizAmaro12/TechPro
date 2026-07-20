@@ -1717,6 +1717,25 @@
         }
       }
     },
+    "/api/estoque/lista-compra": {
+      "get": {
+        "tags": [
+          "Estoque"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaCompraResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ordens-servico/{ordemId}/orcamento": {
       "put": {
         "tags": [
@@ -3518,6 +3537,116 @@
         }
       }
     },
+    "/api/pecas/{id}/movimentacoes": {
+      "get": {
+        "tags": [
+          "Pecas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MovimentacaoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pecas"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovimentacaoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovimentacaoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovimentacaoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovimentacaoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publico/{slug}/info": {
       "get": {
         "tags": [
@@ -4933,6 +5062,32 @@
         },
         "additionalProperties": false
       },
+      "GrupoListaCompraResponse": {
+        "type": "object",
+        "properties": {
+          "fornecedorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fornecedorNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemListaCompraResponse"
+            },
+            "nullable": true
+          },
+          "custoEstimado": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "HistoricoEtapaResponse": {
         "type": "object",
         "properties": {
@@ -5036,6 +5191,61 @@
               "$ref": "#/components/schemas/HorarioFuncionamentoDia"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ItemListaCompraResponse": {
+        "type": "object",
+        "properties": {
+          "pecaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pecaNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantidadeEmEstoque": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "estoqueMinimo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sugestaoCompra": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "custoUnitario": {
+            "type": "number",
+            "format": "double"
+          },
+          "custoEstimado": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ListaCompraResponse": {
+        "type": "object",
+        "properties": {
+          "grupos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrupoListaCompraResponse"
+            },
+            "nullable": true
+          },
+          "totalDeItens": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "custoEstimado": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false
@@ -5232,6 +5442,76 @@
             "nullable": true
           },
           "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MovimentacaoRequest": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoMovimentacaoEstoque"
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "custoUnitario": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MovimentacaoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/TipoMovimentacaoEstoque"
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "saldoApos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "custoUnitario": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "ordemServicoId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ordemServicoNumero": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "usuarioNome": {
             "type": "string",
             "nullable": true
           },
@@ -6694,6 +6974,16 @@
         ],
         "type": "string"
       },
+      "TipoMovimentacaoEstoque": {
+        "enum": [
+          "Entrada",
+          "Saida",
+          "Ajuste",
+          "ConsumoOs",
+          "EstornoOs"
+        ],
+        "type": "string"
+      },
       "TotalPorFormaResponse": {
         "type": "object",
         "properties": {
@@ -6867,6 +7157,9 @@
     },
     {
       "name": "Equipe"
+    },
+    {
+      "name": "Estoque"
     },
     {
       "name": "Financeiro"
