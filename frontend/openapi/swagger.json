@@ -1298,6 +1298,54 @@
         }
       }
     },
+    "/api/clientes/importar": {
+      "post": {
+        "tags": [
+          "Clientes"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportarClientesRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportarClientesRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportarClientesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportacaoClientesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/clientes": {
       "get": {
         "tags": [
@@ -5811,6 +5859,41 @@
         },
         "additionalProperties": false
       },
+      "ImportacaoClientesResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "importados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duplicados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "erros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinhaImportacaoResponse"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImportarClientesRequest": {
+        "type": "object",
+        "properties": {
+          "conteudoCsv": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ItemListaCompraResponse": {
         "type": "object",
         "properties": {
@@ -5841,6 +5924,20 @@
           "custoEstimado": {
             "type": "number",
             "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LinhaImportacaoResponse": {
+        "type": "object",
+        "properties": {
+          "linha": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

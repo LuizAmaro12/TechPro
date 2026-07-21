@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ImportarCsv } from "@/components/clientes/importar-csv";
 import { ResumoComparecimento } from "@/components/clientes/resumo-comparecimento";
 import { ApiError } from "@/lib/api-client/fetcher";
 import {
@@ -299,6 +300,10 @@ export default function PaginaClientes() {
         >
           Novo cliente
         </Button>
+      </div>
+
+      <div className="mt-6">
+        <ImportarCsv aoImportar={invalidar} />
       </div>
 
       {formAberto && (

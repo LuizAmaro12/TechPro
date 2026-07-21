@@ -785,6 +785,25 @@ export interface HorariosFuncionamentoRequest {
   dias?: HorarioFuncionamentoDia[] | null;
 }
 
+export interface LinhaImportacaoResponse {
+  linha?: number;
+  /** @nullable */
+  motivo?: string | null;
+}
+
+export interface ImportacaoClientesResponse {
+  total?: number;
+  importados?: number;
+  duplicados?: number;
+  /** @nullable */
+  erros?: LinhaImportacaoResponse[] | null;
+}
+
+export interface ImportarClientesRequest {
+  /** @nullable */
+  conteudoCsv?: string | null;
+}
+
 export interface ListaCompraResponse {
   /** @nullable */
   grupos?: GrupoListaCompraResponse[] | null;
@@ -4110,6 +4129,90 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
 
 
 
+
+export type postApiClientesImportarResponse200 = {
+  data: ImportacaoClientesResponse
+  status: 200
+}
+
+export type postApiClientesImportarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiClientesImportarResponseSuccess = (postApiClientesImportarResponse200) & {
+  headers: Headers;
+};
+export type postApiClientesImportarResponseError = (postApiClientesImportarResponse400) & {
+  headers: Headers;
+};
+
+export type postApiClientesImportarResponse = (postApiClientesImportarResponseSuccess | postApiClientesImportarResponseError)
+
+export const getPostApiClientesImportarUrl = () => {
+
+
+
+
+  return `/api/clientes/importar`
+}
+
+export const postApiClientesImportar = async (importarClientesRequest?: ImportarClientesRequest, options?: RequestInit): Promise<postApiClientesImportarResponse> => {
+
+  return apiFetch<postApiClientesImportarResponse>(getPostApiClientesImportarUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(importarClientesRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiClientesImportarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesImportar>>, TError,{data?: ImportarClientesRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiClientesImportar>>, TError,{data?: ImportarClientesRequest}, TContext> => {
+
+const mutationKey = ['postApiClientesImportar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiClientesImportar>>, {data?: ImportarClientesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiClientesImportar(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiClientesImportarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiClientesImportar>>>
+    export type PostApiClientesImportarMutationBody = ImportarClientesRequest | undefined
+    export type PostApiClientesImportarMutationError = ProblemDetails
+
+    export const usePostApiClientesImportar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiClientesImportar>>, TError,{data?: ImportarClientesRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiClientesImportar>>,
+        TError,
+        {data?: ImportarClientesRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiClientesImportarMutationOptions(options), queryClient);
+    }
 
 export type getApiClientesResponse200 = {
   data: ClienteResponsePaginaResponse
