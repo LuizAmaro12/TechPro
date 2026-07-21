@@ -14,6 +14,19 @@ public record ClienteRequest(
 
 public record VinculoResponse(int Id, string Nome);
 
+// --- Importação por CSV (Fase 2) ----------------------------------------------
+
+public record ImportarClientesRequest(string ConteudoCsv);
+
+/// <summary>Linha que não entrou (inválida ou duplicada), com o motivo.</summary>
+public record LinhaImportacaoResponse(int Linha, string Motivo);
+
+public record ImportacaoClientesResponse(
+    int Total,
+    int Importados,
+    int Duplicados,
+    List<LinhaImportacaoResponse> Erros);
+
 public record ClienteResponse(
     int Id,
     string Nome,

@@ -73,6 +73,7 @@ builder.Services.AddScoped<FornecedorService>();
 builder.Services.AddScoped<PecaService>();
 builder.Services.AddScoped<ServicoService>();
 builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<ImportacaoClientesService>();
 builder.Services.AddScoped<AparelhoService>();
 builder.Services.AddScoped<LgpdService>();
 builder.Services.AddScoped<AgendaService>();

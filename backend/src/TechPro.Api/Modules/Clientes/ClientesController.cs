@@ -10,8 +10,24 @@ namespace TechPro.Api.Modules.Clientes;
 [Route("api/clientes")]
 [Authorize]
 [Produces("application/json")]
-public class ClientesController(ClienteService service, IValidator<ClienteRequest> validador) : ControllerBase
+public class ClientesController(
+    ClienteService service,
+    ImportacaoClientesService importacao,
+    IValidator<ClienteRequest> validador) : ControllerBase
 {
+    /// <summary>Importa a carteira existente por CSV — só adiciona, com relatório
+    /// por linha (duplicados e inválidos são pulados, não bloqueiam o resto).</summary>
+    [HttpPost("importar")]
+    [ProducesResponseType<ImportacaoClientesResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Importar(ImportarClientesRequest request)
+    {
+        var resultado = await importacao.ImportarAsync(request.ConteudoCsv);
+        return resultado.Erro is not null
+            ? Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest)
+            : Ok(resultado.Valor);
+    }
+
     [HttpGet]
     [ProducesResponseType<PaginaResponse<ClienteResponse>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(
