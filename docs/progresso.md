@@ -85,6 +85,36 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Importação de clientes por CSV — concluída em 2026-07-21
+
+9º item web da Fase 2 (início do bloco clientes/reputação). Plano em
+`docs/superpowers/plans/2026-07-21-importacao-clientes-csv.md`.
+
+**Motivação**: é a **porta de entrada** do produto. Uma loja com carteira
+existente (planilha, contatos exportados) não recadastra centenas à mão —
+importar reduz o atrito que derruba adoção.
+
+- **Um passo com relatório por linha**: a importação só **adiciona** (nunca
+  atualiza/apaga), então importa as válidas e **reporta** duplicadas e
+  inválidas. Reimportar depois de corrigir é seguro — há teste de que reenviar
+  o mesmo arquivo dá 100% duplicado.
+- **Dedup por telefone (só dígitos)** contra o banco **e** dentro do próprio
+  arquivo — telefone é a chave natural do cliente no resto do sistema.
+- **Parser tolerante**: cabeçalho por nome sem acento/case
+  (`nome`/`telefone`/`email`/`cpf`/`endereço`/`obs` e sinônimos), delimitador
+  `,` ou `;` detectado (Excel BR usa `;`), campos entre aspas com vírgula
+  interna. `nome` e `telefone` obrigatórios no cabeçalho, senão falha inteira
+  com mensagem clara.
+- **Consentimento LGPD = false** nos importados: importar uma lista não é
+  consentimento. Registrado e testado.
+- **Teto de 5000 linhas**; transacional (as válidas num único `SaveChanges`).
+- **Sem tabela nova** — cria `Cliente` existentes.
+- **Evidência**: 6 testes de integração → **157/157**; e2e **6/6** (relatório
+  com números, linha de erro listada, importados existem sem consentimento, não
+  duplica o existente, reimportar não duplica).
+- **Registrado como fora desta etapa**: atualizar existentes na importação
+  (merge — decisão de produto arriscada).
+
 ### Fila de espera de agendamento — concluída em 2026-07-21
 
 8º item web da Fase 2 — **fecha o bloco de agendamento**. Plano em
