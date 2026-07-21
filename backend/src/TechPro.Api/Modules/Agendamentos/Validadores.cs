@@ -131,3 +131,41 @@ public class AgendamentoPublicoRequestValidator : AbstractValidator<AgendamentoP
             .MaximumLength(150).WithMessage("O modelo pode ter no máximo 150 caracteres.");
     }
 }
+
+public class FilaEsperaPublicaRequestValidator : AbstractValidator<FilaEsperaPublicaRequest>
+{
+    public FilaEsperaPublicaRequestValidator()
+    {
+        RuleFor(a => a.ServicoId).GreaterThan(0).WithMessage("Informe o serviço.");
+        RuleFor(a => a.NomeContato)
+            .NotEmpty().WithMessage("Informe seu nome.")
+            .MaximumLength(200).WithMessage("O nome pode ter no máximo 200 caracteres.");
+        RuleFor(a => a.TelefoneContato)
+            .NotEmpty().WithMessage("Informe seu telefone/WhatsApp.")
+            .MaximumLength(20).WithMessage("O telefone pode ter no máximo 20 caracteres.");
+        RuleFor(a => a.EmailContato)
+            .MaximumLength(256)
+            .EmailAddress().When(a => !string.IsNullOrEmpty(a.EmailContato))
+            .WithMessage("Informe um e-mail válido.");
+        RuleFor(a => a.DescricaoProblema).MaximumLength(1000);
+        RuleFor(a => a.AparelhoMarca).MaximumLength(100);
+        RuleFor(a => a.AparelhoModelo).MaximumLength(150);
+    }
+}
+
+public class FilaEsperaRequestValidator : AbstractValidator<FilaEsperaRequest>
+{
+    public FilaEsperaRequestValidator()
+    {
+        RuleFor(a => a.ServicoId).GreaterThan(0).WithMessage("Informe o serviço.");
+        RuleFor(a => a.NomeContato).MaximumLength(200);
+        RuleFor(a => a.TelefoneContato).MaximumLength(20);
+        RuleFor(a => a.EmailContato)
+            .MaximumLength(256)
+            .EmailAddress().When(a => !string.IsNullOrEmpty(a.EmailContato))
+            .WithMessage("Informe um e-mail válido.");
+        RuleFor(a => a.DescricaoProblema).MaximumLength(1000);
+        RuleFor(a => a.AparelhoMarca).MaximumLength(100);
+        RuleFor(a => a.AparelhoModelo).MaximumLength(150);
+    }
+}

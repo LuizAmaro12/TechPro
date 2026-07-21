@@ -26,7 +26,9 @@ public class PublicoController(
     TenantAmbiente tenantAmbiente,
     AgendamentoService agendamentos,
     DisponibilidadeService disponibilidade,
-    IValidator<AgendamentoPublicoRequest> validador) : ControllerBase
+    FilaEsperaService filaEspera,
+    IValidator<AgendamentoPublicoRequest> validador,
+    IValidator<FilaEsperaPublicaRequest> validadorFila) : ControllerBase
 {
     [HttpGet("info")]
     [ProducesResponseType<LojaPublicaResponse>(StatusCodes.Status200OK)]
@@ -101,6 +103,44 @@ public class PublicoController(
         }
 
         return Created($"/api/publico/{slug}/agendamentos/{resultado.Valor!.Id}", resultado.Valor);
+    }
+
+    /// <summary>
+    /// Entrar na fila de espera quando não há vaga na data desejada — a demanda
+    /// que antes se perdia. Devolve só o resumo do que a pessoa enviou.
+    /// </summary>
+    [HttpPost("fila-espera")]
+    [ProducesResponseType<FilaEsperaPublicaResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> EntrarNaFila(string slug, FilaEsperaPublicaRequest request)
+    {
+        var empresa = await ResolverLojaAsync(slug);
+        if (empresa is null)
+        {
+            return NotFound();
+        }
+
+        var validacao = await validadorFila.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var resultado = await filaEspera.EntrarPublicoAsync(request);
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var entrada = resultado.Valor!;
+        var servicoNome = await db.Servicos
+            .Where(s => s.Id == entrada.ServicoId)
+            .Select(s => s.Nome)
+            .SingleAsync();
+        return Created(
+            $"/api/publico/{slug}/fila-espera/{entrada.Id}",
+            new FilaEsperaPublicaResponse(entrada.Id, empresa.Nome, servicoNome));
     }
 
     /// <summary>

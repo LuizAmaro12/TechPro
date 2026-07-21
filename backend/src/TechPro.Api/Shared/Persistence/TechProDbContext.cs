@@ -34,6 +34,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<HorarioFuncionamento> HorariosFuncionamento => Set<HorarioFuncionamento>();
     public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
+    public DbSet<EntradaFilaEspera> FilaEspera => Set<EntradaFilaEspera>();
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
@@ -228,6 +229,25 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.ClienteId);
             // Restrict: histórico de agenda não some junto com cliente/serviço
             // (ambos usam desativação, nunca exclusão física — defesa extra).
+            e.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<EntradaFilaEspera>(e =>
+        {
+            e.ToTable("fila_espera");
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.Origem).HasConversion<string>().HasMaxLength(20);
+            e.Property(x => x.NomeContato).HasMaxLength(200);
+            e.Property(x => x.TelefoneContato).HasMaxLength(20);
+            e.Property(x => x.EmailContato).HasMaxLength(256);
+            e.Property(x => x.DescricaoProblema).HasMaxLength(1000);
+            e.Property(x => x.AparelhoMarca).HasMaxLength(100);
+            e.Property(x => x.AparelhoModelo).HasMaxLength(150);
+            e.Property(x => x.MotivoDescarte).HasMaxLength(500);
+            e.HasIndex(x => new { x.TenantId, x.Status });
             e.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)

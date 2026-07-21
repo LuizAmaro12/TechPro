@@ -78,6 +78,7 @@ builder.Services.AddScoped<LgpdService>();
 builder.Services.AddScoped<AgendaService>();
 builder.Services.AddScoped<DisponibilidadeService>();
 builder.Services.AddScoped<AgendamentoService>();
+builder.Services.AddScoped<FilaEsperaService>();
 builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddScoped<EstoqueService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
