@@ -85,6 +85,39 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Fila de espera de agendamento — concluída em 2026-07-21
+
+8º item web da Fase 2 — **fecha o bloco de agendamento**. Plano em
+`docs/superpowers/plans/2026-07-21-fila-de-espera.md`.
+
+**Motivação (doc de módulos, textual)**: "fila de espera / lista de interesse
+quando não há horário disponível na data desejada. Hoje essa demanda
+simplesmente se perde; capturá-la é receita que já existe e está sendo
+descartada." O portal, ao não achar vaga, era um beco sem saída.
+
+- **Entidade própria `EntradaFilaEspera`**, não um status de `Agendamento`: uma
+  entrada de fila não ocupa horário nem vira OS — forçá-la no agendamento
+  sujaria disponibilidade/capacidade. São coisas diferentes.
+- **Captura nas duas pontas**: portal (o cliente entra sozinho quando a data não
+  tem vaga) e manual (a loja registra quem ligou). `Origem` distingue.
+- **Vínculo silencioso por telefone** na captura pública (reusa
+  `VincularOuCriarPorTelefoneAsync`): o cliente já entra ligado ao CRM.
+- **Converter reusa `CriarManualAsync`**: a loja escolhe data/hora, a conversão
+  cria o agendamento normal (com todas as validações) e marca a entrada como
+  `Convertida` guardando o `AgendamentoId`. Horário indisponível **mantém** a
+  entrada na fila (há teste). Zero duplicação da lógica de agendar.
+- **Descartar preserva o registro** (histórico de demanda); estado terminal não
+  reabre.
+- **Fora do escopo offline** (int PK): captação administrativa, não fluxo de
+  campo.
+- **Fora desta etapa** (registrado): notificar automaticamente quando abre vaga
+  (depende de canal + detecção de vaga — sub-projeto próprio). A conversão
+  manual já entrega o valor central.
+- **RLS `ENABLE`+`FORCE`** na tabela nova → **22/22 tabelas de tenant**.
+- **Evidência**: 5 testes de integração → **151/151**; e2e **6/6** (portal +
+  agenda) e **3/3** (UI do portal: botão aparece sem vaga, confirma, entrada
+  chega na loja).
+
 ### Sinalização de peça em falta na agenda — concluída em 2026-07-20
 
 7º item web da Fase 2 (segunda parte do bloco agendamento) e o **elo com o
@@ -327,13 +360,14 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 21/21 tabelas cobertas
+### Isolamento entre empresas: 22/22 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 21** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 22** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `bloqueios_agenda`, `clientes`, `fornecedores`,
-`horarios_funcionamento`, `mensagens_enviadas`, `movimentacoes_estoque`,
+`fila_espera`, `horarios_funcionamento`, `mensagens_enviadas`,
+`movimentacoes_estoque`,
 `orcamento_eventos`,
 `orcamentos`, `ordem_servico_comentarios`, `ordem_servico_historico_etapas`,
 `ordem_servico_pecas`, `ordem_servico_reatribuicoes`, `ordens_servico`,

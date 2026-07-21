@@ -37,7 +37,8 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   dados para existir.
 - **Agendamento**: histórico de comparecimento por cliente ✅ + não
   comparecimento ✅ + sinalização por indisponibilidade de peça ✅ (concluídos
-  em 2026-07-20). Resta: fila de espera (superfície de UX própria).
+  em 2026-07-20) + fila de espera ✅ (2026-07-21). **Bloco de agendamento
+  concluído.**
 - **Clientes/reputação**: importação CSV; conta vinculada família/empresa com
   UI completa; avaliações (nota/comentário, NPS, pedido após entrega,
   fechamento de loop); indicador de risco de inadimplência.
