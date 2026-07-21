@@ -13,6 +13,7 @@ import {
   useGetApiPublicoSlugDisponibilidade,
   useGetApiPublicoSlugInfo,
   usePostApiPublicoSlugAgendamentos,
+  usePostApiPublicoSlugFilaEspera,
   type AgendamentoPublicoResponse,
 } from "@/lib/api-client/gerado";
 import { formatarDataLonga, hojeIso, horaCurta } from "@/lib/agenda-datas";
@@ -58,6 +59,8 @@ export default function PaginaAgendarPublico() {
       : [];
 
   const agendar = usePostApiPublicoSlugAgendamentos();
+  const entrarNaFila = usePostApiPublicoSlugFilaEspera();
+  const [filaConfirmada, setFilaConfirmada] = useState(false);
 
   const formIdentificacao = useForm<ValoresIdentificacao>({
     resolver: zodResolver(esquemaIdentificacao),
@@ -97,6 +100,35 @@ export default function PaginaAgendarPublico() {
         erro instanceof ApiError
           ? erro.message
           : "Não foi possível concluir o agendamento. Tente novamente.",
+      );
+    }
+  }
+
+  async function aoEntrarNaFila() {
+    if (!identificacao || !aparelho || servicoId === null) return;
+    setErroEnvio(null);
+    try {
+      const resposta = await entrarNaFila.mutateAsync({
+        slug,
+        data: {
+          servicoId,
+          nomeContato: identificacao.nomeContato,
+          telefoneContato: identificacao.telefoneContato,
+          emailContato: identificacao.emailContato || null,
+          dataPreferida: data,
+          descricaoProblema: aparelho.descricaoProblema || null,
+          aparelhoMarca: aparelho.aparelhoMarca,
+          aparelhoModelo: aparelho.aparelhoModelo,
+        },
+      });
+      if (resposta.status === 201) {
+        setFilaConfirmada(true);
+      }
+    } catch (erro) {
+      setErroEnvio(
+        erro instanceof ApiError
+          ? erro.message
+          : "Não foi possível entrar na fila. Tente novamente.",
       );
     }
   }
@@ -374,9 +406,27 @@ export default function PaginaAgendarPublico() {
               <Label>Horários disponíveis</Label>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {horariosLivres.length === 0 ? (
-                  <p className="text-sm text-[#8B8D98]">
-                    Nenhum horário livre nesta data — tente outro dia.
-                  </p>
+                  filaConfirmada ? (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                      Pronto! Você está na fila de espera. A loja entra em contato
+                      assim que abrir um horário para esta data.
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-[#14162B]/10 bg-[#F7F7F9] p-4">
+                      <p className="text-sm text-[#6B7280]">
+                        Nenhum horário livre nesta data. Quer entrar na fila de
+                        espera? A loja te avisa quando abrir uma vaga.
+                      </p>
+                      <Button
+                        type="button"
+                        disabled={entrarNaFila.isPending}
+                        onClick={aoEntrarNaFila}
+                        className="mt-3 h-10 rounded-full bg-[#E8536B] px-6 text-white hover:bg-[#E8536B]/90"
+                      >
+                        Entrar na fila de espera
+                      </Button>
+                    </div>
+                  )
                 ) : (
                   horariosLivres.map((hora) => (
                     <button

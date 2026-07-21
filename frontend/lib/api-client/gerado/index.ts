@@ -452,6 +452,11 @@ export interface ContaRequest {
   nome?: string | null;
 }
 
+export interface ConverterFilaRequest {
+  data?: string;
+  horaInicio?: string;
+}
+
 export interface OrdemServicoExportada {
   numero?: number;
   /** @nullable */
@@ -531,6 +536,11 @@ export interface DashboardResponse {
   radar?: RadarResponse;
 }
 
+export interface DescartarFilaRequest {
+  /** @nullable */
+  motivo?: string | null;
+}
+
 export interface DisponibilidadeResponse {
   data?: string;
   servicoId?: number;
@@ -551,6 +561,89 @@ export interface EquipeMembroResponse {
   nome?: string | null;
   /** @nullable */
   email?: string | null;
+}
+
+export interface FilaEsperaPublicaRequest {
+  servicoId?: number;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  dataPreferida?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+}
+
+export interface FilaEsperaPublicaResponse {
+  id?: number;
+  /** @nullable */
+  nomeLoja?: string | null;
+  /** @nullable */
+  servicoNome?: string | null;
+}
+
+export interface FilaEsperaRequest {
+  servicoId?: number;
+  /** @nullable */
+  clienteId?: number | null;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  dataPreferida?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+}
+
+export type StatusFilaEspera = typeof StatusFilaEspera[keyof typeof StatusFilaEspera];
+
+
+export const StatusFilaEspera = {
+  Aguardando: 'Aguardando',
+  Convertida: 'Convertida',
+  Descartada: 'Descartada',
+} as const;
+
+export interface FilaEsperaResponse {
+  id?: number;
+  servicoId?: number;
+  /** @nullable */
+  servicoNome?: string | null;
+  /** @nullable */
+  clienteId?: number | null;
+  /** @nullable */
+  nomeContato?: string | null;
+  /** @nullable */
+  telefoneContato?: string | null;
+  /** @nullable */
+  emailContato?: string | null;
+  /** @nullable */
+  dataPreferida?: string | null;
+  /** @nullable */
+  descricaoProblema?: string | null;
+  /** @nullable */
+  aparelhoMarca?: string | null;
+  /** @nullable */
+  aparelhoModelo?: string | null;
+  origem?: OrigemAgendamento;
+  status?: StatusFilaEspera;
+  /** @nullable */
+  agendamentoId?: number | null;
+  criadoEm?: string;
 }
 
 export type FormaPagamento = typeof FormaPagamento[keyof typeof FormaPagamento];
@@ -1353,6 +1446,10 @@ somenteVip?: boolean;
 incluirInativos?: boolean;
 pagina?: number;
 tamanhoPagina?: number;
+};
+
+export type GetApiFilaEsperaParams = {
+status?: StatusFilaEspera;
 };
 
 export type GetApiFinanceiroParams = {
@@ -5370,6 +5467,384 @@ export function useGetApiEstoqueListaCompra<TData = Awaited<ReturnType<typeof ge
 
 
 
+
+export type getApiFilaEsperaResponse200 = {
+  data: FilaEsperaResponse[]
+  status: 200
+}
+
+export type getApiFilaEsperaResponseSuccess = (getApiFilaEsperaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiFilaEsperaResponse = (getApiFilaEsperaResponseSuccess)
+
+export const getGetApiFilaEsperaUrl = (params?: GetApiFilaEsperaParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/fila-espera?${stringifiedParams}` : `/api/fila-espera`
+}
+
+export const getApiFilaEspera = async (params?: GetApiFilaEsperaParams, options?: RequestInit): Promise<getApiFilaEsperaResponse> => {
+
+  return apiFetch<getApiFilaEsperaResponse>(getGetApiFilaEsperaUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiFilaEsperaQueryKey = (params?: GetApiFilaEsperaParams,) => {
+    return [
+    `/api/fila-espera`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiFilaEsperaQueryOptions = <TData = Awaited<ReturnType<typeof getApiFilaEspera>>, TError = unknown>(params?: GetApiFilaEsperaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFilaEsperaQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFilaEspera>>> = ({ signal }) => getApiFilaEspera(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFilaEsperaQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFilaEspera>>>
+export type GetApiFilaEsperaQueryError = unknown
+
+
+export function useGetApiFilaEspera<TData = Awaited<ReturnType<typeof getApiFilaEspera>>, TError = unknown>(
+ params: undefined |  GetApiFilaEsperaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFilaEspera>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFilaEspera>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFilaEspera<TData = Awaited<ReturnType<typeof getApiFilaEspera>>, TError = unknown>(
+ params?: GetApiFilaEsperaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFilaEspera>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFilaEspera>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFilaEspera<TData = Awaited<ReturnType<typeof getApiFilaEspera>>, TError = unknown>(
+ params?: GetApiFilaEsperaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiFilaEspera<TData = Awaited<ReturnType<typeof getApiFilaEspera>>, TError = unknown>(
+ params?: GetApiFilaEsperaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFilaEspera>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFilaEsperaQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiFilaEsperaResponse201 = {
+  data: FilaEsperaResponse
+  status: 201
+}
+
+export type postApiFilaEsperaResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiFilaEsperaResponseSuccess = (postApiFilaEsperaResponse201) & {
+  headers: Headers;
+};
+export type postApiFilaEsperaResponseError = (postApiFilaEsperaResponse400) & {
+  headers: Headers;
+};
+
+export type postApiFilaEsperaResponse = (postApiFilaEsperaResponseSuccess | postApiFilaEsperaResponseError)
+
+export const getPostApiFilaEsperaUrl = () => {
+
+
+
+
+  return `/api/fila-espera`
+}
+
+export const postApiFilaEspera = async (filaEsperaRequest?: FilaEsperaRequest, options?: RequestInit): Promise<postApiFilaEsperaResponse> => {
+
+  return apiFetch<postApiFilaEsperaResponse>(getPostApiFilaEsperaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(filaEsperaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiFilaEsperaMutationOptions = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEspera>>, TError,{data?: FilaEsperaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEspera>>, TError,{data?: FilaEsperaRequest}, TContext> => {
+
+const mutationKey = ['postApiFilaEspera'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiFilaEspera>>, {data?: FilaEsperaRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiFilaEspera(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiFilaEsperaMutationResult = NonNullable<Awaited<ReturnType<typeof postApiFilaEspera>>>
+    export type PostApiFilaEsperaMutationBody = FilaEsperaRequest | undefined
+    export type PostApiFilaEsperaMutationError = ValidationProblemDetails
+
+    export const usePostApiFilaEspera = <TError = ValidationProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEspera>>, TError,{data?: FilaEsperaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiFilaEspera>>,
+        TError,
+        {data?: FilaEsperaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiFilaEsperaMutationOptions(options), queryClient);
+    }
+
+export type postApiFilaEsperaIdConverterResponse200 = {
+  data: FilaEsperaResponse
+  status: 200
+}
+
+export type postApiFilaEsperaIdConverterResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiFilaEsperaIdConverterResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiFilaEsperaIdConverterResponseSuccess = (postApiFilaEsperaIdConverterResponse200) & {
+  headers: Headers;
+};
+export type postApiFilaEsperaIdConverterResponseError = (postApiFilaEsperaIdConverterResponse400 | postApiFilaEsperaIdConverterResponse404) & {
+  headers: Headers;
+};
+
+export type postApiFilaEsperaIdConverterResponse = (postApiFilaEsperaIdConverterResponseSuccess | postApiFilaEsperaIdConverterResponseError)
+
+export const getPostApiFilaEsperaIdConverterUrl = (id: number,) => {
+
+
+
+
+  return `/api/fila-espera/${id}/converter`
+}
+
+export const postApiFilaEsperaIdConverter = async (id: number,
+    converterFilaRequest?: ConverterFilaRequest, options?: RequestInit): Promise<postApiFilaEsperaIdConverterResponse> => {
+
+  return apiFetch<postApiFilaEsperaIdConverterResponse>(getPostApiFilaEsperaIdConverterUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(converterFilaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiFilaEsperaIdConverterMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>, TError,{id: number;data?: ConverterFilaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>, TError,{id: number;data?: ConverterFilaRequest}, TContext> => {
+
+const mutationKey = ['postApiFilaEsperaIdConverter'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>, {id: number;data?: ConverterFilaRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiFilaEsperaIdConverter(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiFilaEsperaIdConverterMutationResult = NonNullable<Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>>
+    export type PostApiFilaEsperaIdConverterMutationBody = ConverterFilaRequest | undefined
+    export type PostApiFilaEsperaIdConverterMutationError = ProblemDetails
+
+    export const usePostApiFilaEsperaIdConverter = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>, TError,{id: number;data?: ConverterFilaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiFilaEsperaIdConverter>>,
+        TError,
+        {id: number;data?: ConverterFilaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiFilaEsperaIdConverterMutationOptions(options), queryClient);
+    }
+
+export type postApiFilaEsperaIdDescartarResponse200 = {
+  data: FilaEsperaResponse
+  status: 200
+}
+
+export type postApiFilaEsperaIdDescartarResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiFilaEsperaIdDescartarResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiFilaEsperaIdDescartarResponseSuccess = (postApiFilaEsperaIdDescartarResponse200) & {
+  headers: Headers;
+};
+export type postApiFilaEsperaIdDescartarResponseError = (postApiFilaEsperaIdDescartarResponse400 | postApiFilaEsperaIdDescartarResponse404) & {
+  headers: Headers;
+};
+
+export type postApiFilaEsperaIdDescartarResponse = (postApiFilaEsperaIdDescartarResponseSuccess | postApiFilaEsperaIdDescartarResponseError)
+
+export const getPostApiFilaEsperaIdDescartarUrl = (id: number,) => {
+
+
+
+
+  return `/api/fila-espera/${id}/descartar`
+}
+
+export const postApiFilaEsperaIdDescartar = async (id: number,
+    descartarFilaRequest?: DescartarFilaRequest, options?: RequestInit): Promise<postApiFilaEsperaIdDescartarResponse> => {
+
+  return apiFetch<postApiFilaEsperaIdDescartarResponse>(getPostApiFilaEsperaIdDescartarUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(descartarFilaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiFilaEsperaIdDescartarMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>, TError,{id: number;data?: DescartarFilaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>, TError,{id: number;data?: DescartarFilaRequest}, TContext> => {
+
+const mutationKey = ['postApiFilaEsperaIdDescartar'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>, {id: number;data?: DescartarFilaRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiFilaEsperaIdDescartar(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiFilaEsperaIdDescartarMutationResult = NonNullable<Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>>
+    export type PostApiFilaEsperaIdDescartarMutationBody = DescartarFilaRequest | undefined
+    export type PostApiFilaEsperaIdDescartarMutationError = ProblemDetails
+
+    export const usePostApiFilaEsperaIdDescartar = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>, TError,{id: number;data?: DescartarFilaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiFilaEsperaIdDescartar>>,
+        TError,
+        {id: number;data?: DescartarFilaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiFilaEsperaIdDescartarMutationOptions(options), queryClient);
+    }
 
 export type putApiOrdensServicoOrdemIdOrcamentoResponse200 = {
   data: OrcamentoResponse
@@ -9557,6 +10032,96 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiPublicoSlugAgendamentosMutationOptions(options), queryClient);
+    }
+
+export type postApiPublicoSlugFilaEsperaResponse201 = {
+  data: FilaEsperaPublicaResponse
+  status: 201
+}
+
+export type postApiPublicoSlugFilaEsperaResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiPublicoSlugFilaEsperaResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiPublicoSlugFilaEsperaResponseSuccess = (postApiPublicoSlugFilaEsperaResponse201) & {
+  headers: Headers;
+};
+export type postApiPublicoSlugFilaEsperaResponseError = (postApiPublicoSlugFilaEsperaResponse400 | postApiPublicoSlugFilaEsperaResponse404) & {
+  headers: Headers;
+};
+
+export type postApiPublicoSlugFilaEsperaResponse = (postApiPublicoSlugFilaEsperaResponseSuccess | postApiPublicoSlugFilaEsperaResponseError)
+
+export const getPostApiPublicoSlugFilaEsperaUrl = (slug: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/fila-espera`
+}
+
+export const postApiPublicoSlugFilaEspera = async (slug: string,
+    filaEsperaPublicaRequest?: FilaEsperaPublicaRequest, options?: RequestInit): Promise<postApiPublicoSlugFilaEsperaResponse> => {
+
+  return apiFetch<postApiPublicoSlugFilaEsperaResponse>(getPostApiPublicoSlugFilaEsperaUrl(slug),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(filaEsperaPublicaRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiPublicoSlugFilaEsperaMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>, TError,{slug: string;data?: FilaEsperaPublicaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>, TError,{slug: string;data?: FilaEsperaPublicaRequest}, TContext> => {
+
+const mutationKey = ['postApiPublicoSlugFilaEspera'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>, {slug: string;data?: FilaEsperaPublicaRequest}> = (props) => {
+          const {slug,data} = props ?? {};
+
+          return  postApiPublicoSlugFilaEspera(slug,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiPublicoSlugFilaEsperaMutationResult = NonNullable<Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>>
+    export type PostApiPublicoSlugFilaEsperaMutationBody = FilaEsperaPublicaRequest | undefined
+    export type PostApiPublicoSlugFilaEsperaMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiPublicoSlugFilaEspera = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>, TError,{slug: string;data?: FilaEsperaPublicaRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiPublicoSlugFilaEspera>>,
+        TError,
+        {slug: string;data?: FilaEsperaPublicaRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiPublicoSlugFilaEsperaMutationOptions(options), queryClient);
     }
 
 export type getApiServicosResponse200 = {

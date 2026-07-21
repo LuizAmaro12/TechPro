@@ -1816,6 +1816,221 @@
         }
       }
     },
+    "/api/fila-espera": {
+      "get": {
+        "tags": [
+          "FilaEspera"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/StatusFilaEspera"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FilaEsperaResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "FilaEspera"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilaEsperaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fila-espera/{id}/converter": {
+      "post": {
+        "tags": [
+          "FilaEspera"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConverterFilaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConverterFilaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConverterFilaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilaEsperaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fila-espera/{id}/descartar": {
+      "post": {
+        "tags": [
+          "FilaEspera"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescartarFilaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescartarFilaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescartarFilaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilaEsperaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ordens-servico/{ordemId}/orcamento": {
       "put": {
         "tags": [
@@ -3899,6 +4114,74 @@
         }
       }
     },
+    "/api/publico/{slug}/fila-espera": {
+      "post": {
+        "tags": [
+          "Publico"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaPublicaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaPublicaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilaEsperaPublicaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilaEsperaPublicaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/servicos": {
       "get": {
         "tags": [
@@ -4937,6 +5220,20 @@
         },
         "additionalProperties": false
       },
+      "ConverterFilaRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "time"
+          }
+        },
+        "additionalProperties": false
+      },
       "DadosPessoaisResponse": {
         "type": "object",
         "properties": {
@@ -5009,6 +5306,16 @@
           },
           "radar": {
             "$ref": "#/components/schemas/RadarResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DescartarFilaRequest": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -5098,6 +5405,174 @@
           "Cancelado"
         ],
         "type": "string"
+      },
+      "FilaEsperaPublicaRequest": {
+        "type": "object",
+        "properties": {
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nomeContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefoneContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataPreferida": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilaEsperaPublicaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nomeLoja": {
+            "type": "string",
+            "nullable": true
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilaEsperaRequest": {
+        "type": "object",
+        "properties": {
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "nomeContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefoneContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataPreferida": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilaEsperaResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "clienteId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "nomeContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefoneContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailContato": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataPreferida": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "descricaoProblema": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoMarca": {
+            "type": "string",
+            "nullable": true
+          },
+          "aparelhoModelo": {
+            "type": "string",
+            "nullable": true
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemAgendamento"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusFilaEspera"
+          },
+          "agendamentoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "FinanceiroRelatorioResponse": {
         "type": "object",
@@ -7091,6 +7566,14 @@
         ],
         "type": "string"
       },
+      "StatusFilaEspera": {
+        "enum": [
+          "Aguardando",
+          "Convertida",
+          "Descartada"
+        ],
+        "type": "string"
+      },
       "StatusMensagem": {
         "enum": [
           "Enviada",
@@ -7324,6 +7807,9 @@
     },
     {
       "name": "Estoque"
+    },
+    {
+      "name": "FilaEspera"
     },
     {
       "name": "Financeiro"
