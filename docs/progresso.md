@@ -85,6 +85,64 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Equipe, permissões e histórico de ações — concluída em 2026-07-22
+
+12º item web da Fase 2 (módulo 13 avançado + módulo 14). Plano em
+`docs/superpowers/plans/2026-07-22-equipe-permissoes-auditoria.md`.
+
+**Diagnóstico que motivou a prioridade** — três achados confirmados no código:
+
+1. `CreateAsync` só rodava no cadastro da empresa: **não havia como adicionar um
+   segundo usuário**. O produto era, na prática, mono-usuário.
+2. Os papéis `tecnico` e `atendente` estavam seedados desde a fundação e **nunca
+   eram atribuídos** — todo usuário nascia `gestor`.
+3. **Nenhum endpoint usava `[Authorize(Roles=…)]`** — qualquer autenticado podia
+   tudo, inclusive financeiro, configurações e LGPD.
+
+Efeito colateral: recursos já construídos (reatribuição de técnico, satisfação
+por técnico, SLA por técnico) só podiam apontar para o próprio dono. Esta etapa
+destravou esse valor.
+
+**Decisões do usuário (AskUserQuestion)**: o doc exige que os papéis "não
+acessem os mesmos dados" mas não define quais — decidido em conjunto: **três
+níveis por função** e **escopo completo** (membros + permissões + histórico).
+
+- **Políticas nomeadas** (`Gestao`/`Atendimento`/`Bancada`) num arquivo só, em
+  vez de listas de papéis espalhadas: a matriz vira uma edição única e o nome
+  documenta a intenção.
+- **Fail-closed**: endpoint sem política segue exigindo autenticação; as
+  políticas só **restringem** — nada ficou mais aberto do que era.
+- **Desativar, nunca apagar** membro (o usuário tem histórico); o **login
+  rejeita inativo** com a mesma resposta de credencial inválida, para não
+  revelar que a conta existe.
+- **Guarda do último gestor**: não dá para rebaixar nem desativar o único
+  gestor — senão a loja se tranca para fora das próprias configurações.
+- **Senha inicial definida pelo gestor**, não convite por link: o envio de
+  e-mail ainda está em modo `log`, então um convite ficaria quebrado na prática.
+  Registrado como evolução quando o Resend estiver ligado.
+- **Auditoria só onde ainda não havia rastro** — equipe, LGPD e configurações.
+  OS, orçamento, estoque e reatribuição já têm as próprias trilhas; duplicá-las
+  numa tabela genérica seria redundância cara de manter sincronizada.
+
+**Dois defeitos corrigidos nesta etapa:**
+
+- **Migração**: o EF gerou `defaultValue: false` para `usuarios.ativo` — isso
+  deixaria **todos os usuários existentes inativos e sem conseguir logar**.
+  Corrigido para `true` e conferido no banco (**56/56 usuários seguem ativos**).
+- **Dashboard**: exibia "Faturamento do mês" e linkava para `/financeiro` para
+  todos os papéis — vazava dado financeiro e levava técnico/atendente a um 403.
+  Agora só o gestor vê o card.
+
+- **RLS `ENABLE`+`FORCE`** em `registros_auditoria` → **25/25 tabelas de tenant**
+  (`usuarios` segue fora por decisão documentada: plano de controle).
+- **Evidência**: 9 testes de integração → **177/177** (os 168 anteriores
+  seguiram verdes, confirmando que o caminho do gestor não regrediu); e2e
+  **14/14** (gestor adiciona membro, ação no histórico, navegação difere por
+  papel, 403 real no backend, desativado não entra mais).
+- **Registrado como fora desta etapa**: convite por e-mail com link (depende do
+  Resend); permissão por objeto (ex.: técnico só vê as OS dele) — a matriz
+  aprovada é por área.
+
 ### Templates editáveis e central de mensagens — concluída em 2026-07-22
 
 11º item web da Fase 2 (bloco comunicação, módulo 9). Plano em
@@ -468,16 +526,16 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 24/24 tabelas cobertas
+### Isolamento entre empresas: 25/25 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 24** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 25** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `avaliacoes`, `bloqueios_agenda`, `clientes`,
 `fornecedores`,
 `fila_espera`, `horarios_funcionamento`, `mensagens_enviadas`,
 `movimentacoes_estoque`,
-`orcamento_eventos`,
+`orcamento_eventos`, `registros_auditoria`,
 `orcamentos`, `ordem_servico_comentarios`, `ordem_servico_historico_etapas`,
 `ordem_servico_pecas`, `ordem_servico_reatribuicoes`, `ordens_servico`,
 `pagamentos`, `pecas`, `preferencias_notificacao`,
@@ -1014,7 +1072,7 @@ docker compose up -d --build
   mais peças depois) − desconto. Um orçamento por OS na Fase 1 (item a item é
   Fase 2). Editar um orçamento já respondido volta o status a Rascunho,
   preservando a trilha.
-- **Trilha de auditoria append-only** (`orcamento_eventos`, seção 16 do doc de
+- **Trilha de auditoria append-only** (`orcamento_eventos`, `registros_auditoria`, seção 16 do doc de
   stack — diferencial do branding): cada envio/aprovação/recusa grava tipo,
   **canal** (Loja/Portal), usuário (quando loja), valor total e motivo, nunca
   sobrescrita.

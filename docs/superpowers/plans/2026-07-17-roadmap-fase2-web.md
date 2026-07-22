@@ -44,9 +44,8 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   família/empresa com UI completa; indicador de risco de inadimplência; quebra
   do resumo de satisfação por serviço (o dado já é gravado).
 - **Comunicação/config**: templates editáveis por evento ✅ e central de
-  mensagens unificada por cliente ✅ (2026-07-22). Restam: equipe com funções e
-  permissões + histórico de ações (o doc pede desenhar junto com
-  LGPD/auditoria). Resposta automática a FAQ segue dependente da API de
+  mensagens unificada por cliente ✅ (2026-07-22). Equipe com funções e permissões +
+  histórico de ações ✅ (2026-07-22). **Bloco de comunicação/config concluído.** Resposta automática a FAQ segue dependente da API de
   WhatsApp; campanhas/reativação dependem de consentimento de marketing.
 - **Portal do técnico (web responsivo)** — item web, mas de fluxo de campo;
   fica para depois dos itens acima.
