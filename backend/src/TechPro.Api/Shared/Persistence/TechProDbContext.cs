@@ -48,6 +48,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<Pagamento> Pagamentos => Set<Pagamento>();
     public DbSet<MensagemEnviada> MensagensEnviadas => Set<MensagemEnviada>();
     public DbSet<PreferenciaNotificacao> PreferenciasNotificacao => Set<PreferenciaNotificacao>();
+    public DbSet<TemplateMensagem> TemplatesMensagem => Set<TemplateMensagem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -235,6 +236,16 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<TemplateMensagem>(e =>
+        {
+            e.ToTable("templates_mensagem");
+            e.Property(x => x.TipoEvento).HasConversion<string>().HasMaxLength(30);
+            e.Property(x => x.Assunto).HasMaxLength(200);
+            e.Property(x => x.Corpo).HasMaxLength(2000);
+            // Um template por evento por loja.
+            e.HasIndex(x => new { x.TenantId, x.TipoEvento }).IsUnique();
         });
 
         builder.Entity<Avaliacao>(e =>

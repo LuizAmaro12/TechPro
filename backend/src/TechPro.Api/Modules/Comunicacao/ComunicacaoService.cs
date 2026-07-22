@@ -59,9 +59,7 @@ public class ComunicacaoService(
         await DespacharAsync(
             await DestinatarioDoAgendamentoAsync(ag),
             TipoEventoComunicacao.AgendamentoConfirmado,
-            assunto: $"Agendamento confirmado — {loja}",
-            corpo: $"Olá, {ag.NomeContato}! Seu agendamento de {ag.Servico?.Nome} na {loja} "
-                 + $"está confirmado para {quando}. Até lá!",
+            contexto: ContextoAgendamento(ag, loja, quando),
             agendamentoId: ag.Id, ordemId: null, clienteId: ag.ClienteId);
     }
 
@@ -80,9 +78,7 @@ public class ComunicacaoService(
         await DespacharAsync(
             await DestinatarioDoAgendamentoAsync(ag),
             TipoEventoComunicacao.AgendamentoLembrete,
-            assunto: $"Lembrete do seu agendamento — {loja}",
-            corpo: $"Oi, {ag.NomeContato}! Passando para lembrar do seu agendamento de "
-                 + $"{ag.Servico?.Nome} na {loja} em {quando}. Se precisar remarcar, é só avisar.",
+            contexto: ContextoAgendamento(ag, loja, quando),
             agendamentoId: ag.Id, ordemId: null, clienteId: ag.ClienteId);
     }
 
@@ -98,9 +94,7 @@ public class ComunicacaoService(
         await DespacharAsync(
             DestinatarioDaOs(os),
             TipoEventoComunicacao.OrdemServicoCriada,
-            assunto: $"Recebemos seu aparelho — OS #{os.Numero} ({loja})",
-            corpo: $"Olá, {os.Cliente!.Nome}! Abrimos a ordem de serviço #{os.Numero} para o seu "
-                 + $"{DescricaoAparelho(os)}({os.Servico?.Nome}). {LinkAcompanhamento(os, await SlugLojaAsync())}",
+            contexto: await ContextoOsAsync(os, loja),
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
@@ -118,10 +112,7 @@ public class ComunicacaoService(
         await DespacharAsync(
             DestinatarioDaOs(os),
             TipoEventoComunicacao.OrcamentoDisponivel,
-            assunto: $"Orçamento da OS #{os.Numero} — {loja}",
-            corpo: $"Olá, {os.Cliente!.Nome}! O orçamento do reparo do seu {DescricaoAparelho(os)}"
-                 + $"ficou em {Reais(total)}. Você pode aprovar ou recusar por aqui: "
-                 + $"{LinkAcompanhamento(os, await SlugLojaAsync(), curto: true)}",
+            contexto: await ContextoOsAsync(os, loja, valor: Reais(total)),
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
@@ -134,17 +125,12 @@ public class ComunicacaoService(
         }
 
         var loja = await NomeLojaAsync();
-        var (evento, assunto, corpo) = aprovado
-            ? (TipoEventoComunicacao.OrcamentoAprovado,
-               $"Orçamento aprovado — OS #{os.Numero}",
-               $"Recebemos a aprovação do orçamento da OS #{os.Numero}. Já vamos seguir com o "
-               + $"reparo do seu {DescricaoAparelho(os)}e avisamos quando estiver pronto!")
-            : (TipoEventoComunicacao.OrcamentoRecusado,
-               $"Orçamento recusado — OS #{os.Numero}",
-               $"Registramos a recusa do orçamento da OS #{os.Numero}. Se quiser conversar sobre "
-               + $"outras opções, é só falar com a {loja}.");
+        var evento = aprovado
+            ? TipoEventoComunicacao.OrcamentoAprovado
+            : TipoEventoComunicacao.OrcamentoRecusado;
         await DespacharAsync(
-            DestinatarioDaOs(os), evento, assunto, corpo,
+            DestinatarioDaOs(os), evento,
+            contexto: await ContextoOsAsync(os, loja),
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
@@ -160,9 +146,7 @@ public class ComunicacaoService(
         await DespacharAsync(
             DestinatarioDaOs(os),
             TipoEventoComunicacao.ProntoParaRetirada,
-            assunto: $"Seu aparelho está pronto! — OS #{os.Numero} ({loja})",
-            corpo: $"Boa notícia, {os.Cliente!.Nome}! O reparo do seu {DescricaoAparelho(os)}"
-                 + $"foi concluído e está pronto para retirada na {loja}. Te esperamos!",
+            contexto: await ContextoOsAsync(os, loja),
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
@@ -183,24 +167,68 @@ public class ComunicacaoService(
         await DespacharAsync(
             DestinatarioDaOs(os),
             TipoEventoComunicacao.PedidoAvaliacao,
-            assunto: $"Como foi seu atendimento? — OS #{os.Numero} ({loja})",
-            corpo: $"Olá, {os.Cliente!.Nome}! Esperamos que o seu {DescricaoAparelho(os)}esteja "
-                 + $"funcionando bem. Sua opinião ajuda muito a {loja}: avalie o atendimento por "
-                 + $"aqui em 1 minuto. {LinkAcompanhamento(os, await SlugLojaAsync(), curto: true)}",
+            contexto: await ContextoOsAsync(os, loja),
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
+    // --- Contexto das variáveis de template -----------------------------------------
+
+    private static Dictionary<string, string> ContextoAgendamento(
+        Agendamento ag, string loja, string quando) => new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["cliente"] = ag.NomeContato,
+            ["loja"] = loja,
+            ["servico"] = ag.Servico?.Nome ?? "",
+            ["data"] = quando,
+        };
+
+    private async Task<Dictionary<string, string>> ContextoOsAsync(
+        OrdemServico os, string loja, string? valor = null) =>
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["cliente"] = os.Cliente?.Nome ?? "",
+            ["loja"] = loja,
+            ["servico"] = os.Servico?.Nome ?? "",
+            ["aparelho"] = DescricaoAparelho(os).Trim(),
+            ["numero"] = os.Numero.ToString(),
+            ["valor"] = valor ?? "",
+            ["link"] = LinkAcompanhamento(os, await SlugLojaAsync(), curto: true),
+        };
+
     // --- Núcleo de despacho ---------------------------------------------------------
+
+    /// <summary>
+    /// Texto efetivo do evento: o template da loja, se existir; senão o padrão
+    /// embutido. Ausência = padrão — sem seed e sem migração de dados.
+    /// </summary>
+    private async Task<(string Assunto, string Corpo)> ComporAsync(
+        TipoEventoComunicacao evento,
+        IReadOnlyDictionary<string, string> contexto)
+    {
+        var (assuntoPadrao, corpoPadrao) = TemplatesPadrao.Para(evento);
+
+        _templates ??= await db.TemplatesMensagem.ToDictionaryAsync(t => t.TipoEvento);
+        var personalizado = _templates.GetValueOrDefault(evento);
+
+        return (
+            RenderizadorDeTemplate.Render(
+                string.IsNullOrWhiteSpace(personalizado?.Assunto) ? assuntoPadrao : personalizado.Assunto,
+                contexto),
+            RenderizadorDeTemplate.Render(personalizado?.Corpo ?? corpoPadrao, contexto));
+    }
+
+    private Dictionary<TipoEventoComunicacao, TemplateMensagem>? _templates;
 
     private async Task DespacharAsync(
         Destinatario destinatario,
         TipoEventoComunicacao evento,
-        string assunto,
-        string corpo,
+        IReadOnlyDictionary<string, string> contexto,
         int? agendamentoId,
         Guid? ordemId,
         int? clienteId)
     {
+        var (assunto, corpo) = await ComporAsync(evento, contexto);
+
         var alvos = new List<(CanalNotificacao Canal, string Destino)>();
         if (!string.IsNullOrWhiteSpace(destinatario.Telefone))
         {

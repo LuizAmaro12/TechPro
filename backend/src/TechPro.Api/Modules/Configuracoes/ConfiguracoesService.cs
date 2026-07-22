@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.Configuracoes.Dtos;
+using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Persistence;
 using TechPro.Api.Shared.Tenancy;
 
@@ -86,6 +87,95 @@ public class ConfiguracoesService(TechProDbContext db, ITenantProvider tenantPro
 
         await db.SaveChangesAsync();
         return await ObterPreferenciasAsync();
+    }
+
+    // --- Templates de mensagem por evento ------------------------------------------
+
+    /// <summary>
+    /// Texto efetivo de cada evento: o personalizado da loja, se houver; senão
+    /// o padrão do catálogo — que é literalmente o mesmo texto que o despacho
+    /// usa, então a tela nunca mostra algo diferente do que o cliente recebe.
+    /// </summary>
+    public async Task<TemplatesResponse> ObterTemplatesAsync()
+    {
+        var salvos = await db.TemplatesMensagem.ToDictionaryAsync(t => t.TipoEvento);
+
+        var itens = Eventos.Select(evento =>
+        {
+            var (assuntoPadrao, corpoPadrao) = TemplatesPadrao.Para(evento);
+            var salvo = salvos.GetValueOrDefault(evento);
+            return new TemplateItem(
+                evento,
+                string.IsNullOrWhiteSpace(salvo?.Assunto) ? assuntoPadrao : salvo.Assunto,
+                salvo?.Corpo ?? corpoPadrao,
+                Personalizado: salvo is not null,
+                VariaveisDeTemplate.Para(evento));
+        }).ToList();
+
+        return new TemplatesResponse(itens);
+    }
+
+    /// <summary>
+    /// Salva as personalizações. Corpo vazio **remove** a personalização (volta
+    /// ao padrão). Variável inexistente para o evento é rejeitada aqui — o erro
+    /// é pego na configuração, nunca no texto que chega ao cliente.
+    /// </summary>
+    public async Task<CatalogoResultado<TemplatesResponse>> SalvarTemplatesAsync(
+        TemplatesRequest request)
+    {
+        foreach (var item in request.Itens)
+        {
+            var permitidas = VariaveisDeTemplate.Para(item.TipoEvento);
+            var usadas = RenderizadorDeTemplate.VariaveisUsadas(item.Assunto)
+                .Concat(RenderizadorDeTemplate.VariaveisUsadas(item.Corpo))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+            var invalida = usadas.FirstOrDefault(v =>
+                !permitidas.Contains(v, StringComparer.OrdinalIgnoreCase));
+            if (invalida is not null)
+            {
+                return CatalogoResultado<TemplatesResponse>.Falha(
+                    $"A variável {{{invalida}}} não existe em {item.TipoEvento}. "
+                    + $"Disponíveis: {string.Join(", ", permitidas.Select(v => $"{{{v}}}"))}.");
+            }
+        }
+
+        var salvos = await db.TemplatesMensagem.ToListAsync();
+        foreach (var item in request.Itens)
+        {
+            var existente = salvos.FirstOrDefault(t => t.TipoEvento == item.TipoEvento);
+            var corpo = Normalizar(item.Corpo);
+
+            if (corpo is null)
+            {
+                if (existente is not null)
+                {
+                    db.TemplatesMensagem.Remove(existente);
+                }
+
+                continue;
+            }
+
+            if (existente is null)
+            {
+                db.TemplatesMensagem.Add(new TemplateMensagem
+                {
+                    TenantId = TenantId,
+                    TipoEvento = item.TipoEvento,
+                    Assunto = Normalizar(item.Assunto),
+                    Corpo = corpo,
+                    AtualizadoEm = DateTimeOffset.UtcNow,
+                });
+            }
+            else
+            {
+                existente.Assunto = Normalizar(item.Assunto);
+                existente.Corpo = corpo;
+                existente.AtualizadoEm = DateTimeOffset.UtcNow;
+            }
+        }
+
+        await db.SaveChangesAsync();
+        return CatalogoResultado<TemplatesResponse>.Ok(await ObterTemplatesAsync());
     }
 
     private static string? Normalizar(string? valor) =>

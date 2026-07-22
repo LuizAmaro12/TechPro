@@ -51,4 +51,22 @@ public class ConfiguracoesController(
 
         return Ok(await service.SalvarPreferenciasAsync(request));
     }
+
+    // --- Templates de mensagem (Fase 2) --------------------------------------
+
+    [HttpGet("templates")]
+    [ProducesResponseType<TemplatesResponse>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ObterTemplates() => Ok(await service.ObterTemplatesAsync());
+
+    /// <summary>Corpo vazio em um item volta aquele evento ao texto padrão.</summary>
+    [HttpPut("templates")]
+    [ProducesResponseType<TemplatesResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SalvarTemplates(TemplatesRequest request)
+    {
+        var resultado = await service.SalvarTemplatesAsync(request);
+        return resultado.Erro is not null
+            ? Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest)
+            : Ok(resultado.Valor);
+    }
 }
