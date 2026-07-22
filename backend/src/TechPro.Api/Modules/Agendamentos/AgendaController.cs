@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Agendamentos.Dtos;
 using TechPro.Api.Shared.Api;
@@ -24,6 +25,8 @@ public class AgendaController(
         Ok(await service.ListarHorariosAsync());
 
     [HttpPut("horarios")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<List<HorarioFuncionamentoDia>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SalvarHorarios(HorariosFuncionamentoRequest request)
@@ -44,6 +47,8 @@ public class AgendaController(
         Ok(await service.ListarBloqueiosAsync(deData, ateData));
 
     [HttpPost("bloqueios")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<BloqueioResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CriarBloqueio(BloqueioRequest request)
@@ -59,6 +64,8 @@ public class AgendaController(
     }
 
     [HttpDelete("bloqueios/{id:int}")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoverBloqueio(int id) =>
@@ -70,6 +77,8 @@ public class AgendaController(
         Ok(await service.ObterConfiguracaoAsync());
 
     [HttpPut("configuracoes")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<ConfiguracaoAgendaResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]

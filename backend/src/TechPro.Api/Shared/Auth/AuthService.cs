@@ -99,7 +99,9 @@ public class AuthService(
     public async Task<TokensEmitidos?> LoginAsync(LoginRequest requisicao, TipoCliente tipoCliente)
     {
         var usuario = await userManager.FindByEmailAsync(requisicao.Email.Trim());
-        if (usuario is null)
+        // Membro desativado não entra — mesma resposta de credencial inválida,
+        // para não revelar que a conta existe.
+        if (usuario is null || !usuario.Ativo)
         {
             return null;
         }

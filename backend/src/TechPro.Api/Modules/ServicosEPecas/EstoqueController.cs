@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.ServicosEPecas.Dtos;
 
@@ -10,7 +11,7 @@ namespace TechPro.Api.Modules.ServicosEPecas;
 /// </summary>
 [ApiController]
 [Route("api/estoque")]
-[Authorize]
+[Authorize(Policy = Politicas.Bancada)]
 [Produces("application/json")]
 public class EstoqueController(EstoqueService estoque) : ControllerBase
 {

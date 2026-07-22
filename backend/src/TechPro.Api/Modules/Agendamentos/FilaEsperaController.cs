@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Agendamentos.Dtos;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -21,6 +22,8 @@ public class FilaEsperaController(
         Ok(await service.ListarAsync(status));
 
     [HttpPost]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<FilaEsperaResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Entrar(FilaEsperaRequest request)
@@ -42,6 +45,7 @@ public class FilaEsperaController(
 
     /// <summary>Abriu vaga: converte a entrada em agendamento na data/hora escolhida.</summary>
     [HttpPost("{id:int}/converter")]
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<FilaEsperaResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -49,6 +53,8 @@ public class FilaEsperaController(
         Traduzir(await service.ConverterAsync(id, request));
 
     [HttpPost("{id:int}/descartar")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<FilaEsperaResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

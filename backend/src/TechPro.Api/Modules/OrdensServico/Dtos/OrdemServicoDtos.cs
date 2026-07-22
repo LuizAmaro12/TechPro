@@ -165,7 +165,12 @@ public record OrdensServicoSyncResponse(
 
 // --- Equipe (responsável técnico) ---------------------------------------------
 
-public record EquipeMembroResponse(Guid Id, string Nome, string Email);
+public record EquipeMembroResponse(
+    Guid Id, string Nome, string Email, string Papel, bool Ativo);
+
+public record NovoMembroRequest(string Nome, string Email, string Senha, string Papel);
+
+public record AtualizarMembroRequest(string Nome, string Papel);
 
 // --- Acompanhamento público (portal do cliente, sem login) --------------------
 

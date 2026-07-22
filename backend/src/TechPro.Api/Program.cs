@@ -69,6 +69,8 @@ builder.Services
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<EquipeService>();
+builder.Services.AddScoped<AuditoriaService>();
 builder.Services.AddScoped<FornecedorService>();
 builder.Services.AddScoped<PecaService>();
 builder.Services.AddScoped<ServicoService>();
@@ -174,7 +176,7 @@ builder.Services
             RoleClaimType = TokenService.ClaimRole,
         };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddPoliticasTechPro();
 
 // --- CORS + rate limiting -------------------------------------------------
 

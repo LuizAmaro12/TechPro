@@ -49,6 +49,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<MensagemEnviada> MensagensEnviadas => Set<MensagemEnviada>();
     public DbSet<PreferenciaNotificacao> PreferenciasNotificacao => Set<PreferenciaNotificacao>();
     public DbSet<TemplateMensagem> TemplatesMensagem => Set<TemplateMensagem>();
+    public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -236,6 +237,17 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<RegistroAuditoria>(e =>
+        {
+            e.ToTable("registros_auditoria");
+            e.Property(x => x.UsuarioNome).HasMaxLength(200);
+            e.Property(x => x.Acao).HasMaxLength(120);
+            e.Property(x => x.Entidade).HasMaxLength(60);
+            e.Property(x => x.EntidadeId).HasMaxLength(64);
+            e.Property(x => x.Detalhe).HasMaxLength(500);
+            e.HasIndex(x => new { x.TenantId, x.Entidade });
         });
 
         builder.Entity<TemplateMensagem>(e =>

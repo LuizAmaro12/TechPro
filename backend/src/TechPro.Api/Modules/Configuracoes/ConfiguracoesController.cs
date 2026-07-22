@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Configuracoes.Dtos;
 using TechPro.Api.Shared.Api;
@@ -8,12 +9,13 @@ namespace TechPro.Api.Modules.Configuracoes;
 
 [ApiController]
 [Route("api/configuracoes")]
-[Authorize]
+[Authorize(Policy = Politicas.Gestao)]
 [Produces("application/json")]
 public class ConfiguracoesController(
     ConfiguracoesService service,
     IValidator<LojaRequest> validadorLoja,
-    IValidator<PreferenciasNotificacaoRequest> validadorPreferencias) : ControllerBase
+    IValidator<PreferenciasNotificacaoRequest> validadorPreferencias,
+    AuditoriaService auditoria) : ControllerBase
 {
     [HttpGet("loja")]
     [ProducesResponseType<LojaResponse>(StatusCodes.Status200OK)]
@@ -30,7 +32,9 @@ public class ConfiguracoesController(
             return this.ProblemaDeValidacao(validacao);
         }
 
-        return Ok(await service.SalvarLojaAsync(request));
+        var salvo = await service.SalvarLojaAsync(request);
+        await auditoria.RegistrarESalvarAsync("Dados da loja alterados", AreasAuditadas.Configuracoes);
+        return Ok(salvo);
     }
 
     [HttpGet("notificacoes")]
@@ -49,7 +53,9 @@ public class ConfiguracoesController(
             return this.ProblemaDeValidacao(validacao);
         }
 
-        return Ok(await service.SalvarPreferenciasAsync(request));
+        var prefs = await service.SalvarPreferenciasAsync(request);
+        await auditoria.RegistrarESalvarAsync("Preferências de notificação alteradas", AreasAuditadas.Configuracoes);
+        return Ok(prefs);
     }
 
     // --- Templates de mensagem (Fase 2) --------------------------------------
@@ -65,8 +71,14 @@ public class ConfiguracoesController(
     public async Task<IActionResult> SalvarTemplates(TemplatesRequest request)
     {
         var resultado = await service.SalvarTemplatesAsync(request);
-        return resultado.Erro is not null
-            ? Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest)
-            : Ok(resultado.Valor);
+        if (resultado.Erro is not null)
+        {
+            return Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        await auditoria.RegistrarESalvarAsync(
+            "Textos das mensagens alterados", AreasAuditadas.Configuracoes,
+            detalhe: string.Join(", ", request.Itens.Select(i => i.TipoEvento)));
+        return Ok(resultado.Valor);
     }
 }

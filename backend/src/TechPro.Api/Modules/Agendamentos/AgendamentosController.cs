@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Agendamentos.Dtos;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -32,6 +33,8 @@ public class AgendamentosController(
         await service.ObterAsync(id) is { } agendamento ? Ok(agendamento) : NotFound();
 
     [HttpPost]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Criar(AgendamentoRequest request)
@@ -52,6 +55,8 @@ public class AgendamentosController(
     }
 
     [HttpPut("{id:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,6 +72,8 @@ public class AgendamentosController(
     }
 
     [HttpPost("{id:int}/checkin")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -75,6 +82,8 @@ public class AgendamentosController(
             id, Guid.TryParse(User.FindFirstValue("sub"), out var usuarioId) ? usuarioId : null));
 
     [HttpPost("{id:int}/cancelar")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -91,6 +100,7 @@ public class AgendamentosController(
 
     /// <summary>Cliente não apareceu — estado terminal distinto de cancelamento.</summary>
     [HttpPost("{id:int}/nao-compareceu")]
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AgendamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

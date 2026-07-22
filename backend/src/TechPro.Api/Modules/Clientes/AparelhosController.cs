@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Clientes.Dtos;
 using TechPro.Api.Shared.Api;
@@ -13,6 +14,7 @@ namespace TechPro.Api.Modules.Clientes;
 public class AparelhosController(AparelhoService service, IValidator<AparelhoRequest> validador) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AparelhoResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -31,6 +33,8 @@ public class AparelhosController(AparelhoService service, IValidator<AparelhoReq
     }
 
     [HttpPut("{id:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<AparelhoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -47,6 +51,8 @@ public class AparelhosController(AparelhoService service, IValidator<AparelhoReq
     }
 
     [HttpDelete("{id:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(int clienteId, int id) =>

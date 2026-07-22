@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Clientes.Dtos;
 using TechPro.Api.Shared.Api;
@@ -18,6 +19,7 @@ public class ClientesController(
     /// <summary>Importa a carteira existente por CSV — só adiciona, com relatório
     /// por linha (duplicados e inválidos são pulados, não bloqueiam o resto).</summary>
     [HttpPost("importar")]
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<ImportacaoClientesResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Importar(ImportarClientesRequest request)
@@ -49,6 +51,8 @@ public class ClientesController(
         await service.ObterAsync(id) is { } cliente ? Ok(cliente) : NotFound();
 
     [HttpPost]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<ClienteResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Criar(ClienteRequest request)
@@ -69,6 +73,8 @@ public class ClientesController(
     }
 
     [HttpPut("{id:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<ClienteResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -95,6 +101,8 @@ public class ClientesController(
     }
 
     [HttpDelete("{id:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(int id) =>

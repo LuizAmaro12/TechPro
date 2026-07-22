@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.OrdensServico.Dtos;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -111,6 +112,7 @@ public class OrdensServicoController(
         await pecasService.ListarAsync(id) is { } lista ? Ok(lista) : NotFound();
 
     [HttpPost("{id:guid}/pecas")]
+    [Authorize(Policy = Politicas.Bancada)]
     [ProducesResponseType<PecaUsadaResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -137,6 +139,7 @@ public class OrdensServicoController(
     }
 
     [HttpPost("{id:guid}/pecas/aplicar-padrao")]
+    [Authorize(Policy = Politicas.Bancada)]
     [ProducesResponseType<List<PecaUsadaResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -157,6 +160,7 @@ public class OrdensServicoController(
     }
 
     [HttpDelete("{id:guid}/pecas/{pecaUsadaId:guid}")]
+    [Authorize(Policy = Politicas.Bancada)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

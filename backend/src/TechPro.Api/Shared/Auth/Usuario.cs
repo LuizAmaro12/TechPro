@@ -14,4 +14,11 @@ public class Usuario : IdentityUser<Guid>
     public Guid TenantId { get; set; }
     public required string Nome { get; set; }
     public DateTimeOffset CriadoEm { get; set; }
+
+    /// <summary>
+    /// Desativar em vez de apagar (coerente com o resto do sistema): o membro
+    /// tem histórico (OS, comentários, auditoria) que não pode sumir. O login
+    /// rejeita inativo.
+    /// </summary>
+    public bool Ativo { get; set; } = true;
 }

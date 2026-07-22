@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.ServicosEPecas.Dtos;
 using TechPro.Api.Shared.Api;
@@ -9,7 +10,7 @@ namespace TechPro.Api.Modules.ServicosEPecas;
 
 [ApiController]
 [Route("api/pecas")]
-[Authorize]
+[Authorize(Policy = Politicas.Bancada)]
 [Produces("application/json")]
 public class PecasController(
     PecaService service,

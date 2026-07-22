@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Onboarding.Dtos;
 
@@ -6,7 +7,7 @@ namespace TechPro.Api.Modules.Onboarding;
 
 [ApiController]
 [Route("api/onboarding")]
-[Authorize]
+[Authorize(Policy = Politicas.Gestao)]
 [Produces("application/json")]
 public class OnboardingController(OnboardingService service) : ControllerBase
 {

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Reputacao.Dtos;
 using TechPro.Api.Shared.Api;
@@ -29,6 +30,7 @@ public class AvaliacoesController(
 
     /// <summary>Fecha o loop de uma avaliação negativa com a nota de tratamento.</summary>
     [HttpPost("{id:int}/resolver")]
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<AvaliacaoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

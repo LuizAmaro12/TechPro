@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.ServicosEPecas.Dtos;
 using TechPro.Api.Shared.Api;
@@ -33,6 +34,8 @@ public class ServicosController(ServicoService service, IValidator<ServicoReques
         await service.ObterAsync(id) is { } servico ? Ok(servico) : NotFound();
 
     [HttpPost]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<ServicoResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Criar(ServicoRequest request)
@@ -53,6 +56,8 @@ public class ServicosController(ServicoService service, IValidator<ServicoReques
     }
 
     [HttpPut("{id:int}")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType<ServicoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -79,6 +84,8 @@ public class ServicosController(ServicoService service, IValidator<ServicoReques
     }
 
     [HttpDelete("{id:int}")]
+
+    [Authorize(Policy = Politicas.Gestao)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desativar(int id) =>

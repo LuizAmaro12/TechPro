@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Financeiro.Dtos;
 
@@ -7,7 +8,7 @@ namespace TechPro.Api.Modules.Financeiro;
 /// <summary>Relatório de caixa da loja (módulo 8).</summary>
 [ApiController]
 [Route("api/financeiro")]
-[Authorize]
+[Authorize(Policy = Politicas.Gestao)]
 [Produces("application/json")]
 public class FinanceiroRelatorioController(FinanceiroRelatorioService service) : ControllerBase
 {

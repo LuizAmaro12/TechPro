@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using TechPro.Api.Shared.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TechPro.Api.Modules.Financeiro.Dtos;
 using TechPro.Api.Modules.ServicosEPecas;
@@ -23,6 +24,8 @@ public class FinanceiroController(
         Guid.TryParse(User.FindFirstValue("sub"), out var id) ? id : null;
 
     [HttpPut("orcamento")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<OrcamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -38,6 +41,8 @@ public class FinanceiroController(
     }
 
     [HttpPost("orcamento/enviar")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<OrcamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -45,6 +50,8 @@ public class FinanceiroController(
         Traduzir(await service.EnviarAsync(ordemId, UsuarioId));
 
     [HttpPost("orcamento/aprovar")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<OrcamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -61,6 +68,8 @@ public class FinanceiroController(
     }
 
     [HttpPost("orcamento/recusar")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<OrcamentoResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -77,6 +86,8 @@ public class FinanceiroController(
     }
 
     [HttpPost("pagamentos")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<ResumoPagamentosResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -103,6 +114,8 @@ public class FinanceiroController(
     }
 
     [HttpDelete("pagamentos/{pagamentoId:int}")]
+
+    [Authorize(Policy = Politicas.Atendimento)]
     [ProducesResponseType<ResumoPagamentosResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoverPagamento(Guid ordemId, int pagamentoId)
