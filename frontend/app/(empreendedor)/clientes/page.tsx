@@ -286,18 +286,18 @@ export default function PaginaClientes() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             CRM
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Clientes</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Clientes</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             Quem confia os aparelhos à sua assistência — contatos, aparelhos e
             consentimento de comunicação.
           </p>
         </div>
         <Button
           onClick={abrirCriacao}
-          className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Novo cliente
         </Button>
@@ -308,9 +308,9 @@ export default function PaginaClientes() {
       </div>
 
       {formAberto && (
-        <div className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+        <div className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
           <form onSubmit={formCliente.handleSubmit(aoSalvarCliente)}>
-            <h2 className="text-lg font-semibold text-[#14162B]">
+            <h2 className="text-lg font-semibold text-tinta">
               {editandoId === null ? "Novo cliente" : "Editar cliente"}
             </h2>
 
@@ -387,7 +387,7 @@ export default function PaginaClientes() {
                 <Label htmlFor="clientePrincipalId">Vinculado a (família/empresa)</Label>
                 <select
                   id="clientePrincipalId"
-                  className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                  className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                   {...formCliente.register("clientePrincipalId")}
                 >
                   <option value="">Sem vínculo</option>
@@ -399,11 +399,11 @@ export default function PaginaClientes() {
                 </select>
               </div>
               <div className="flex flex-col justify-end gap-2">
-                <label className="flex items-center gap-2 text-sm text-[#14162B]">
+                <label className="flex items-center gap-2 text-sm text-tinta">
                   <input type="checkbox" {...formCliente.register("vip")} />
                   Cliente VIP
                 </label>
-                <label className="flex items-center gap-2 text-sm text-[#14162B]">
+                <label className="flex items-center gap-2 text-sm text-tinta">
                   <input type="checkbox" {...formCliente.register("consentiuComunicacoes")} />
                   Autorizou receber comunicações sobre os serviços (LGPD)
                 </label>
@@ -414,7 +414,7 @@ export default function PaginaClientes() {
               <Button
                 type="submit"
                 disabled={formCliente.formState.isSubmitting}
-                className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
               >
                 {formCliente.formState.isSubmitting ? "Salvando..." : "Salvar cliente"}
               </Button>
@@ -429,9 +429,9 @@ export default function PaginaClientes() {
           {editandoId !== null && <HistoricoMensagens clienteId={editandoId} />}
 
           {editandoId !== null && (
-            <div className="mt-8 border-t border-[#14162B]/8 pt-6">
+            <div className="mt-8 border-t border-borda pt-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#14162B]">
+                <h3 className="text-sm font-semibold text-tinta">
                   Aparelhos deste cliente
                 </h3>
                 <Button type="button" variant="outline" className="h-9" onClick={abrirNovoAparelho}>
@@ -440,7 +440,7 @@ export default function PaginaClientes() {
               </div>
 
               {aparelhos.length === 0 && !formAparelhoAberto && (
-                <p className="mt-3 text-sm text-[#6B7280]">
+                <p className="mt-3 text-sm text-tinta-suave">
                   Nenhum aparelho cadastrado ainda.
                 </p>
               )}
@@ -449,13 +449,13 @@ export default function PaginaClientes() {
                 {aparelhos.map((aparelho) => (
                   <li
                     key={aparelho.id}
-                    className="flex items-center justify-between rounded-xl border border-[#14162B]/8 px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-borda px-4 py-3"
                   >
                     <div>
-                      <p className="text-sm font-medium text-[#14162B]">
+                      <p className="text-sm font-medium text-tinta">
                         {aparelho.marca} {aparelho.modelo}
                       </p>
-                      <p className="text-xs text-[#6B7280]">
+                      <p className="text-xs text-tinta-suave">
                         {aparelho.imei ? `IMEI/série: ${aparelho.imei}` : "Sem IMEI/série"}
                         {aparelho.observacoes ? ` · ${aparelho.observacoes}` : ""}
                       </p>
@@ -472,7 +472,7 @@ export default function PaginaClientes() {
                       <Button
                         type="button"
                         variant="ghost"
-                        className="h-8 px-3 text-[#E8536B] hover:text-[#E8536B]"
+                        className="h-8 px-3 text-marca hover:text-marca"
                         onClick={() => aoDesativarAparelho(aparelho.id)}
                       >
                         Desativar
@@ -485,14 +485,14 @@ export default function PaginaClientes() {
               {formAparelhoAberto && (
                 <form
                   onSubmit={formAparelho.handleSubmit(aoSalvarAparelho)}
-                  className="mt-4 rounded-xl bg-[#F7F7F9] p-4"
+                  className="mt-4 rounded-xl bg-sutil p-4"
                 >
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <Label htmlFor="marca">Marca</Label>
                       <Input
                         id="marca"
-                        className="mt-1 h-10 bg-white"
+                        className="mt-1 h-10 bg-superficie"
                         aria-invalid={!!errosAparelho.marca}
                         {...formAparelho.register("marca")}
                       />
@@ -506,7 +506,7 @@ export default function PaginaClientes() {
                       <Label htmlFor="modelo">Modelo</Label>
                       <Input
                         id="modelo"
-                        className="mt-1 h-10 bg-white"
+                        className="mt-1 h-10 bg-superficie"
                         aria-invalid={!!errosAparelho.modelo}
                         {...formAparelho.register("modelo")}
                       />
@@ -518,13 +518,13 @@ export default function PaginaClientes() {
                     </div>
                     <div>
                       <Label htmlFor="imei">IMEI / nº de série (opcional)</Label>
-                      <Input id="imei" className="mt-1 h-10 bg-white" {...formAparelho.register("imei")} />
+                      <Input id="imei" className="mt-1 h-10 bg-superficie" {...formAparelho.register("imei")} />
                     </div>
                     <div>
                       <Label htmlFor="senhaDesbloqueio">Senha de desbloqueio (opcional)</Label>
                       <Input
                         id="senhaDesbloqueio"
-                        className="mt-1 h-10 bg-white"
+                        className="mt-1 h-10 bg-superficie"
                         {...formAparelho.register("senhaDesbloqueio")}
                       />
                     </div>
@@ -532,7 +532,7 @@ export default function PaginaClientes() {
                       <Label htmlFor="obsAparelho">Observações (opcional)</Label>
                       <Input
                         id="obsAparelho"
-                        className="mt-1 h-10 bg-white"
+                        className="mt-1 h-10 bg-superficie"
                         {...formAparelho.register("observacoes")}
                       />
                     </div>
@@ -541,7 +541,7 @@ export default function PaginaClientes() {
                     <Button
                       type="submit"
                       disabled={formAparelho.formState.isSubmitting}
-                      className="h-9 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+                      className="h-9 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
                     >
                       {editandoAparelhoId === null ? "Adicionar" : "Salvar aparelho"}
                     </Button>
@@ -560,19 +560,19 @@ export default function PaginaClientes() {
           )}
 
           {editandoId !== null && detalhe && (
-            <div className="mt-8 border-t border-[#14162B]/8 pt-6">
-              <h3 className="text-sm font-semibold text-[#14162B]">
+            <div className="mt-8 border-t border-borda pt-6">
+              <h3 className="text-sm font-semibold text-tinta">
                 Dados pessoais (LGPD)
               </h3>
               {detalhe.anonimizadoEm ? (
-                <p className="mt-2 text-sm text-[#8B8D98]">
+                <p className="mt-2 text-sm text-tinta-fraca">
                   Cliente anonimizado em{" "}
                   {new Date(detalhe.anonimizadoEm).toLocaleDateString("pt-BR")}. Os
                   dados pessoais foram removidos; o histórico de OS foi preservado.
                 </p>
               ) : (
                 <>
-                  <p className="mt-1 text-sm text-[#6B7280]">
+                  <p className="mt-1 text-sm text-tinta-suave">
                     Direitos do titular: exporte os dados (portabilidade) ou
                     anonimize (exclusão, irreversível).
                   </p>
@@ -588,7 +588,7 @@ export default function PaginaClientes() {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-9 text-[#E8536B] hover:text-[#E8536B]"
+                      className="h-9 text-marca hover:text-marca"
                       disabled={anonimizar.isPending}
                       onClick={aoAnonimizar}
                     >
@@ -610,7 +610,7 @@ export default function PaginaClientes() {
           className="h-10 max-w-xs"
         />
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+          <label className="flex items-center gap-2 text-sm text-tinta-suave">
             <input
               type="checkbox"
               checked={somenteVip}
@@ -618,7 +618,7 @@ export default function PaginaClientes() {
             />
             Somente VIP
           </label>
-          <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+          <label className="flex items-center gap-2 text-sm text-tinta-suave">
             <input
               type="checkbox"
               checked={mostrarInativos}
@@ -629,9 +629,9 @@ export default function PaginaClientes() {
         </div>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-[#14162B]/8">
+      <div className="mt-3 overflow-x-auto rounded-2xl border border-borda">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F7F7F9] text-xs text-[#8B8D98] uppercase tracking-wide">
+          <thead className="bg-sutil text-xs text-tinta-fraca uppercase tracking-wide">
             <tr>
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3">Telefone</th>
@@ -642,31 +642,31 @@ export default function PaginaClientes() {
           </thead>
           <tbody>
             {(clientes?.itens ?? []).map((cliente) => (
-              <tr key={cliente.id} className="border-t border-[#14162B]/6">
-                <td className="px-4 py-3 font-medium text-[#14162B]">
+              <tr key={cliente.id} className="border-t border-borda">
+                <td className="px-4 py-3 font-medium text-tinta">
                   {cliente.nome}
                   {cliente.vip && (
-                    <span className="ml-2 rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-xs font-semibold text-[#E8536B]">
+                    <span className="ml-2 rounded-full bg-marca-fundo px-2 py-0.5 text-xs font-semibold text-marca">
                       VIP
                     </span>
                   )}
                   {cliente.clientePrincipal && (
                     <span
-                      className="ml-2 rounded-full bg-[#F7F7F9] px-2 py-0.5 text-xs text-[#6B7280]"
+                      className="ml-2 rounded-full bg-sutil px-2 py-0.5 text-xs text-tinta-suave"
                       title={`Vinculado a ${cliente.clientePrincipal.nome}`}
                     >
                       vínculo: {cliente.clientePrincipal.nome}
                     </span>
                   )}
                   {!cliente.ativo && (
-                    <span className="ml-2 rounded-full bg-[#F7F7F9] px-2 py-0.5 text-xs text-[#8B8D98]">
+                    <span className="ml-2 rounded-full bg-sutil px-2 py-0.5 text-xs text-tinta-fraca">
                       inativo
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">{cliente.telefone}</td>
-                <td className="px-4 py-3 text-[#6B7280]">{cliente.email ?? "—"}</td>
-                <td className="px-4 py-3 text-[#6B7280]">{cliente.quantidadeAparelhos}</td>
+                <td className="px-4 py-3 text-tinta-suave">{cliente.telefone}</td>
+                <td className="px-4 py-3 text-tinta-suave">{cliente.email ?? "—"}</td>
+                <td className="px-4 py-3 text-tinta-suave">{cliente.quantidadeAparelhos}</td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <Button
                     variant="ghost"
@@ -678,7 +678,7 @@ export default function PaginaClientes() {
                   {cliente.ativo && (
                     <Button
                       variant="ghost"
-                      className="h-8 px-3 text-[#E8536B] hover:text-[#E8536B]"
+                      className="h-8 px-3 text-marca hover:text-marca"
                       onClick={() => aoDesativarCliente(cliente.id)}
                     >
                       Desativar
@@ -689,7 +689,7 @@ export default function PaginaClientes() {
             ))}
             {clientes && (clientes.itens?.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-[#6B7280]">
+                <td colSpan={5} className="px-4 py-10 text-center text-tinta-suave">
                   Nenhum cliente encontrado. Clique em “Novo cliente” para começar.
                 </td>
               </tr>

@@ -78,14 +78,14 @@ export function MovimentacaoPeca({
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+    <section className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#14162B]">
+          <h2 className="text-lg font-semibold text-tinta">
             Estoque de {pecaNome}
           </h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
-            Saldo atual: <strong className="text-[#14162B]">{saldoAtual}</strong>{" "}
+          <p className="mt-1 text-sm text-tinta-suave">
+            Saldo atual: <strong className="text-tinta">{saldoAtual}</strong>{" "}
             — todo movimento fica registrado, inclusive os gerados pelas OS.
           </p>
         </div>
@@ -101,7 +101,7 @@ export function MovimentacaoPeca({
             id="tipoMovimento"
             value={tipo}
             onChange={(e) => setTipo(e.target.value as TipoMovimentacaoEstoque)}
-            className="mt-1 h-11 w-full rounded-md border border-[#14162B]/10 bg-white px-2 text-sm"
+            className="mt-1 h-11 w-full rounded-md border border-borda bg-superficie px-2 text-sm"
           >
             {TIPOS_MANUAIS.map((t) => (
               <option key={t} value={t}>
@@ -123,7 +123,7 @@ export function MovimentacaoPeca({
             onChange={(e) => setQuantidade(e.target.value)}
           />
           {ajuste && (
-            <p className="mt-1 text-xs text-[#8B8D98]">
+            <p className="mt-1 text-xs text-tinta-fraca">
               Informe quanto existe de verdade na prateleira.
             </p>
           )}
@@ -142,14 +142,14 @@ export function MovimentacaoPeca({
             disabled={tipo !== "Entrada"}
           />
           {tipo === "Entrada" && (
-            <p className="mt-1 text-xs text-[#8B8D98]">
+            <p className="mt-1 text-xs text-tinta-fraca">
               Se informado, passa a ser o custo da peça.
             </p>
           )}
         </div>
         <div>
           <Label htmlFor="motivoMovimento">
-            Motivo {ajuste && <span className="text-[#E8536B]">*</span>}
+            Motivo {ajuste && <span className="text-marca">*</span>}
           </Label>
           <Input
             id="motivoMovimento"
@@ -164,24 +164,24 @@ export function MovimentacaoPeca({
           <Button
             type="submit"
             disabled={movimentar.isPending || (ajuste && !motivo.trim())}
-            className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+            className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
           >
             Registrar movimentação
           </Button>
         </div>
       </form>
 
-      <h3 className="mt-6 text-sm font-semibold text-[#14162B]">
+      <h3 className="mt-6 text-sm font-semibold text-tinta">
         Histórico de movimentações
       </h3>
       {extrato.length === 0 ? (
-        <p className="mt-2 text-sm text-[#8B8D98]">
+        <p className="mt-2 text-sm text-tinta-fraca">
           Nenhuma movimentação registrada para esta peça.
         </p>
       ) : (
-        <div className="mt-2 overflow-x-auto rounded-xl border border-[#14162B]/8">
+        <div className="mt-2 overflow-x-auto rounded-xl border border-borda">
           <table className="w-full text-left text-sm">
-            <thead className="bg-[#F7F7F9] text-xs text-[#6B7280] uppercase">
+            <thead className="bg-sutil text-xs text-tinta-suave uppercase">
               <tr>
                 <th className="px-4 py-2">Quando</th>
                 <th className="px-4 py-2">Tipo</th>
@@ -192,8 +192,8 @@ export function MovimentacaoPeca({
             </thead>
             <tbody>
               {extrato.map((m) => (
-                <tr key={m.id} className="border-t border-[#14162B]/6">
-                  <td className="px-4 py-2 text-[#6B7280] whitespace-nowrap">
+                <tr key={m.id} className="border-t border-borda">
+                  <td className="px-4 py-2 text-tinta-suave whitespace-nowrap">
                     {new Date(m.criadoEm ?? "").toLocaleString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
@@ -201,18 +201,18 @@ export function MovimentacaoPeca({
                       minute: "2-digit",
                     })}
                   </td>
-                  <td className="px-4 py-2 text-[#14162B]">
+                  <td className="px-4 py-2 text-tinta">
                     {ROTULOS[m.tipo ?? ""] ?? m.tipo}
                   </td>
                   <td
                     className={`px-4 py-2 text-right font-semibold ${
-                      (m.quantidade ?? 0) < 0 ? "text-[#E8536B]" : "text-emerald-700"
+                      (m.quantidade ?? 0) < 0 ? "text-marca" : "text-ok"
                     }`}
                   >
                     {(m.quantidade ?? 0) > 0 ? `+${m.quantidade}` : m.quantidade}
                   </td>
-                  <td className="px-4 py-2 text-right text-[#14162B]">{m.saldoApos}</td>
-                  <td className="px-4 py-2 text-[#6B7280]">
+                  <td className="px-4 py-2 text-right text-tinta">{m.saldoApos}</td>
+                  <td className="px-4 py-2 text-tinta-suave">
                     {m.ordemServicoNumero ? `OS #${m.ordemServicoNumero}` : null}
                     {m.motivo}
                     {m.custoUnitario != null && ` · ${formatarBRL(m.custoUnitario)}`}

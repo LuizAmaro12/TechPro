@@ -135,7 +135,7 @@ export default function PaginaAgendarPublico() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center text-sm text-[#6B7280]">
+      <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center text-sm text-tinta-suave">
         Carregando...
       </div>
     );
@@ -144,8 +144,8 @@ export default function PaginaAgendarPublico() {
   if (!loja) {
     return (
       <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center">
-        <h1 className="text-2xl font-bold text-[#14162B]">Loja não encontrada</h1>
-        <p className="mt-2 text-sm text-[#6B7280]">
+        <h1 className="text-2xl font-bold text-tinta">Loja não encontrada</h1>
+        <p className="mt-2 text-sm text-tinta-suave">
           Confira o link de agendamento com a assistência técnica.
         </p>
       </div>
@@ -155,19 +155,19 @@ export default function PaginaAgendarPublico() {
   if (confirmacao) {
     return (
       <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+        <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
           Agendamento confirmado
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Até breve!</h1>
-        <div className="mx-auto mt-6 max-w-md rounded-2xl border border-[#14162B]/8 p-6 text-left text-sm">
-          <p className="font-semibold text-[#14162B]">{confirmacao.nomeLoja}</p>
-          <p className="mt-2 text-[#6B7280]">
-            <span className="font-medium text-[#14162B]">{confirmacao.servicoNome}</span>
+        <h1 className="mt-2 text-3xl font-bold text-tinta">Até breve!</h1>
+        <div className="mx-auto mt-6 max-w-md rounded-2xl border border-borda p-6 text-left text-sm">
+          <p className="font-semibold text-tinta">{confirmacao.nomeLoja}</p>
+          <p className="mt-2 text-tinta-suave">
+            <span className="font-medium text-tinta">{confirmacao.servicoNome}</span>
             <br />
             {formatarDataLonga(confirmacao.data ?? "")} às{" "}
             {horaCurta(confirmacao.horaInicio ?? "")}
           </p>
-          <p className="mt-3 text-xs text-[#8B8D98]">
+          <p className="mt-3 text-xs text-tinta-fraca">
             Número do agendamento: #{confirmacao.id}. Guarde este número — a loja
             confirma seus dados no check-in.
           </p>
@@ -178,11 +178,11 @@ export default function PaginaAgendarPublico() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 pb-16">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Agendamento online
       </p>
-      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">{loja.nome}</h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
+      <h1 className="mt-2 text-3xl font-bold text-tinta">{loja.nome}</h1>
+      <p className="mt-1 text-sm text-tinta-suave">
         Agende seu atendimento em poucos passos — sem cadastro, sem senha.
       </p>
 
@@ -195,10 +195,10 @@ export default function PaginaAgendarPublico() {
             key={rotulo}
             className={`rounded-full px-3 py-1 text-xs ${
               i === etapa
-                ? "bg-[#14162B] font-semibold text-white"
+                ? "bg-tinta font-semibold text-sobre-tinta"
                 : i < etapa
-                  ? "bg-[#14162B]/10 text-[#14162B]"
-                  : "bg-[#F7F7F9] text-[#8B8D98]"
+                  ? "bg-sutil text-tinta"
+                  : "bg-sutil text-tinta-fraca"
             }`}
           >
             {i + 1}. {rotulo}
@@ -206,7 +206,7 @@ export default function PaginaAgendarPublico() {
         ))}
       </ol>
 
-      <div className="mt-6 rounded-2xl border border-[#14162B]/8 p-6">
+      <div className="mt-6 rounded-2xl border border-borda p-6">
         {etapa === 0 && (
           <form
             onSubmit={formIdentificacao.handleSubmit((valores) => {
@@ -214,7 +214,7 @@ export default function PaginaAgendarPublico() {
               setEtapa(1);
             })}
           >
-            <h2 className="text-lg font-semibold text-[#14162B]">Como falamos com você?</h2>
+            <h2 className="text-lg font-semibold text-tinta">Como falamos com você?</h2>
             <div className="mt-4 space-y-4">
               <div>
                 <Label htmlFor="nomeContato">Nome</Label>
@@ -262,7 +262,7 @@ export default function PaginaAgendarPublico() {
             </div>
             <Button
               type="submit"
-              className="mt-6 h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+              className="mt-6 h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
             >
               Continuar
             </Button>
@@ -276,7 +276,7 @@ export default function PaginaAgendarPublico() {
               setEtapa(2);
             })}
           >
-            <h2 className="text-lg font-semibold text-[#14162B]">Qual é o aparelho?</h2>
+            <h2 className="text-lg font-semibold text-tinta">Qual é o aparelho?</h2>
             <div className="mt-4 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -323,7 +323,7 @@ export default function PaginaAgendarPublico() {
             <div className="mt-6 flex gap-3">
               <Button
                 type="submit"
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 Continuar
               </Button>
@@ -336,9 +336,9 @@ export default function PaginaAgendarPublico() {
 
         {etapa === 2 && (
           <div>
-            <h2 className="text-lg font-semibold text-[#14162B]">Qual serviço você precisa?</h2>
+            <h2 className="text-lg font-semibold text-tinta">Qual serviço você precisa?</h2>
             {(loja.servicos?.length ?? 0) === 0 ? (
-              <p className="mt-4 text-sm text-[#6B7280]">
+              <p className="mt-4 text-sm text-tinta-suave">
                 Esta loja ainda não tem serviços com agendamento online. Entre em
                 contato direto com a assistência.
               </p>
@@ -351,17 +351,17 @@ export default function PaginaAgendarPublico() {
                     onClick={() => setServicoId(servico.id ?? null)}
                     className={`rounded-2xl border p-4 text-left transition-colors ${
                       servicoId === servico.id
-                        ? "border-[#14162B] bg-[#14162B]/[0.03]"
-                        : "border-[#14162B]/10 hover:border-[#14162B]/40"
+                        ? "border-tinta bg-sutil"
+                        : "border-borda hover:border-tinta/40"
                     }`}
                   >
-                    <p className="font-semibold text-[#14162B]">{servico.nome}</p>
-                    <p className="mt-1 text-sm text-[#6B7280]">
+                    <p className="font-semibold text-tinta">{servico.nome}</p>
+                    <p className="mt-1 text-sm text-tinta-suave">
                       a partir de {formatarBRL(servico.precoBase ?? 0)} ·{" "}
                       {servico.duracaoEstimadaMinutos} min
                     </p>
                     {servico.exigeDiagnostico && (
-                      <p className="mt-1 text-xs text-[#E8536B]">
+                      <p className="mt-1 text-xs text-marca">
                         valor final após diagnóstico
                       </p>
                     )}
@@ -374,7 +374,7 @@ export default function PaginaAgendarPublico() {
                 type="button"
                 disabled={servicoId === null}
                 onClick={() => setEtapa(3)}
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 Continuar
               </Button>
@@ -387,7 +387,7 @@ export default function PaginaAgendarPublico() {
 
         {etapa === 3 && (
           <div>
-            <h2 className="text-lg font-semibold text-[#14162B]">Quando fica bom para você?</h2>
+            <h2 className="text-lg font-semibold text-tinta">Quando fica bom para você?</h2>
             <div className="mt-4">
               <Label htmlFor="dataAgendamento">Data</Label>
               <Input
@@ -407,13 +407,13 @@ export default function PaginaAgendarPublico() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {horariosLivres.length === 0 ? (
                   filaConfirmada ? (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                    <div className="rounded-xl border border-ok/40 bg-ok-fundo p-4 text-sm text-ok">
                       Pronto! Você está na fila de espera. A loja entra em contato
                       assim que abrir um horário para esta data.
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-[#14162B]/10 bg-[#F7F7F9] p-4">
-                      <p className="text-sm text-[#6B7280]">
+                    <div className="rounded-xl border border-borda bg-sutil p-4">
+                      <p className="text-sm text-tinta-suave">
                         Nenhum horário livre nesta data. Quer entrar na fila de
                         espera? A loja te avisa quando abrir uma vaga.
                       </p>
@@ -421,7 +421,7 @@ export default function PaginaAgendarPublico() {
                         type="button"
                         disabled={entrarNaFila.isPending}
                         onClick={aoEntrarNaFila}
-                        className="mt-3 h-10 rounded-full bg-[#E8536B] px-6 text-white hover:bg-[#E8536B]/90"
+                        className="mt-3 h-10 rounded-full bg-marca px-6 text-sobre-tinta hover:bg-marca/90"
                       >
                         Entrar na fila de espera
                       </Button>
@@ -435,8 +435,8 @@ export default function PaginaAgendarPublico() {
                       onClick={() => setHoraInicio(hora)}
                       className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
                         horaInicio === hora
-                          ? "border-[#14162B] bg-[#14162B] text-white"
-                          : "border-[#14162B]/15 text-[#14162B] hover:border-[#14162B]"
+                          ? "border-tinta bg-tinta text-sobre-tinta"
+                          : "border-borda-forte text-tinta hover:border-tinta"
                       }`}
                     >
                       {horaCurta(hora)}
@@ -450,7 +450,7 @@ export default function PaginaAgendarPublico() {
                 type="button"
                 disabled={horaInicio === ""}
                 onClick={() => setEtapa(4)}
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 Continuar
               </Button>
@@ -463,34 +463,34 @@ export default function PaginaAgendarPublico() {
 
         {etapa === 4 && identificacao && aparelho && servicoEscolhido && (
           <div>
-            <h2 className="text-lg font-semibold text-[#14162B]">Confirme seu agendamento</h2>
+            <h2 className="text-lg font-semibold text-tinta">Confirme seu agendamento</h2>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-[#6B7280]">Serviço</dt>
-                <dd className="font-medium text-[#14162B]">{servicoEscolhido.nome}</dd>
+                <dt className="text-tinta-suave">Serviço</dt>
+                <dd className="font-medium text-tinta">{servicoEscolhido.nome}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-[#6B7280]">Quando</dt>
-                <dd className="font-medium text-[#14162B]">
+                <dt className="text-tinta-suave">Quando</dt>
+                <dd className="font-medium text-tinta">
                   {formatarDataLonga(data)} às {horaCurta(horaInicio)}
                 </dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-[#6B7280]">Aparelho</dt>
-                <dd className="font-medium text-[#14162B]">
+                <dt className="text-tinta-suave">Aparelho</dt>
+                <dd className="font-medium text-tinta">
                   {aparelho.aparelhoMarca} {aparelho.aparelhoModelo}
                 </dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-[#6B7280]">Contato</dt>
-                <dd className="font-medium text-[#14162B]">
+                <dt className="text-tinta-suave">Contato</dt>
+                <dd className="font-medium text-tinta">
                   {identificacao.nomeContato} · {identificacao.telefoneContato}
                 </dd>
               </div>
               {aparelho.descricaoProblema && (
                 <div className="flex justify-between gap-4">
-                  <dt className="text-[#6B7280]">Problema</dt>
-                  <dd className="text-right font-medium text-[#14162B]">
+                  <dt className="text-tinta-suave">Problema</dt>
+                  <dd className="text-right font-medium text-tinta">
                     {aparelho.descricaoProblema}
                   </dd>
                 </div>
@@ -502,7 +502,7 @@ export default function PaginaAgendarPublico() {
                 type="button"
                 disabled={agendar.isPending}
                 onClick={aoConfirmar}
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 {agendar.isPending ? "Enviando..." : "Confirmar agendamento"}
               </Button>

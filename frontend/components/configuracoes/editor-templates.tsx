@@ -48,9 +48,9 @@ export function EditorTemplates() {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Textos das mensagens</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
+    <section className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">Textos das mensagens</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
         Ajuste o texto que o cliente recebe em cada evento. As variáveis entre
         chaves são trocadas pelos dados reais no envio.
       </p>
@@ -61,13 +61,13 @@ export function EditorTemplates() {
           return (
             <article
               key={item.tipoEvento}
-              className="rounded-xl border border-[#14162B]/8 p-4"
+              className="rounded-xl border border-borda p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-[#14162B]">
+                <h3 className="text-sm font-semibold text-tinta">
                   {ROTULOS_EVENTO_COMUNICACAO[item.tipoEvento ?? ""] ?? item.tipoEvento}
                   {item.personalizado && (
-                    <span className="ml-2 rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-[10px] font-semibold text-[#E8536B] uppercase">
+                    <span className="ml-2 rounded-full bg-marca-fundo px-2 py-0.5 text-[10px] font-semibold text-marca uppercase">
                       personalizado
                     </span>
                   )}
@@ -93,19 +93,19 @@ export function EditorTemplates() {
               </div>
 
               {!aberto && (
-                <p className="mt-2 text-sm whitespace-pre-wrap text-[#6B7280]">{item.corpo}</p>
+                <p className="mt-2 text-sm whitespace-pre-wrap text-tinta-suave">{item.corpo}</p>
               )}
 
               {aberto && (
                 <div className="mt-3 space-y-3">
-                  <p className="text-xs text-[#8B8D98]">
+                  <p className="text-xs text-tinta-fraca">
                     Disponíveis:{" "}
                     {(item.variaveisDisponiveis ?? []).map((v) => (
                       <button
                         key={v}
                         type="button"
                         onClick={() => setCorpo((c) => `${c}{${v}}`)}
-                        className="mr-1 rounded bg-[#14162B]/5 px-1.5 py-0.5 font-mono text-[#14162B] hover:bg-[#14162B]/10"
+                        className="mr-1 rounded bg-sutil px-1.5 py-0.5 font-mono text-tinta hover:bg-sutil"
                       >
                         {`{${v}}`}
                       </button>
@@ -113,7 +113,7 @@ export function EditorTemplates() {
                   </p>
                   <div>
                     <label
-                      className="text-xs text-[#6B7280]"
+                      className="text-xs text-tinta-suave"
                       htmlFor={`assunto-${item.tipoEvento}`}
                     >
                       Assunto (só no e-mail)
@@ -128,7 +128,7 @@ export function EditorTemplates() {
                   </div>
                   <div>
                     <label
-                      className="text-xs text-[#6B7280]"
+                      className="text-xs text-tinta-suave"
                       htmlFor={`corpo-${item.tipoEvento}`}
                     >
                       Mensagem
@@ -139,13 +139,13 @@ export function EditorTemplates() {
                       rows={4}
                       maxLength={2000}
                       onChange={(e) => setCorpo(e.target.value)}
-                      className="mt-1 w-full rounded-xl border border-[#14162B]/10 p-3 text-sm text-[#14162B]"
+                      className="mt-1 w-full rounded-xl border border-borda p-3 text-sm text-tinta"
                     />
                   </div>
                   <Button
                     disabled={salvar.isPending || !corpo.trim()}
                     onClick={() => enviar(item.tipoEvento!, corpo, assunto || null)}
-                    className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+                    className="h-10 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
                   >
                     Salvar mensagem
                   </Button>

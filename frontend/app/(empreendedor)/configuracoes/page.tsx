@@ -1,5 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
+import { Abas, type Aba } from "@/components/ui/abas";
+import { AlternadorTema } from "@/components/ui/alternador-tema";
+import { useAuth } from "@/lib/auth/AuthProvider";
 import { EditorTemplates } from "@/components/configuracoes/editor-templates";
 import { SecaoAuditoria } from "@/components/configuracoes/secao-auditoria";
 import { SecaoEquipe } from "@/components/configuracoes/secao-equipe";
@@ -47,52 +51,116 @@ const EVENTOS = [
 ];
 
 export default function PaginaConfiguracoes() {
-  const { data: respostaLoja } = useGetApiConfiguracoesLoja();
+  const { usuario } = useAuth();
+  const ehGestor = usuario?.papel === "gestor";
+
+  // As seções de loja/notificações são exclusivas do gestor: sem o `enabled`,
+  // um técnico dispararia chamadas que voltam 403.
+  const { data: respostaLoja } = useGetApiConfiguracoesLoja({
+    query: { enabled: ehGestor },
+  });
   const loja = respostaLoja?.status === 200 ? respostaLoja.data : undefined;
-  const { data: respostaPrefs } = useGetApiConfiguracoesNotificacoes();
+  const { data: respostaPrefs } = useGetApiConfiguracoesNotificacoes({
+    query: { enabled: ehGestor },
+  });
   const prefs = respostaPrefs?.status === 200 ? respostaPrefs.data.itens : undefined;
   const { data: respostaMe } = useGetApiAuthMe();
   const me = respostaMe?.status === 200 ? respostaMe.data : undefined;
 
+  // "Minha conta" vale para qualquer papel — é onde a pessoa troca a própria
+  // senha. O resto é gestão da loja.
+  const abas: Aba[] = [
+    ...(ehGestor
+      ? [
+          {
+            id: "loja",
+            rotulo: "Loja",
+            conteudo: loja ? (
+              <SecaoLoja key={loja.slug} loja={loja} />
+            ) : (
+              <Carregando titulo="Dados da loja" />
+            ),
+          },
+          {
+            id: "mensagens",
+            rotulo: "Mensagens",
+            // Preferências e textos são a mesma pergunta ("o que o cliente
+            // recebe, por qual canal") — ficavam separados sem motivo.
+            conteudo: (
+              <>
+                {prefs ? (
+                  <SecaoNotificacoes key={prefs.length} iniciais={prefs} />
+                ) : (
+                  <Carregando titulo="Notificações" />
+                )}
+                <EditorTemplates />
+              </>
+            ),
+          },
+          { id: "equipe", rotulo: "Equipe", conteudo: <SecaoEquipe /> },
+          { id: "historico", rotulo: "Histórico", conteudo: <SecaoAuditoria /> },
+        ]
+      : []),
+    {
+      id: "aparencia",
+      rotulo: "Aparência",
+      conteudo: (
+        <section className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
+          <h2 className="text-lg font-semibold text-tinta">Tema</h2>
+          <p className="mt-1 text-sm text-tinta-suave">
+            Vale para este navegador. Em &ldquo;Sistema&rdquo;, acompanha a
+            preferência do seu computador automaticamente.
+          </p>
+          <div className="mt-4">
+            <AlternadorTema />
+          </div>
+        </section>
+      ),
+    },
+    {
+      id: "conta",
+      rotulo: "Minha conta",
+      conteudo: me ? (
+        <SecaoConta key={me.id} nomeAtual={me.nome ?? ""} email={me.email ?? ""} />
+      ) : (
+        <Carregando titulo="Sua conta" />
+      ),
+    },
+  ];
+
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Configurações
       </p>
-      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Sua loja e sua conta</h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
-        Os horários de funcionamento e o link público de agendamento ficam em{" "}
-        <Link
-          href="/agenda/configuracoes"
-          className="underline underline-offset-4 hover:text-[#14162B]"
-        >
-          configurações da agenda
-        </Link>
-        .
-      </p>
-
-      {loja ? <SecaoLoja key={loja.slug} loja={loja} /> : <Carregando titulo="Dados da loja" />}
-      {prefs ? (
-        <SecaoNotificacoes key={prefs.length} iniciais={prefs} />
-      ) : (
-        <Carregando titulo="Notificações" />
+      <h1 className="mt-2 text-3xl font-bold text-tinta">
+        {ehGestor ? "Sua loja e sua conta" : "Sua conta"}
+      </h1>
+      {ehGestor && (
+        <p className="mt-1 text-sm text-tinta-suave">
+          Os horários de funcionamento e o link público de agendamento ficam em{" "}
+          <Link
+            href="/agenda/configuracoes"
+            className="underline underline-offset-4 hover:text-tinta"
+          >
+            configurações da agenda
+          </Link>
+          .
+        </p>
       )}
-      <EditorTemplates />
 
-      <SecaoEquipe />
-
-      <SecaoAuditoria />
-
-      {me ? <SecaoConta key={me.id} nomeAtual={me.nome ?? ""} email={me.email ?? ""} /> : null}
+      <Suspense fallback={null}>
+        <Abas abas={abas} />
+      </Suspense>
     </div>
   );
 }
 
 function Carregando({ titulo }: { titulo: string }) {
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">{titulo}</h2>
-      <p className="mt-2 text-sm text-[#6B7280]">Carregando...</p>
+    <section className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">{titulo}</h2>
+      <p className="mt-2 text-sm text-tinta-suave">Carregando...</p>
     </section>
   );
 }
@@ -137,9 +205,9 @@ function SecaoLoja({ loja }: { loja: LojaResponse }) {
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Dados da loja</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
+    <section className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">Dados da loja</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
         Contato e políticas aparecem para o cliente nas páginas de agendamento e
         de acompanhamento.
       </p>
@@ -192,7 +260,7 @@ function SecaoLoja({ loja }: { loja: LojaResponse }) {
             id="politicas"
             rows={4}
             placeholder="Garantia de 90 dias. Aparelhos não retirados em 30 dias..."
-            className="mt-1 w-full rounded-md border border-input bg-white px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-input bg-superficie px-3 py-2 text-sm"
             {...register("politicas")}
           />
           {errors.politicas && (
@@ -203,7 +271,7 @@ function SecaoLoja({ loja }: { loja: LojaResponse }) {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+            className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
           >
             {isSubmitting ? "Salvando..." : "Salvar dados da loja"}
           </Button>
@@ -246,15 +314,15 @@ function SecaoNotificacoes({ iniciais }: { iniciais: PreferenciaItem[] }) {
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Notificações</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
+    <section className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">Notificações</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
         Escolha o que o cliente recebe em cada canal. Desligar aqui não apaga o
         registro — a OS mostra a notificação como “desativada nas configurações”.
       </p>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="text-xs tracking-wide text-[#8B8D98] uppercase">
+          <thead className="text-xs tracking-wide text-tinta-fraca uppercase">
             <tr>
               <th className="py-2">Evento</th>
               <th className="w-28 py-2 text-center">WhatsApp</th>
@@ -263,8 +331,8 @@ function SecaoNotificacoes({ iniciais }: { iniciais: PreferenciaItem[] }) {
           </thead>
           <tbody>
             {EVENTOS.map((evento) => (
-              <tr key={evento} className="border-t border-[#14162B]/6">
-                <td className="py-2.5 text-[#14162B]">
+              <tr key={evento} className="border-t border-borda">
+                <td className="py-2.5 text-tinta">
                   {ROTULOS_EVENTO_COMUNICACAO[evento] ?? evento}
                 </td>
                 {["WhatsApp", "Email"].map((canal) => (
@@ -285,7 +353,7 @@ function SecaoNotificacoes({ iniciais }: { iniciais: PreferenciaItem[] }) {
       <Button
         onClick={aoSalvar}
         disabled={salvando}
-        className="mt-4 h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+        className="mt-4 h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
       >
         {salvando ? "Salvando..." : "Salvar notificações"}
       </Button>
@@ -332,10 +400,10 @@ function SecaoConta({ nomeAtual, email }: { nomeAtual: string; email: string }) 
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Sua conta</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
-        Login: <span className="font-medium text-[#14162B]">{email}</span> — para trocar
+    <section className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">Sua conta</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
+        Login: <span className="font-medium text-tinta">{email}</span> — para trocar
         o e-mail, fale com o suporte (exige confirmação).
       </p>
 
@@ -369,9 +437,9 @@ function SecaoConta({ nomeAtual, email }: { nomeAtual: string; email: string }) 
 
       <form
         onSubmit={formSenha.handleSubmit(aoTrocarSenha)}
-        className="mt-6 border-t border-[#14162B]/6 pt-4"
+        className="mt-6 border-t border-borda pt-4"
       >
-        <h3 className="text-sm font-semibold text-[#14162B]">Trocar senha</h3>
+        <h3 className="text-sm font-semibold text-tinta">Trocar senha</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="senhaAtual">Senha atual</Label>

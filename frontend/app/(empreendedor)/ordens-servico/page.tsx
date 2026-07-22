@@ -276,11 +276,11 @@ export default function PaginaOrdensServico() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             Ordens de serviço
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Ordens de serviço</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Ordens de serviço</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             O registro único de cada aparelho, do check-in à entrega. Para mover
             etapas visualmente, use o{" "}
             <Link href="/kanban" className="underline underline-offset-4">
@@ -291,7 +291,7 @@ export default function PaginaOrdensServico() {
         </div>
         <Button
           onClick={abrirCriacao}
-          className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Nova OS
         </Button>
@@ -300,15 +300,15 @@ export default function PaginaOrdensServico() {
       {formAberto && (
         <form
           onSubmit={formCriacao.handleSubmit(aoCriar)}
-          className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6"
+          className="mt-8 rounded-2xl border border-borda bg-superficie p-6"
         >
-          <h2 className="text-lg font-semibold text-[#14162B]">Nova ordem de serviço</h2>
+          <h2 className="text-lg font-semibold text-tinta">Nova ordem de serviço</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="clienteId">Cliente</Label>
               <select
                 id="clienteId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 aria-invalid={!!formCriacao.formState.errors.clienteId}
                 {...formCriacao.register("clienteId")}
               >
@@ -325,7 +325,7 @@ export default function PaginaOrdensServico() {
               <Label htmlFor="servicoId">Serviço</Label>
               <select
                 id="servicoId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 aria-invalid={!!formCriacao.formState.errors.servicoId}
                 {...formCriacao.register("servicoId")}
               >
@@ -368,7 +368,7 @@ export default function PaginaOrdensServico() {
               <Label htmlFor="prioridade">Prioridade</Label>
               <select
                 id="prioridade"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 {...formCriacao.register("prioridade")}
               >
                 {Object.entries(ROTULOS_PRIORIDADE).map(([valor, rotulo]) => (
@@ -391,7 +391,7 @@ export default function PaginaOrdensServico() {
               <Label htmlFor="responsavelTecnicoId">Responsável técnico</Label>
               <select
                 id="responsavelTecnicoId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 {...formCriacao.register("responsavelTecnicoId")}
               >
                 <option value="">Sem responsável</option>
@@ -415,7 +415,7 @@ export default function PaginaOrdensServico() {
             <Button
               type="submit"
               disabled={formCriacao.formState.isSubmitting}
-              className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+              className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
             >
               {formCriacao.formState.isSubmitting ? "Criando..." : "Criar OS"}
             </Button>
@@ -427,16 +427,16 @@ export default function PaginaOrdensServico() {
       )}
 
       {editandoId !== null && detalhe && (
-        <div className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+        <div className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-[#14162B]">
+            <h2 className="text-lg font-semibold text-tinta">
               OS #{detalhe.ordem?.numero} — {detalhe.ordem?.clienteNome}
             </h2>
-            <span className="rounded-full bg-[#14162B]/5 px-3 py-1 text-xs font-semibold text-[#14162B]">
+            <span className="rounded-full bg-sutil px-3 py-1 text-xs font-semibold text-tinta">
               {rotuloDaEtapa(detalhe.ordem?.etapa)}
             </span>
           </div>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <p className="mt-1 text-sm text-tinta-suave">
             {detalhe.ordem?.servicoNome}
             {detalhe.ordem?.aparelhoMarca &&
               ` · ${detalhe.ordem.aparelhoMarca} ${detalhe.ordem.aparelhoModelo ?? ""}`}
@@ -444,8 +444,8 @@ export default function PaginaOrdensServico() {
 
           {slug && detalhe.ordem?.codigoAcompanhamento && (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-[#6B7280]">Link de acompanhamento:</span>
-              <code className="rounded-lg bg-[#F7F7F9] px-3 py-1.5 text-xs text-[#14162B]">
+              <span className="text-tinta-suave">Link de acompanhamento:</span>
+              <code className="rounded-lg bg-sutil px-3 py-1.5 text-xs text-tinta">
                 {`${window.location.origin}/acompanhar/${slug}/${detalhe.ordem.codigoAcompanhamento}`}
               </code>
               <Button
@@ -470,7 +470,7 @@ export default function PaginaOrdensServico() {
                 <Label htmlFor="edicaoPrioridade">Prioridade</Label>
                 <select
                   id="edicaoPrioridade"
-                  className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                  className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                   {...formEdicao.register("prioridade")}
                 >
                   {Object.entries(ROTULOS_PRIORIDADE).map(([valor, rotulo]) => (
@@ -493,7 +493,7 @@ export default function PaginaOrdensServico() {
                 <Label htmlFor="edicaoResponsavel">Responsável técnico</Label>
                 <select
                   id="edicaoResponsavel"
-                  className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                  className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                   {...formEdicao.register("responsavelTecnicoId")}
                 >
                   <option value="">Sem responsável</option>
@@ -518,7 +518,7 @@ export default function PaginaOrdensServico() {
               <Button
                 type="submit"
                 disabled={formEdicao.formState.isSubmitting}
-                className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
               >
                 {formEdicao.formState.isSubmitting ? "Salvando..." : "Salvar OS"}
               </Button>
@@ -547,9 +547,9 @@ export default function PaginaOrdensServico() {
           <SecaoNotificacoes ordemId={editandoId} />
 
 
-          <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+          <div className="mt-6 border-t border-borda pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-[#14162B]">Peças utilizadas</h3>
+              <h3 className="text-sm font-semibold text-tinta">Peças utilizadas</h3>
               {detalhe.ordem?.etapa !== "Entregue" && detalhe.ordem?.etapa !== "Cancelado" && (
                 <Button
                   type="button"
@@ -569,7 +569,7 @@ export default function PaginaOrdensServico() {
                   aria-label="Peça"
                   value={novaPecaId}
                   onChange={(e) => setNovaPecaId(e.target.value)}
-                  className="h-10 min-w-64 rounded-md border border-input bg-white px-3 text-sm"
+                  className="h-10 min-w-64 rounded-md border border-input bg-superficie px-3 text-sm"
                 >
                   <option value="">Escolha a peça...</option>
                   {pecasCatalogo
@@ -602,7 +602,7 @@ export default function PaginaOrdensServico() {
             )}
 
             {(detalhe.pecas?.length ?? 0) === 0 ? (
-              <p className="mt-3 text-sm text-[#8B8D98]">
+              <p className="mt-3 text-sm text-tinta-fraca">
                 Nenhuma peça registrada nesta OS.
               </p>
             ) : (
@@ -610,12 +610,12 @@ export default function PaginaOrdensServico() {
                 {detalhe.pecas?.map((linha) => (
                   <div
                     key={linha.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-borda px-3 py-2 text-sm"
                   >
-                    <span className="text-[#14162B]">
+                    <span className="text-tinta">
                       <span className="font-medium">{linha.quantidade}×</span>{" "}
                       {linha.pecaNome}
-                      <span className="ml-2 text-xs text-[#8B8D98]">
+                      <span className="ml-2 text-xs text-tinta-fraca">
                         custo {formatarBRL(linha.custoUnitarioNoUso ?? 0)} · venda{" "}
                         {formatarBRL(linha.precoVendaNoUso ?? 0)}
                       </span>
@@ -624,7 +624,7 @@ export default function PaginaOrdensServico() {
                       detalhe.ordem?.etapa !== "Cancelado" && (
                         <Button
                           variant="ghost"
-                          className="h-7 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                          className="h-7 px-3 text-xs text-marca hover:text-marca"
                           onClick={() => aoRemoverPeca(linha.id)}
                         >
                           Remover
@@ -632,9 +632,9 @@ export default function PaginaOrdensServico() {
                       )}
                   </div>
                 ))}
-                <p className="pt-1 text-right text-sm text-[#6B7280]">
+                <p className="pt-1 text-right text-sm text-tinta-suave">
                   Total em peças (venda):{" "}
-                  <span className="font-semibold text-[#14162B]">
+                  <span className="font-semibold text-tinta">
                     {formatarBRL(
                       detalhe.pecas?.reduce(
                         (soma, l) =>
@@ -649,9 +649,9 @@ export default function PaginaOrdensServico() {
           </div>
 
           {(detalhe.historico?.length ?? 0) > 0 && (
-            <div className="mt-6 border-t border-[#14162B]/6 pt-4">
-              <h3 className="text-sm font-semibold text-[#14162B]">Trilha de etapas</h3>
-              <ul className="mt-2 space-y-1 text-sm text-[#6B7280]">
+            <div className="mt-6 border-t border-borda pt-4">
+              <h3 className="text-sm font-semibold text-tinta">Trilha de etapas</h3>
+              <ul className="mt-2 space-y-1 text-sm text-tinta-suave">
                 {detalhe.historico?.map((h, i) => (
                   <li key={i}>
                     {new Date(h.criadoEm ?? "").toLocaleString("pt-BR", {
@@ -661,7 +661,7 @@ export default function PaginaOrdensServico() {
                       minute: "2-digit",
                     })}{" "}
                     — {h.deEtapa ? `${rotuloDaEtapa(h.deEtapa)} → ` : ""}
-                    <span className="font-medium text-[#14162B]">
+                    <span className="font-medium text-tinta">
                       {rotuloDaEtapa(h.paraEtapa)}
                     </span>
                     {h.usuarioNome && ` · ${h.usuarioNome}`}
@@ -693,7 +693,7 @@ export default function PaginaOrdensServico() {
           onChange={(e) => setBusca(e.target.value)}
           className="h-10 max-w-72"
         />
-        <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={incluirFinalizadas}
@@ -703,9 +703,9 @@ export default function PaginaOrdensServico() {
         </label>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-[#14162B]/8">
+      <div className="mt-3 overflow-x-auto rounded-2xl border border-borda">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F7F7F9] text-xs text-[#8B8D98] uppercase tracking-wide">
+          <thead className="bg-sutil text-xs text-tinta-fraca uppercase tracking-wide">
             <tr>
               <th className="px-4 py-3">OS</th>
               <th className="px-4 py-3">Cliente</th>
@@ -719,12 +719,12 @@ export default function PaginaOrdensServico() {
           </thead>
           <tbody>
             {(ordens ?? []).map((ordem) => (
-              <tr key={ordem.id} className="border-t border-[#14162B]/6">
-                <td className="px-4 py-3 font-semibold text-[#14162B]">#{ordem.numero}</td>
-                <td className="px-4 py-3 text-[#14162B]">{ordem.clienteNome}</td>
-                <td className="px-4 py-3 text-[#6B7280]">{ordem.servicoNome}</td>
+              <tr key={ordem.id} className="border-t border-borda">
+                <td className="px-4 py-3 font-semibold text-tinta">#{ordem.numero}</td>
+                <td className="px-4 py-3 text-tinta">{ordem.clienteNome}</td>
+                <td className="px-4 py-3 text-tinta-suave">{ordem.servicoNome}</td>
                 <td className="px-4 py-3">
-                  <span className="rounded-full bg-[#14162B]/5 px-2 py-0.5 text-xs font-medium text-[#14162B]">
+                  <span className="rounded-full bg-sutil px-2 py-0.5 text-xs font-medium text-tinta">
                     {rotuloDaEtapa(ordem.etapa)}
                   </span>
                 </td>
@@ -732,17 +732,17 @@ export default function PaginaOrdensServico() {
                   <span
                     className={
                       ordem.prioridade === "Alta"
-                        ? "font-semibold text-[#E8536B]"
-                        : "text-[#6B7280]"
+                        ? "font-semibold text-marca"
+                        : "text-tinta-suave"
                     }
                   >
                     {ROTULOS_PRIORIDADE[ordem.prioridade ?? "Normal"]}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {ordem.prazoEstimado ? formatarDataCurta(ordem.prazoEstimado) : "—"}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {ROTULOS_PAGAMENTO[ordem.statusPagamento ?? "NaoPago"]}
                 </td>
                 <td className="px-4 py-3 text-right">
@@ -758,7 +758,7 @@ export default function PaginaOrdensServico() {
             ))}
             {ordens && ordens.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-[#6B7280]">
+                <td colSpan={8} className="px-4 py-10 text-center text-tinta-suave">
                   Nenhuma OS por aqui. Crie uma manualmente ou faça o check-in de
                   um agendamento.
                 </td>
@@ -820,17 +820,17 @@ function SecaoOrcamento({
   }
 
   return (
-    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+    <div className="mt-6 border-t border-borda pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-[#14162B]">Orçamento</h3>
+        <h3 className="text-sm font-semibold text-tinta">Orçamento</h3>
         {orcamento && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
               orcamento.status === "Aprovado"
-                ? "bg-emerald-100 text-emerald-700"
+                ? "bg-ok-fundo text-ok"
                 : orcamento.status === "Recusado"
-                  ? "bg-[#E8536B]/10 text-[#E8536B]"
-                  : "bg-[#14162B]/5 text-[#14162B]"
+                  ? "bg-marca-fundo text-marca"
+                  : "bg-sutil text-tinta"
             }`}
           >
             {ROTULOS_STATUS_ORCAMENTO[orcamento.status ?? "Rascunho"]}
@@ -839,7 +839,7 @@ function SecaoOrcamento({
       </div>
 
       {orcamento?.motivoRecusa && (
-        <p className="mt-1 text-sm text-[#E8536B]">
+        <p className="mt-1 text-sm text-marca">
           Motivo da recusa: {orcamento.motivoRecusa}
         </p>
       )}
@@ -895,7 +895,7 @@ function SecaoOrcamento({
                 "Orçamento enviado — OS movida para Aguardando aprovação.",
               )
             }
-            className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+            className="h-10 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
           >
             Enviar orçamento
           </Button>
@@ -908,12 +908,12 @@ function SecaoOrcamento({
       )}
 
       {orcamento && (
-        <div className="mt-3 rounded-xl border border-[#14162B]/6 px-4 py-3 text-sm">
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-[#6B7280]">
+        <div className="mt-3 rounded-xl border border-borda px-4 py-3 text-sm">
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-tinta-suave">
             <span>Mão de obra: {formatarBRL(orcamento.valorMaoDeObra ?? 0)}</span>
             <span>Peças: {formatarBRL(orcamento.valorPecas ?? 0)}</span>
             <span>Desconto: −{formatarBRL(orcamento.desconto ?? 0)}</span>
-            <span className="font-semibold text-[#14162B]">
+            <span className="font-semibold text-tinta">
               Total: {formatarBRL(orcamento.total ?? 0)}
             </span>
           </div>
@@ -922,7 +922,7 @@ function SecaoOrcamento({
 
       {orcamento?.status === "Enviado" && !finalizada && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <p className="text-sm text-[#6B7280]">Cliente respondeu por fora?</p>
+          <p className="text-sm text-tinta-suave">Cliente respondeu por fora?</p>
           <Button
             variant="outline"
             className="h-8 rounded-full px-3 text-xs"
@@ -939,7 +939,7 @@ function SecaoOrcamento({
           {!recusando ? (
             <Button
               variant="ghost"
-              className="h-8 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+              className="h-8 px-3 text-xs text-marca hover:text-marca"
               onClick={() => setRecusando(true)}
             >
               Registrar recusa
@@ -954,7 +954,7 @@ function SecaoOrcamento({
               />
               <Button
                 variant="outline"
-                className="h-8 rounded-full px-3 text-xs text-[#E8536B]"
+                className="h-8 rounded-full px-3 text-xs text-marca"
                 disabled={recusar.isPending}
                 onClick={() =>
                   executar(
@@ -971,7 +971,7 @@ function SecaoOrcamento({
       )}
 
       {(orcamento?.eventos?.length ?? 0) > 0 && (
-        <ul className="mt-3 space-y-1 text-xs text-[#8B8D98]">
+        <ul className="mt-3 space-y-1 text-xs text-tinta-fraca">
           {orcamento!.eventos!.map((evento, i) => (
             <li key={i}>
               {new Date(evento.criadoEm ?? "").toLocaleString("pt-BR", {
@@ -980,7 +980,7 @@ function SecaoOrcamento({
                 hour: "2-digit",
                 minute: "2-digit",
               })}{" "}
-              — <span className="font-medium text-[#6B7280]">{evento.tipo}</span> via{" "}
+              — <span className="font-medium text-tinta-suave">{evento.tipo}</span> via{" "}
               {evento.canal === "Portal" ? "portal do cliente" : "loja"}
               {evento.usuarioNome && ` (${evento.usuarioNome})`} ·{" "}
               {formatarBRL(evento.valorTotal ?? 0)}
@@ -1046,17 +1046,17 @@ function SecaoPagamentos({
   }
 
   return (
-    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
+    <div className="mt-6 border-t border-borda pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-[#14162B]">Pagamentos</h3>
+        <h3 className="text-sm font-semibold text-tinta">Pagamentos</h3>
         {resumo && (
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
               resumo.status === "Pago"
-                ? "bg-emerald-100 text-emerald-700"
+                ? "bg-ok-fundo text-ok"
                 : resumo.status === "Parcial"
-                  ? "bg-amber-100 text-amber-700"
-                  : "bg-[#F7F7F9] text-[#8B8D98]"
+                  ? "bg-alerta-fundo text-alerta"
+                  : "bg-sutil text-tinta-fraca"
             }`}
           >
             {ROTULOS_PAGAMENTO[resumo.status ?? "NaoPago"]}
@@ -1084,7 +1084,7 @@ function SecaoPagamentos({
           <Label htmlFor="pagamentoForma">Forma</Label>
           <select
             id="pagamentoForma"
-            className="mt-1 h-10 rounded-md border border-input bg-white px-3 text-sm"
+            className="mt-1 h-10 rounded-md border border-input bg-superficie px-3 text-sm"
             {...register("forma")}
           >
             {Object.entries(ROTULOS_FORMA_PAGAMENTO).map(([valor, rotulo]) => (
@@ -1121,21 +1121,21 @@ function SecaoPagamentos({
           {resumo!.pagamentos!.map((pagamento) => (
             <div
               key={pagamento.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-borda px-3 py-2 text-sm"
             >
-              <span className="text-[#14162B]">
+              <span className="text-tinta">
                 <span className="font-medium">{formatarBRL(pagamento.valor ?? 0)}</span> ·{" "}
                 {ROTULOS_FORMA_PAGAMENTO[pagamento.forma ?? "Outro"]}
                 {pagamento.observacao && (
-                  <span className="text-[#8B8D98]"> — {pagamento.observacao}</span>
+                  <span className="text-tinta-fraca"> — {pagamento.observacao}</span>
                 )}
                 {pagamento.registradoPorNome && (
-                  <span className="text-xs text-[#8B8D98]"> · {pagamento.registradoPorNome}</span>
+                  <span className="text-xs text-tinta-fraca"> · {pagamento.registradoPorNome}</span>
                 )}
               </span>
               <Button
                 variant="ghost"
-                className="h-7 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                className="h-7 px-3 text-xs text-marca hover:text-marca"
                 onClick={() => aoRemover(pagamento.id)}
               >
                 Remover
@@ -1146,13 +1146,13 @@ function SecaoPagamentos({
       )}
 
       {resumo && (
-        <p className="mt-2 text-right text-sm text-[#6B7280]">
-          Pago: <span className="font-semibold text-[#14162B]">{formatarBRL(resumo.totalPago ?? 0)}</span>
+        <p className="mt-2 text-right text-sm text-tinta-suave">
+          Pago: <span className="font-semibold text-tinta">{formatarBRL(resumo.totalPago ?? 0)}</span>
           {resumo.totalOrcamento != null && (
             <>
               {" "}
               de {formatarBRL(resumo.totalOrcamento)} · saldo{" "}
-              <span className="font-semibold text-[#14162B]">
+              <span className="font-semibold text-tinta">
                 {formatarBRL(resumo.saldo ?? 0)}
               </span>
             </>
@@ -1172,10 +1172,10 @@ function SecaoNotificacoes({ ordemId }: { ordemId: string }) {
   const mensagens = resposta?.status === 200 ? resposta.data : [];
 
   return (
-    <div className="mt-6 border-t border-[#14162B]/6 pt-4">
-      <h3 className="text-sm font-semibold text-[#14162B]">Notificações enviadas</h3>
+    <div className="mt-6 border-t border-borda pt-4">
+      <h3 className="text-sm font-semibold text-tinta">Notificações enviadas</h3>
       {mensagens.length === 0 ? (
-        <p className="mt-2 text-sm text-[#8B8D98]">
+        <p className="mt-2 text-sm text-tinta-fraca">
           Nenhuma notificação registrada ainda para esta OS.
         </p>
       ) : (
@@ -1183,30 +1183,30 @@ function SecaoNotificacoes({ ordemId }: { ordemId: string }) {
           {mensagens.map((m) => (
             <li
               key={m.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#14162B]/6 px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-borda px-3 py-2"
             >
-              <span className="text-[#14162B]">
+              <span className="text-tinta">
                 <span className="font-medium">
                   {m.canal === "Email" ? "E-mail" : "WhatsApp"}
                 </span>{" "}
                 — {ROTULOS_EVENTO_COMUNICACAO[m.tipoEvento ?? ""] ?? m.tipoEvento}
-                <span className="ml-1 text-xs text-[#8B8D98]">para {m.destino}</span>
+                <span className="ml-1 text-xs text-tinta-fraca">para {m.destino}</span>
               </span>
               <span className="flex items-center gap-2 text-xs">
                 <span
                   className={`rounded-full px-2 py-0.5 font-semibold ${
                     m.status === "Enviada"
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-ok-fundo text-ok"
                       : m.status === "Falhou"
-                        ? "bg-[#E8536B]/10 text-[#E8536B]"
+                        ? "bg-marca-fundo text-marca"
                         : m.status === "Suprimida"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-[#F7F7F9] text-[#8B8D98]"
+                          ? "bg-alerta-fundo text-alerta"
+                          : "bg-sutil text-tinta-fraca"
                   }`}
                 >
                   {ROTULOS_STATUS_MENSAGEM[m.status ?? ""] ?? m.status}
                 </span>
-                <span className="text-[#8B8D98]">
+                <span className="text-tinta-fraca">
                   {new Date(m.criadoEm ?? "").toLocaleString("pt-BR", {
                     day: "2-digit",
                     month: "2-digit",

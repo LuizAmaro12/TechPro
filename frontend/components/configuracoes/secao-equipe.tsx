@@ -82,11 +82,11 @@ export function SecaoEquipe() {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+    <section className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#14162B]">Equipe</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h2 className="text-lg font-semibold text-tinta">Equipe</h2>
+          <p className="mt-1 text-sm text-tinta-suave">
             Quem trabalha na loja e o que cada função enxerga.
           </p>
         </div>
@@ -133,7 +133,7 @@ export function SecaoEquipe() {
               onChange={(e) => setNovo({ ...novo, senha: e.target.value })}
               className="mt-1 h-11"
             />
-            <p className="mt-1 text-xs text-[#8B8D98]">
+            <p className="mt-1 text-xs text-tinta-fraca">
               Combine com a pessoa; ela pode trocar depois em Sua conta.
             </p>
           </div>
@@ -143,7 +143,7 @@ export function SecaoEquipe() {
               id="membroPapel"
               value={novo.papel}
               onChange={(e) => setNovo({ ...novo, papel: e.target.value })}
-              className="mt-1 h-11 w-full rounded-md border border-[#14162B]/10 bg-white px-2 text-sm"
+              className="mt-1 h-11 w-full rounded-md border border-borda bg-superficie px-2 text-sm"
             >
               {Object.entries(ROTULO_PAPEL).map(([valor, rotulo]) => (
                 <option key={valor} value={valor}>
@@ -151,13 +151,13 @@ export function SecaoEquipe() {
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-[#8B8D98]">{DESCRICAO_PAPEL[novo.papel]}</p>
+            <p className="mt-1 text-xs text-tinta-fraca">{DESCRICAO_PAPEL[novo.papel]}</p>
           </div>
           <div className="sm:col-span-2">
             <Button
               type="submit"
               disabled={criar.isPending}
-              className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+              className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
             >
               Adicionar
             </Button>
@@ -165,9 +165,9 @@ export function SecaoEquipe() {
         </form>
       )}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-[#14162B]/8">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-borda">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F7F7F9] text-xs text-[#6B7280] uppercase">
+          <thead className="bg-sutil text-xs text-tinta-suave uppercase">
             <tr>
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">E-mail</th>
@@ -179,24 +179,24 @@ export function SecaoEquipe() {
             {membros.map((m) => (
               <tr
                 key={m.id}
-                className={`border-t border-[#14162B]/6 ${m.ativo ? "" : "opacity-50"}`}
+                className={`border-t border-borda ${m.ativo ? "" : "opacity-50"}`}
               >
-                <td className="px-4 py-3 font-medium text-[#14162B]">
+                <td className="px-4 py-3 font-medium text-tinta">
                   {m.nome}
                   {!m.ativo && (
-                    <span className="ml-2 rounded-full bg-[#F7F7F9] px-2 py-0.5 text-[10px] font-semibold text-[#8B8D98] uppercase">
+                    <span className="ml-2 rounded-full bg-sutil px-2 py-0.5 text-[10px] font-semibold text-tinta-fraca uppercase">
                       inativo
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">{m.email}</td>
+                <td className="px-4 py-3 text-tinta-suave">{m.email}</td>
                 <td className="px-4 py-3">
                   {m.ativo ? (
                     <select
                       aria-label={`Função de ${m.nome}`}
                       value={m.papel ?? "tecnico"}
                       onChange={(e) => aoTrocarPapel(m, e.target.value)}
-                      className="h-9 rounded-md border border-[#14162B]/10 bg-white px-2 text-sm"
+                      className="h-9 rounded-md border border-borda bg-superficie px-2 text-sm"
                     >
                       {Object.entries(ROTULO_PAPEL).map(([valor, rotulo]) => (
                         <option key={valor} value={valor}>
@@ -205,7 +205,7 @@ export function SecaoEquipe() {
                       ))}
                     </select>
                   ) : (
-                    <span className="text-[#6B7280]">
+                    <span className="text-tinta-suave">
                       {ROTULO_PAPEL[m.papel ?? ""] ?? m.papel}
                     </span>
                   )}
@@ -214,7 +214,7 @@ export function SecaoEquipe() {
                   {m.ativo && (
                     <Button
                       variant="ghost"
-                      className="h-8 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                      className="h-8 px-3 text-xs text-marca hover:text-marca"
                       onClick={() => aoDesativar(m)}
                     >
                       Desativar

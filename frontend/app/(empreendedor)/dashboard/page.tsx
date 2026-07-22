@@ -85,26 +85,26 @@ export default function PaginaDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Visão geral
       </p>
-      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">
+      <h1 className="mt-2 text-3xl font-bold text-tinta">
         Olá, {usuario?.nome ?? "..."}
       </h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
+      <p className="mt-1 text-sm text-tinta-suave">
         O resumo da operação de hoje — o que precisa de atenção vem primeiro.
       </p>
 
       {/* --- Ativação: passos que ainda faltam (some quando completo) ------- */}
       {(ativacaoIncompleta || onboarding?.temDadosExemplo) && (
-        <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-[#F7F7F9] p-6">
+        <section className="mt-8 rounded-2xl border border-borda bg-sutil p-6">
           {ativacaoIncompleta && (
             <>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-[#14162B]">
+                <h2 className="text-sm font-semibold text-tinta">
                   Ativação da loja
                 </h2>
-                <span className="text-xs font-semibold text-[#6B7280]">
+                <span className="text-xs font-semibold text-tinta-suave">
                   {onboarding?.passosConcluidos} de {onboarding?.totalPassos}
                 </span>
               </div>
@@ -117,8 +117,8 @@ export default function PaginaDashboard() {
                       href={p.href}
                       className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm ${
                         feito
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-[#14162B]/15 bg-white text-[#14162B] hover:border-[#14162B]"
+                          ? "border-ok/40 bg-ok-fundo text-ok"
+                          : "border-borda-forte bg-superficie text-tinta hover:border-tinta"
                       }`}
                     >
                       <span>{feito ? "✓" : "○"}</span>
@@ -131,7 +131,7 @@ export default function PaginaDashboard() {
           )}
           {onboarding?.temDadosExemplo && (
             <div className={ativacaoIncompleta ? "mt-4" : ""}>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm text-tinta-suave">
                 Você tem um cliente e uma OS de exemplo carregados.
               </p>
               <Button
@@ -154,14 +154,14 @@ export default function PaginaDashboard() {
             aria-hidden
             className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-orange-400 via-pink-500 to-indigo-500 opacity-10 blur-2xl"
           />
-          <div className="relative rounded-2xl border border-[#E8536B]/20 bg-white p-6">
-            <h2 className="text-sm font-semibold tracking-wide text-[#E8536B] uppercase">
+          <div className="relative rounded-2xl border border-marca/20 bg-superficie p-6">
+            <h2 className="text-sm font-semibold tracking-wide text-marca uppercase">
               Radar do dia
             </h2>
             <div className="mt-4 grid gap-6 md:grid-cols-2">
               {osAtrasadas.length > 0 && (
                 <div>
-                  <p className="text-sm font-semibold text-[#14162B]">
+                  <p className="text-sm font-semibold text-tinta">
                     OS em atraso ({dash?.radar?.totalOsAtrasadas})
                   </p>
                   <ul className="mt-2 space-y-1">
@@ -169,13 +169,13 @@ export default function PaginaDashboard() {
                       <li key={os.id}>
                         <Link
                           href="/ordens-servico"
-                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[#F7F7F9]"
+                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-sutil"
                         >
-                          <span className="text-[#14162B]">
+                          <span className="text-tinta">
                             <span className="font-medium">#{os.numero}</span> {os.clienteNome}
-                            <span className="text-xs text-[#8B8D98]"> · {os.servicoNome}</span>
+                            <span className="text-xs text-tinta-fraca"> · {os.servicoNome}</span>
                           </span>
-                          <span className="shrink-0 rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-xs font-semibold text-[#E8536B]">
+                          <span className="shrink-0 rounded-full bg-marca-fundo px-2 py-0.5 text-xs font-semibold text-marca">
                             {os.diasAtraso}d
                           </span>
                         </Link>
@@ -187,7 +187,7 @@ export default function PaginaDashboard() {
 
               {orcamentosPendentes.length > 0 && (
                 <div>
-                  <p className="text-sm font-semibold text-[#14162B]">
+                  <p className="text-sm font-semibold text-tinta">
                     Orçamentos aguardando resposta ({dash?.radar?.totalOrcamentosPendentes})
                   </p>
                   <ul className="mt-2 space-y-1">
@@ -195,16 +195,16 @@ export default function PaginaDashboard() {
                       <li key={o.id}>
                         <Link
                           href="/ordens-servico"
-                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-[#F7F7F9]"
+                          className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-sutil"
                         >
-                          <span className="text-[#14162B]">
+                          <span className="text-tinta">
                             <span className="font-medium">#{o.numero}</span> {o.clienteNome}
-                            <span className="text-xs text-[#8B8D98]">
+                            <span className="text-xs text-tinta-fraca">
                               {" "}
                               · {formatarBRL(o.total ?? 0)}
                             </span>
                           </span>
-                          <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                          <span className="shrink-0 rounded-full bg-alerta-fundo px-2 py-0.5 text-xs font-semibold text-alerta">
                             há {o.diasAguardando}d
                           </span>
                         </Link>
@@ -224,18 +224,18 @@ export default function PaginaDashboard() {
           <Link
             key={kpi.rotulo}
             href={kpi.href}
-            className={`rounded-2xl border p-4 transition-colors hover:border-[#14162B]/30 ${
-              kpi.destaque ? "border-[#E8536B]/30 bg-[#E8536B]/[0.03]" : "border-[#14162B]/8 bg-white"
+            className={`rounded-2xl border p-4 transition-colors hover:border-borda-forte ${
+              kpi.destaque ? "border-marca/40 bg-marca/[0.03]" : "border-borda bg-superficie"
             }`}
           >
             <p
               className={`text-3xl font-bold ${
-                kpi.destaque ? "text-[#E8536B]" : "text-[#14162B]"
+                kpi.destaque ? "text-marca" : "text-tinta"
               }`}
             >
               {isLoading ? "—" : kpi.valor}
             </p>
-            <p className="mt-1 text-xs text-[#6B7280]">{kpi.rotulo}</p>
+            <p className="mt-1 text-xs text-tinta-suave">{kpi.rotulo}</p>
           </Link>
         ))}
       </section>
@@ -246,26 +246,26 @@ export default function PaginaDashboard() {
       {usuario?.papel === "gestor" && (
       <Link
         href="/financeiro"
-        className="mt-6 block rounded-2xl border border-[#14162B]/8 bg-white p-6 transition-colors hover:border-[#14162B]/30"
+        className="mt-6 block rounded-2xl border border-borda bg-superficie p-6 transition-colors hover:border-borda-forte"
       >
-        <p className="text-xs font-medium tracking-wide text-[#8B8D98] uppercase">
+        <p className="text-xs font-medium tracking-wide text-tinta-fraca uppercase">
           Faturamento do mês
         </p>
         <div className="mt-1 flex flex-wrap items-baseline gap-3">
-          <span className="text-3xl font-bold text-[#14162B]">
+          <span className="text-3xl font-bold text-tinta">
             {formatarBRL(dash?.faturamentoMes ?? 0)}
           </span>
           {variacao !== null && (
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                subiu ? "bg-emerald-100 text-emerald-700" : "bg-[#E8536B]/10 text-[#E8536B]"
+                subiu ? "bg-ok-fundo text-ok" : "bg-marca-fundo text-marca"
               }`}
             >
               {subiu ? "▲" : "▼"} {Math.abs(variacao)}% vs. mês anterior
             </span>
           )}
         </div>
-        <p className="mt-1 text-sm text-[#6B7280]">
+        <p className="mt-1 text-sm text-tinta-suave">
           Mês anterior: {formatarBRL(dash?.faturamentoMesAnterior ?? 0)} · pagamentos
           recebidos (caixa) — ver detalhes no Financeiro
         </p>

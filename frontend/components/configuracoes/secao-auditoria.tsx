@@ -15,11 +15,11 @@ export function SecaoAuditoria() {
   const registros = resposta?.status === 200 ? resposta.data : [];
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+    <section className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#14162B]">Histórico de ações</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h2 className="text-lg font-semibold text-tinta">Histórico de ações</h2>
+          <p className="mt-1 text-sm text-tinta-suave">
             Quem mexeu em equipe, dados pessoais e configurações. Movimentações de
             OS, orçamento e estoque têm o histórico na própria tela.
           </p>
@@ -28,7 +28,7 @@ export function SecaoAuditoria() {
           aria-label="Filtrar por área"
           value={area}
           onChange={(e) => setArea(e.target.value)}
-          className="h-10 rounded-md border border-[#14162B]/10 bg-white px-2 text-sm"
+          className="h-10 rounded-md border border-borda bg-superficie px-2 text-sm"
         >
           {AREAS.map((a) => (
             <option key={a || "todas"} value={a}>
@@ -39,20 +39,20 @@ export function SecaoAuditoria() {
       </div>
 
       {registros.length === 0 ? (
-        <p className="mt-4 text-sm text-[#8B8D98]">Nenhuma ação registrada ainda.</p>
+        <p className="mt-4 text-sm text-tinta-fraca">Nenhuma ação registrada ainda.</p>
       ) : (
         <ul className="mt-4 space-y-2">
           {registros.map((r) => (
             <li
               key={r.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[#F7F7F9] px-3 py-2 text-sm"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-sutil px-3 py-2 text-sm"
             >
               <div>
-                <p className="text-[#14162B]">
+                <p className="text-tinta">
                   {r.acao}
-                  {r.detalhe && <span className="text-[#6B7280]"> — {r.detalhe}</span>}
+                  {r.detalhe && <span className="text-tinta-suave"> — {r.detalhe}</span>}
                 </p>
-                <p className="text-xs text-[#8B8D98]">
+                <p className="text-xs text-tinta-fraca">
                   {r.usuarioNome} ·{" "}
                   {new Date(r.criadoEm ?? "").toLocaleString("pt-BR", {
                     day: "2-digit",
@@ -62,7 +62,7 @@ export function SecaoAuditoria() {
                   })}
                 </p>
               </div>
-              <span className="rounded-full bg-[#14162B]/5 px-2 py-0.5 text-[10px] font-semibold text-[#14162B] uppercase">
+              <span className="rounded-full bg-sutil px-2 py-0.5 text-[10px] font-semibold text-tinta uppercase">
                 {r.entidade}
               </span>
             </li>

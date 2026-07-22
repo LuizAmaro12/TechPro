@@ -60,14 +60,14 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#E8536B]/30 bg-[#E8536B]/5 p-5">
+    <section className="mt-6 rounded-2xl border border-marca/40 bg-marca-fundo p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[#14162B]">
+          <h2 className="text-sm font-semibold text-tinta">
             Fila de espera · {fila.length}{" "}
             {fila.length === 1 ? "pessoa aguardando" : "pessoas aguardando"}
           </h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <p className="mt-1 text-sm text-tinta-suave">
             Quem pediu horário e não tinha vaga. Converta quando abrir um horário.
           </p>
         </div>
@@ -79,20 +79,20 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
       {aberta && (
         <ul className="mt-4 space-y-2">
           {fila.map((item) => (
-            <li key={item.id} className="rounded-xl border border-[#14162B]/8 bg-white p-3 text-sm">
+            <li key={item.id} className="rounded-xl border border-borda bg-superficie p-3 text-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="font-medium text-[#14162B]">
+                  <p className="font-medium text-tinta">
                     {item.nomeContato} · {item.telefoneContato}
                   </p>
-                  <p className="text-[#6B7280]">
+                  <p className="text-tinta-suave">
                     {item.servicoNome}
                     {item.origem === "Portal" && " · veio pelo portal"}
                     {item.dataPreferida &&
                       ` · queria ${formatarDataCurta(item.dataPreferida)}`}
                   </p>
                   {(item.aparelhoMarca || item.aparelhoModelo) && (
-                    <p className="text-xs text-[#8B8D98]">
+                    <p className="text-xs text-tinta-fraca">
                       {[item.aparelhoMarca, item.aparelhoModelo].filter(Boolean).join(" ")}
                     </p>
                   )}
@@ -109,7 +109,7 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-8 px-3 text-xs text-[#8B8D98]"
+                    className="h-8 px-3 text-xs text-tinta-fraca"
                     onClick={() => aoDescartar(item.id!)}
                   >
                     Descartar
@@ -118,9 +118,9 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
               </div>
 
               {convertendoId === item.id && (
-                <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-[#14162B]/6 pt-3">
+                <div className="mt-3 flex flex-wrap items-end gap-2 border-t border-borda pt-3">
                   <div>
-                    <label className="text-xs text-[#6B7280]">Data</label>
+                    <label className="text-xs text-tinta-suave">Data</label>
                     <Input
                       type="date"
                       min={hojeIso()}
@@ -130,7 +130,7 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[#6B7280]">Hora</label>
+                    <label className="text-xs text-tinta-suave">Hora</label>
                     <Input
                       type="time"
                       value={hora}
@@ -139,7 +139,7 @@ export function FilaDeEspera({ aoConverter }: { aoConverter: () => void }) {
                     />
                   </div>
                   <Button
-                    className="h-9 rounded-full bg-[#14162B] px-5 text-xs text-white hover:bg-[#14162B]/90"
+                    className="h-9 rounded-full bg-tinta px-5 text-xs text-sobre-tinta hover:bg-tinta/90"
                     disabled={converter.isPending}
                     onClick={() => aoConfirmarConversao(item.id!)}
                   >

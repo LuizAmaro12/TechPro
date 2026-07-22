@@ -15,18 +15,18 @@ import {
 
 function Estrelas({ nota }: { nota: number }) {
   return (
-    <span className="text-[#E8536B]" aria-label={`${nota} de 5 estrelas`}>
+    <span className="text-marca" aria-label={`${nota} de 5 estrelas`}>
       {"★".repeat(nota)}
-      <span className="text-[#14162B]/20">{"★".repeat(5 - nota)}</span>
+      <span className="text-tinta-fraca">{"★".repeat(5 - nota)}</span>
     </span>
   );
 }
 
 /** NPS vai de −100 a +100: a cor comunica a faixa sem precisar explicar. */
 function corDoNps(score: number) {
-  if (score >= 50) return "text-emerald-700";
-  if (score >= 0) return "text-amber-700";
-  return "text-[#E8536B]";
+  if (score >= 50) return "text-ok";
+  if (score >= 0) return "text-alerta";
+  return "text-marca";
 }
 
 export default function PaginaAvaliacoes() {
@@ -68,18 +68,18 @@ export default function PaginaAvaliacoes() {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div>
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+        <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
           Reputação
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Avaliações</h1>
-        <p className="mt-1 text-sm text-[#6B7280]">
+        <h1 className="mt-2 text-3xl font-bold text-tinta">Avaliações</h1>
+        <p className="mt-1 text-sm text-tinta-suave">
           O que os clientes acharam do reparo — e o que ainda precisa de resposta.
           O pedido de avaliação sai automaticamente quando a OS é entregue.
         </p>
       </div>
 
       {resumo && (resumo.total ?? 0) === 0 ? (
-        <p className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6 text-sm text-[#6B7280]">
+        <p className="mt-8 rounded-2xl border border-borda bg-superficie p-6 text-sm text-tinta-suave">
           Ainda não há avaliações. Assim que você entregar uma OS, o cliente
           recebe o convite para avaliar pelo link de acompanhamento.
         </p>
@@ -87,8 +87,8 @@ export default function PaginaAvaliacoes() {
         resumo && (
           <>
             {(resumo.pendenciasLoop ?? 0) > 0 && (
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E8536B]/30 bg-[#E8536B]/5 p-4">
-                <p className="text-sm text-[#14162B]">
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-marca/40 bg-marca-fundo p-4">
+                <p className="text-sm text-tinta">
                   <strong>{resumo.pendenciasLoop}</strong> avaliação(ões) negativa(s)
                   aguardando tratamento.
                 </p>
@@ -103,44 +103,44 @@ export default function PaginaAvaliacoes() {
             )}
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[#14162B]/8 bg-white p-5">
-                <p className="text-xs text-[#6B7280] uppercase">Média</p>
-                <p className="mt-1 text-3xl font-bold text-[#14162B]">
+              <div className="rounded-2xl border border-borda bg-superficie p-5">
+                <p className="text-xs text-tinta-suave uppercase">Média</p>
+                <p className="mt-1 text-3xl font-bold text-tinta">
                   {(resumo.mediaEstrelas ?? 0).toLocaleString("pt-BR", {
                     minimumFractionDigits: 1,
                   })}
                 </p>
-                <p className="mt-1 text-sm text-[#6B7280]">
+                <p className="mt-1 text-sm text-tinta-suave">
                   {resumo.total} avaliação(ões)
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[#14162B]/8 bg-white p-5">
-                <p className="text-xs text-[#6B7280] uppercase">NPS</p>
+              <div className="rounded-2xl border border-borda bg-superficie p-5">
+                <p className="text-xs text-tinta-suave uppercase">NPS</p>
                 <p className={`mt-1 text-3xl font-bold ${corDoNps(resumo.nps?.score ?? 0)}`}>
                   {(resumo.nps?.score ?? 0) > 0 ? "+" : ""}
                   {resumo.nps?.score ?? 0}
                 </p>
-                <p className="mt-1 text-sm text-[#6B7280]">
+                <p className="mt-1 text-sm text-tinta-suave">
                   {resumo.nps?.promotores} promotores · {resumo.nps?.detratores} detratores
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[#14162B]/8 bg-white p-5">
-                <p className="text-xs text-[#6B7280] uppercase">Distribuição</p>
+              <div className="rounded-2xl border border-borda bg-superficie p-5">
+                <p className="text-xs text-tinta-suave uppercase">Distribuição</p>
                 <div className="mt-2 space-y-1">
                   {resumo.distribuicao?.map((d) => (
                     <div key={d.estrelas} className="flex items-center gap-2 text-xs">
-                      <span className="w-3 text-[#6B7280]">{d.estrelas}</span>
-                      <span className="h-2 flex-1 rounded-full bg-[#14162B]/5">
+                      <span className="w-3 text-tinta-suave">{d.estrelas}</span>
+                      <span className="h-2 flex-1 rounded-full bg-sutil">
                         <span
-                          className="block h-2 rounded-full bg-[#E8536B]"
+                          className="block h-2 rounded-full bg-marca"
                           style={{
                             width: `${((d.quantidade ?? 0) / maiorFaixa) * 100}%`,
                           }}
                         />
                       </span>
-                      <span className="w-4 text-right text-[#6B7280]">{d.quantidade}</span>
+                      <span className="w-4 text-right text-tinta-suave">{d.quantidade}</span>
                     </div>
                   ))}
                 </div>
@@ -148,9 +148,9 @@ export default function PaginaAvaliacoes() {
             </div>
 
             {(resumo.porTecnico?.length ?? 0) > 0 && (
-              <div className="mt-6 overflow-x-auto rounded-2xl border border-[#14162B]/8">
+              <div className="mt-6 overflow-x-auto rounded-2xl border border-borda">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-[#F7F7F9] text-xs text-[#6B7280] uppercase">
+                  <thead className="bg-sutil text-xs text-tinta-suave uppercase">
                     <tr>
                       <th className="px-4 py-3">Técnico</th>
                       <th className="px-4 py-3 text-right">Avaliações</th>
@@ -160,12 +160,12 @@ export default function PaginaAvaliacoes() {
                   </thead>
                   <tbody>
                     {resumo.porTecnico?.map((t) => (
-                      <tr key={t.tecnicoId} className="border-t border-[#14162B]/6">
-                        <td className="px-4 py-3 font-medium text-[#14162B]">
+                      <tr key={t.tecnicoId} className="border-t border-borda">
+                        <td className="px-4 py-3 font-medium text-tinta">
                           {t.tecnicoNome}
                         </td>
-                        <td className="px-4 py-3 text-right text-[#6B7280]">{t.total}</td>
-                        <td className="px-4 py-3 text-right text-[#14162B]">
+                        <td className="px-4 py-3 text-right text-tinta-suave">{t.total}</td>
+                        <td className="px-4 py-3 text-right text-tinta">
                           {(t.mediaEstrelas ?? 0).toLocaleString("pt-BR", {
                             minimumFractionDigits: 1,
                           })}
@@ -185,10 +185,10 @@ export default function PaginaAvaliacoes() {
       )}
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[#14162B]">
+        <h2 className="text-lg font-semibold text-tinta">
           {apenasPendentes ? "Pendências de tratamento" : "Todas as avaliações"}
         </h2>
-        <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={apenasPendentes}
@@ -200,7 +200,7 @@ export default function PaginaAvaliacoes() {
 
       <div className="mt-3 space-y-3">
         {avaliacoes.length === 0 && (
-          <p className="rounded-2xl border border-[#14162B]/8 bg-white p-6 text-sm text-[#6B7280]">
+          <p className="rounded-2xl border border-borda bg-superficie p-6 text-sm text-tinta-suave">
             {apenasPendentes
               ? "Nenhuma avaliação negativa aguardando tratamento. 🎉"
               : "Nenhuma avaliação ainda."}
@@ -210,49 +210,49 @@ export default function PaginaAvaliacoes() {
         {avaliacoes.map((a: AvaliacaoResponse) => (
           <article
             key={a.id}
-            className={`rounded-2xl border bg-white p-5 ${
+            className={`rounded-2xl border bg-superficie p-5 ${
               a.negativa && !a.resolvida
-                ? "border-[#E8536B]/40"
-                : "border-[#14162B]/8"
+                ? "border-marca/40"
+                : "border-borda"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <Estrelas nota={a.nota ?? 0} />
-                <span className="text-sm text-[#6B7280]">
+                <span className="text-sm text-tinta-suave">
                   recomenda {a.recomendacao}/10
                 </span>
                 {a.negativa && !a.resolvida && (
-                  <span className="rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-[10px] font-semibold text-[#E8536B] uppercase">
+                  <span className="rounded-full bg-marca-fundo px-2 py-0.5 text-[10px] font-semibold text-marca uppercase">
                     tratar
                   </span>
                 )}
                 {a.resolvida && (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 uppercase">
+                  <span className="rounded-full bg-ok-fundo px-2 py-0.5 text-[10px] font-semibold text-ok uppercase">
                     resolvida
                   </span>
                 )}
               </div>
-              <span className="text-xs text-[#8B8D98]">
+              <span className="text-xs text-tinta-fraca">
                 OS #{a.ordemServicoNumero} ·{" "}
                 {new Date(a.criadoEm ?? "").toLocaleDateString("pt-BR")}
               </span>
             </div>
 
-            <p className="mt-1 text-xs text-[#8B8D98]">
+            <p className="mt-1 text-xs text-tinta-fraca">
               {a.clienteNome ?? "Cliente"} · {a.servicoNome}
               {a.tecnicoNome && ` · técnico ${a.tecnicoNome}`}
             </p>
 
             {a.comentario && (
-              <p className="mt-3 rounded-xl bg-[#F7F7F9] p-3 text-sm text-[#14162B]">
+              <p className="mt-3 rounded-xl bg-sutil p-3 text-sm text-tinta">
                 “{a.comentario}”
               </p>
             )}
 
             {a.resolvida && a.resolucaoNota && (
-              <p className="mt-3 text-sm text-[#6B7280]">
-                <strong className="text-[#14162B]">Como foi tratado:</strong>{" "}
+              <p className="mt-3 text-sm text-tinta-suave">
+                <strong className="text-tinta">Como foi tratado:</strong>{" "}
                 {a.resolucaoNota}
               </p>
             )}
@@ -272,7 +272,7 @@ export default function PaginaAvaliacoes() {
                     <Button
                       disabled={resolver.isPending || !notaResolucao.trim()}
                       onClick={() => aoResolver(a.id!)}
-                      className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+                      className="h-10 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
                     >
                       Registrar
                     </Button>

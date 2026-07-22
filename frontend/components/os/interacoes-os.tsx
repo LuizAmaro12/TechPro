@@ -96,9 +96,9 @@ export function InteracoesOs({
 
   return (
     <>
-      <div className="mt-6 border-t border-[#14162B]/6 pt-4">
-        <h3 className="text-sm font-semibold text-[#14162B]">Comentários internos</h3>
-        <p className="mt-1 text-xs text-[#8B8D98]">
+      <div className="mt-6 border-t border-borda pt-4">
+        <h3 className="text-sm font-semibold text-tinta">Comentários internos</h3>
+        <p className="mt-1 text-xs text-tinta-fraca">
           Só a equipe vê — o cliente nunca enxerga isto no link de acompanhamento.
         </p>
 
@@ -114,31 +114,31 @@ export function InteracoesOs({
           <Button
             type="submit"
             disabled={comentar.isPending || !texto.trim()}
-            className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+            className="h-10 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
           >
             Comentar
           </Button>
         </form>
 
         {comentarios.length === 0 ? (
-          <p className="mt-3 text-sm text-[#8B8D98]">Nenhum comentário ainda.</p>
+          <p className="mt-3 text-sm text-tinta-fraca">Nenhum comentário ainda.</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {comentarios.map((c) => (
               <li
                 key={c.id}
-                className="flex items-start justify-between gap-3 rounded-xl bg-[#F7F7F9] px-3 py-2 text-sm"
+                className="flex items-start justify-between gap-3 rounded-xl bg-sutil px-3 py-2 text-sm"
               >
                 <div>
-                  <p className="text-[#14162B]">{c.texto}</p>
-                  <p className="mt-0.5 text-xs text-[#8B8D98]">
+                  <p className="text-tinta">{c.texto}</p>
+                  <p className="mt-0.5 text-xs text-tinta-fraca">
                     {c.autorNome ?? "sistema"} · {quando(c.criadoEm)}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => aoRemover(c.id!)}
-                  className="shrink-0 text-xs text-[#8B8D98] underline hover:text-[#E8536B]"
+                  className="shrink-0 text-xs text-tinta-fraca underline hover:text-marca"
                 >
                   remover
                 </button>
@@ -148,9 +148,9 @@ export function InteracoesOs({
         )}
       </div>
 
-      <div className="mt-6 border-t border-[#14162B]/6 pt-4">
-        <h3 className="text-sm font-semibold text-[#14162B]">Responsável técnico</h3>
-        <p className="mt-1 text-xs text-[#8B8D98]">
+      <div className="mt-6 border-t border-borda pt-4">
+        <h3 className="text-sm font-semibold text-tinta">Responsável técnico</h3>
+        <p className="mt-1 text-xs text-tinta-fraca">
           Toda troca fica registrada com o motivo — é o que responde a quem mexeu
           no aparelho se o cliente questionar.
         </p>
@@ -162,7 +162,7 @@ export function InteracoesOs({
               id="novoResponsavel"
               value={novoResponsavel}
               onChange={(e) => setNovoResponsavel(e.target.value)}
-              className="mt-1 h-10 w-full rounded-md border border-[#14162B]/10 bg-white px-2 text-sm"
+              className="mt-1 h-10 w-full rounded-md border border-borda bg-superficie px-2 text-sm"
             >
               <option value="">Sem responsável</option>
               {equipe.map((m) => (
@@ -186,18 +186,18 @@ export function InteracoesOs({
           <Button
             type="submit"
             disabled={reatribuir.isPending || !motivo.trim()}
-            className="h-10 rounded-full bg-[#14162B] px-5 text-white hover:bg-[#14162B]/90"
+            className="h-10 rounded-full bg-tinta px-5 text-sobre-tinta hover:bg-tinta/90"
           >
             Trocar
           </Button>
         </form>
 
         {reatribuicoes.length > 0 && (
-          <ul className="mt-3 space-y-1 text-sm text-[#6B7280]">
+          <ul className="mt-3 space-y-1 text-sm text-tinta-suave">
             {reatribuicoes.map((r) => (
               <li key={r.id}>
                 {quando(r.criadoEm)} — {r.deNome ?? "sem responsável"} →{" "}
-                <span className="font-medium text-[#14162B]">
+                <span className="font-medium text-tinta">
                   {r.paraNome ?? "sem responsável"}
                 </span>
                 {` · "${r.motivo}"`}

@@ -61,11 +61,11 @@ export function ImportarCsv({ aoImportar }: { aoImportar: () => void }) {
   }
 
   return (
-    <div className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+    <div className="mt-8 rounded-2xl border border-borda bg-superficie p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-[#14162B]">Importar clientes por CSV</h2>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h2 className="text-lg font-semibold text-tinta">Importar clientes por CSV</h2>
+          <p className="mt-1 text-sm text-tinta-suave">
             Traga a sua carteira de uma planilha. Precisa das colunas{" "}
             <strong>nome</strong> e <strong>telefone</strong> no cabeçalho; e-mail,
             CPF, endereço e observações são opcionais. Contatos com telefone repetido
@@ -83,7 +83,7 @@ export function ImportarCsv({ aoImportar }: { aoImportar: () => void }) {
           type="file"
           accept=".csv,text/csv,text/plain"
           onChange={aoEscolherArquivo}
-          className="block text-sm text-[#6B7280] file:mr-3 file:rounded-full file:border-0 file:bg-[#14162B]/5 file:px-4 file:py-2 file:text-sm file:text-[#14162B]"
+          className="block text-sm text-tinta-suave file:mr-3 file:rounded-full file:border-0 file:bg-sutil file:px-4 file:py-2 file:text-sm file:text-tinta"
         />
       </div>
 
@@ -92,34 +92,34 @@ export function ImportarCsv({ aoImportar }: { aoImportar: () => void }) {
         onChange={(e) => setConteudo(e.target.value)}
         placeholder={"nome,telefone,email\nMaria Souza,(11) 99999-0001,maria@ex.com"}
         rows={6}
-        className="mt-3 w-full rounded-xl border border-[#14162B]/10 p-3 font-mono text-xs text-[#14162B]"
+        className="mt-3 w-full rounded-xl border border-borda p-3 font-mono text-xs text-tinta"
       />
 
       <div className="mt-3 flex gap-2">
         <Button
           disabled={importar.isPending || conteudo.trim() === ""}
           onClick={aoEnviar}
-          className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Importar
         </Button>
       </div>
 
       {relatorio && (
-        <div className="mt-4 rounded-xl border border-[#14162B]/8 bg-[#F7F7F9] p-4 text-sm">
+        <div className="mt-4 rounded-xl border border-borda bg-sutil p-4 text-sm">
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-lg bg-emerald-50 px-3 py-1.5 text-emerald-700">
+            <span className="rounded-lg bg-ok-fundo px-3 py-1.5 text-ok">
               Importados <strong>{relatorio.importados}</strong>
             </span>
-            <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-amber-700">
+            <span className="rounded-lg bg-alerta-fundo px-3 py-1.5 text-alerta">
               Já existiam <strong>{relatorio.duplicados}</strong>
             </span>
-            <span className="rounded-lg bg-[#E8536B]/10 px-3 py-1.5 text-[#E8536B]">
+            <span className="rounded-lg bg-marca-fundo px-3 py-1.5 text-marca">
               Com erro <strong>{relatorio.erros?.length ?? 0}</strong>
             </span>
           </div>
           {(relatorio.erros?.length ?? 0) > 0 && (
-            <ul className="mt-3 space-y-1 text-[#6B7280]">
+            <ul className="mt-3 space-y-1 text-tinta-suave">
               {relatorio.erros!.map((e) => (
                 <li key={e.linha}>
                   Linha {e.linha}: {e.motivo}

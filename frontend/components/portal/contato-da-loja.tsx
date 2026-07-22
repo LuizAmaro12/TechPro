@@ -11,32 +11,32 @@ export function ContatoDaLoja({ contato }: { contato?: LojaContatoResponse }) {
   }
 
   return (
-    <div className="mt-4 rounded-2xl border border-[#14162B]/8 bg-[#F7F7F9] p-4 text-sm">
+    <div className="mt-4 rounded-2xl border border-borda bg-sutil p-4 text-sm">
       {temContato && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[#6B7280]">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-tinta-suave">
           {contato?.telefone && (
             <span>
-              <span className="text-[#8B8D98]">Telefone:</span>{" "}
-              <span className="font-medium text-[#14162B]">{contato.telefone}</span>
+              <span className="text-tinta-fraca">Telefone:</span>{" "}
+              <span className="font-medium text-tinta">{contato.telefone}</span>
             </span>
           )}
           {contato?.email && (
             <span>
-              <span className="text-[#8B8D98]">E-mail:</span>{" "}
-              <span className="font-medium text-[#14162B]">{contato.email}</span>
+              <span className="text-tinta-fraca">E-mail:</span>{" "}
+              <span className="font-medium text-tinta">{contato.email}</span>
             </span>
           )}
           {contato?.endereco && (
             <span>
-              <span className="text-[#8B8D98]">Endereço:</span>{" "}
-              <span className="font-medium text-[#14162B]">{contato.endereco}</span>
+              <span className="text-tinta-fraca">Endereço:</span>{" "}
+              <span className="font-medium text-tinta">{contato.endereco}</span>
             </span>
           )}
         </div>
       )}
       {contato?.politicas && (
-        <p className={`whitespace-pre-line text-[#6B7280] ${temContato ? "mt-2" : ""}`}>
-          <span className="text-[#8B8D98]">Políticas:</span> {contato.politicas}
+        <p className={`whitespace-pre-line text-tinta-suave ${temContato ? "mt-2" : ""}`}>
+          <span className="text-tinta-fraca">Políticas:</span> {contato.politicas}
         </p>
       )}
     </div>

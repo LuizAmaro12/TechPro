@@ -39,14 +39,14 @@ export default function PaginaCadastro() {
   const { errors, isSubmitting } = formulario.formState;
 
   return (
-    <div className="rounded-2xl border border-[#14162B]/8 bg-white p-8 shadow-[0_1px_2px_rgba(20,22,43,0.04)]">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+    <div className="rounded-2xl border border-borda bg-superficie p-8 shadow-[0_1px_2px_rgba(20,22,43,0.04)]">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Comece agora
       </p>
-      <h1 className="mt-2 text-2xl font-bold text-[#14162B]">
+      <h1 className="mt-2 text-2xl font-bold text-tinta">
         Crie a conta da sua assistência
       </h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
+      <p className="mt-1 text-sm text-tinta-suave">
         Você será o gestor da empresa e poderá convidar sua equipe depois.
       </p>
 
@@ -112,7 +112,7 @@ export default function PaginaCadastro() {
           {errors.senha && (
             <p className="text-sm text-destructive">{errors.senha.message}</p>
           )}
-          <p className="text-xs text-[#8B8D98]">
+          <p className="text-xs text-tinta-fraca">
             Mínimo de 8 caracteres, com pelo menos uma letra e um número.
           </p>
         </div>
@@ -120,17 +120,17 @@ export default function PaginaCadastro() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-11 w-full rounded-full bg-[#14162B] text-white hover:bg-[#14162B]/90"
+          className="h-11 w-full rounded-full bg-tinta text-sobre-tinta hover:bg-tinta/90"
         >
           {isSubmitting ? "Criando conta..." : "Criar conta"}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#6B7280]">
+      <p className="mt-6 text-center text-sm text-tinta-suave">
         Já tem conta?{" "}
         <Link
           href="/login"
-          className="font-medium text-[#14162B] underline-offset-4 hover:underline"
+          className="font-medium text-tinta underline-offset-4 hover:underline"
         >
           Entrar
         </Link>

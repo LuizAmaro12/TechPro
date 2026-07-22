@@ -139,21 +139,21 @@ export default function PaginaConfiguracoesAgenda() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Agenda
       </p>
-      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Configurações da agenda</h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
+      <h1 className="mt-2 text-3xl font-bold text-tinta">Configurações da agenda</h1>
+      <p className="mt-1 text-sm text-tinta-suave">
         Horários de funcionamento, bloqueios pontuais e o link público de agendamento.{" "}
-        <Link href="/agenda" className="underline underline-offset-4 hover:text-[#14162B]">
+        <Link href="/agenda" className="underline underline-offset-4 hover:text-tinta">
           Voltar para a agenda
         </Link>
       </p>
 
       {/* --- Link público ------------------------------------------------- */}
-      <section className="mt-8 rounded-2xl border border-[#14162B]/8 p-6">
-        <h2 className="text-lg font-semibold text-[#14162B]">Link público de agendamento</h2>
-        <p className="mt-1 text-sm text-[#6B7280]">
+      <section className="mt-8 rounded-2xl border border-borda p-6">
+        <h2 className="text-lg font-semibold text-tinta">Link público de agendamento</h2>
+        <p className="mt-1 text-sm text-tinta-suave">
           Divulgue este endereço para os seus clientes agendarem sozinhos.
         </p>
         <form
@@ -177,14 +177,14 @@ export default function PaginaConfiguracoesAgenda() {
           <Button
             type="submit"
             disabled={formSlug.formState.isSubmitting}
-            className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+            className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
           >
             Salvar endereço
           </Button>
         </form>
         {urlPublica && (
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-            <code className="rounded-lg bg-[#F7F7F9] px-3 py-1.5 text-[#14162B]">
+            <code className="rounded-lg bg-sutil px-3 py-1.5 text-tinta">
               {urlPublica}
             </code>
             <Button
@@ -206,15 +206,15 @@ export default function PaginaConfiguracoesAgenda() {
       {diasIniciais ? (
         <SecaoHorarios inicial={diasIniciais} />
       ) : (
-        <section className="mt-6 rounded-2xl border border-[#14162B]/8 p-6">
-          <p className="text-sm text-[#6B7280]">Carregando horários...</p>
+        <section className="mt-6 rounded-2xl border border-borda p-6">
+          <p className="text-sm text-tinta-suave">Carregando horários...</p>
         </section>
       )}
 
       {/* --- Bloqueios ------------------------------------------------------ */}
-      <section className="mt-6 rounded-2xl border border-[#14162B]/8 p-6">
-        <h2 className="text-lg font-semibold text-[#14162B]">Bloqueios de agenda</h2>
-        <p className="mt-1 text-sm text-[#6B7280]">
+      <section className="mt-6 rounded-2xl border border-borda p-6">
+        <h2 className="text-lg font-semibold text-tinta">Bloqueios de agenda</h2>
+        <p className="mt-1 text-sm text-tinta-suave">
           Feriados, ausências ou manutenção: o período bloqueado some da agenda pública.
         </p>
         <form
@@ -262,7 +262,7 @@ export default function PaginaConfiguracoesAgenda() {
           <Button
             type="submit"
             disabled={formBloqueio.formState.isSubmitting}
-            className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+            className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
           >
             Bloquear
           </Button>
@@ -279,21 +279,21 @@ export default function PaginaConfiguracoesAgenda() {
 
         <div className="mt-4 space-y-2">
           {bloqueios.length === 0 ? (
-            <p className="text-sm text-[#8B8D98]">Nenhum bloqueio futuro.</p>
+            <p className="text-sm text-tinta-fraca">Nenhum bloqueio futuro.</p>
           ) : (
             bloqueios.map((b) => (
               <div
                 key={b.id}
-                className="flex items-center justify-between rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-xl border border-borda px-3 py-2 text-sm"
               >
-                <span className="text-[#14162B]">
+                <span className="text-tinta">
                   <span className="font-medium">{formatarDataCurta(b.data ?? "")}</span> ·{" "}
                   {horaCurta(b.horaInicio ?? "")}–{horaCurta(b.horaFim ?? "")}
-                  {b.motivo && <span className="text-[#6B7280]"> — {b.motivo}</span>}
+                  {b.motivo && <span className="text-tinta-suave"> — {b.motivo}</span>}
                 </span>
                 <Button
                   variant="ghost"
-                  className="h-8 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+                  className="h-8 px-3 text-xs text-marca hover:text-marca"
                   onClick={() => aoRemoverBloqueio(b.id)}
                 >
                   Remover
@@ -360,18 +360,18 @@ function SecaoHorarios({ inicial }: { inicial: DiaForm[] }) {
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Horários de funcionamento</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
+    <section className="mt-6 rounded-2xl border border-borda p-6">
+      <h2 className="text-lg font-semibold text-tinta">Horários de funcionamento</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
         Dias desmarcados ficam fechados — nenhum horário é oferecido neles.
       </p>
       <div className="mt-4 space-y-2">
         {dias.map((dia, i) => (
           <div
             key={DIAS_SEMANA_LONGOS[i]}
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-[#14162B]/6 px-3 py-2"
+            className="flex flex-wrap items-center gap-3 rounded-xl border border-borda px-3 py-2"
           >
-            <label className="flex w-40 items-center gap-2 text-sm font-medium text-[#14162B]">
+            <label className="flex w-40 items-center gap-2 text-sm font-medium text-tinta">
               <input
                 type="checkbox"
                 checked={dia.ativo}
@@ -380,7 +380,7 @@ function SecaoHorarios({ inicial }: { inicial: DiaForm[] }) {
               {DIAS_SEMANA_LONGOS[i]}
             </label>
             {dia.ativo ? (
-              <div className="flex flex-wrap items-center gap-2 text-sm text-[#6B7280]">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-tinta-suave">
                 <Input
                   type="time"
                   aria-label={`Abertura ${DIAS_SEMANA_LONGOS[i]}`}
@@ -413,7 +413,7 @@ function SecaoHorarios({ inicial }: { inicial: DiaForm[] }) {
                 />
               </div>
             ) : (
-              <span className="text-sm text-[#8B8D98]">Fechado</span>
+              <span className="text-sm text-tinta-fraca">Fechado</span>
             )}
           </div>
         ))}
@@ -421,7 +421,7 @@ function SecaoHorarios({ inicial }: { inicial: DiaForm[] }) {
       <Button
         onClick={aoSalvar}
         disabled={salvando}
-        className="mt-4 h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+        className="mt-4 h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
       >
         {salvando ? "Salvando..." : "Salvar horários"}
       </Button>

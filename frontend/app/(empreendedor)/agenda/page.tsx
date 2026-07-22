@@ -240,52 +240,52 @@ export default function PaginaAgenda() {
       <div
         className={`rounded-xl border p-3 text-sm ${
           encerrado
-            ? "border-[#14162B]/6 bg-[#F7F7F9] opacity-60"
-            : "border-[#14162B]/8 bg-white"
+            ? "border-borda bg-sutil opacity-60"
+            : "border-borda bg-superficie"
         }`}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className="font-semibold text-[#14162B]">
+          <span className="font-semibold text-tinta">
             {horaCurta(agendamento.horaInicio ?? "")}–{horaCurta(agendamento.horaFim ?? "")}
           </span>
           <span className="flex items-center gap-1">
             {agendamento.origem === "Portal" && (
-              <span className="rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-[10px] font-semibold text-[#E8536B] uppercase">
+              <span className="rounded-full bg-marca-fundo px-2 py-0.5 text-[10px] font-semibold text-marca uppercase">
                 portal
               </span>
             )}
             {comCheckin && (
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 uppercase">
+              <span className="rounded-full bg-ok-fundo px-2 py-0.5 text-[10px] font-semibold text-ok uppercase">
                 check-in
               </span>
             )}
             {cancelado && (
-              <span className="rounded-full bg-[#F7F7F9] px-2 py-0.5 text-[10px] font-semibold text-[#8B8D98] uppercase">
+              <span className="rounded-full bg-sutil px-2 py-0.5 text-[10px] font-semibold text-tinta-fraca uppercase">
                 cancelado
               </span>
             )}
             {faltou && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700 uppercase">
+              <span className="rounded-full bg-alerta-fundo px-2 py-0.5 text-[10px] font-semibold text-alerta uppercase">
                 faltou
               </span>
             )}
           </span>
         </div>
-        <p className="mt-1 font-medium text-[#14162B]">{agendamento.servicoNome}</p>
-        <p className="text-[#6B7280]">
+        <p className="mt-1 font-medium text-tinta">{agendamento.servicoNome}</p>
+        <p className="text-tinta-suave">
           {agendamento.nomeContato} · {agendamento.telefoneContato}
         </p>
         {/* Risco onde a decisão é tomada: só quando há histórico e o
             agendamento ainda está em aberto. */}
         {!encerrado && (agendamento.clienteFaltas ?? 0) > 0 && (
-          <p className="mt-1 text-xs font-semibold text-amber-700">
+          <p className="mt-1 text-xs font-semibold text-alerta">
             ⚠ Cliente já faltou {agendamento.clienteFaltas}×
           </p>
         )}
         {/* Peça em falta: avisar antes de o cliente chegar, para pedir/remarcar. */}
         {!encerrado && (agendamento.pecasEmFalta?.length ?? 0) > 0 && (
           <p
-            className="mt-1 text-xs font-semibold text-[#E8536B]"
+            className="mt-1 text-xs font-semibold text-marca"
             title={agendamento
               .pecasEmFalta!.map(
                 (p) => `${p.pecaNome}: precisa ${p.necessario}, tem ${p.emEstoque}`,
@@ -297,7 +297,7 @@ export default function PaginaAgenda() {
           </p>
         )}
         {(agendamento.aparelhoMarca || agendamento.aparelhoModelo) && (
-          <p className="text-xs text-[#8B8D98]">
+          <p className="text-xs text-tinta-fraca">
             {[agendamento.aparelhoMarca, agendamento.aparelhoModelo]
               .filter(Boolean)
               .join(" ")}
@@ -323,7 +323,7 @@ export default function PaginaAgenda() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="h-7 px-3 text-xs text-amber-700 hover:text-amber-700"
+                  className="h-7 px-3 text-xs text-alerta hover:text-alerta"
                   onClick={() => aoNaoCompareceu(agendamento.id)}
                 >
                   Não compareceu
@@ -332,7 +332,7 @@ export default function PaginaAgenda() {
             )}
             <Button
               variant="ghost"
-              className="h-7 px-3 text-xs text-[#E8536B] hover:text-[#E8536B]"
+              className="h-7 px-3 text-xs text-marca hover:text-marca"
               onClick={() => {
                 setCancelandoId(agendamento.id ?? null);
                 setMotivoCancelamento("");
@@ -352,7 +352,7 @@ export default function PaginaAgenda() {
             />
             <Button
               variant="outline"
-              className="h-8 px-3 text-xs text-[#E8536B]"
+              className="h-8 px-3 text-xs text-marca"
               onClick={() => aoConfirmarCancelamento(agendamento.id!)}
             >
               Confirmar
@@ -376,24 +376,24 @@ export default function PaginaAgenda() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             Agenda
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Agendamentos</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Agendamentos</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             Acompanhe os horários da loja, faça check-in e organize a semana.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/agenda/configuracoes"
-            className="text-sm text-[#6B7280] underline-offset-4 hover:text-[#14162B] hover:underline"
+            className="text-sm text-tinta-suave underline-offset-4 hover:text-tinta hover:underline"
           >
             Configurações
           </Link>
           <Button
             onClick={() => abrirCriacao()}
-            className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+            className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
           >
             Novo agendamento
           </Button>
@@ -405,9 +405,9 @@ export default function PaginaAgenda() {
       {formAberto && (
         <form
           onSubmit={handleSubmit(aoSalvar)}
-          className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6"
+          className="mt-8 rounded-2xl border border-borda bg-superficie p-6"
         >
-          <h2 className="text-lg font-semibold text-[#14162B]">
+          <h2 className="text-lg font-semibold text-tinta">
             {editandoId === null ? "Novo agendamento" : "Editar agendamento"}
           </h2>
 
@@ -416,7 +416,7 @@ export default function PaginaAgenda() {
               <Label htmlFor="servicoId">Serviço</Label>
               <select
                 id="servicoId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 aria-invalid={!!errors.servicoId}
                 {...register("servicoId")}
               >
@@ -437,7 +437,7 @@ export default function PaginaAgenda() {
               <Label htmlFor="clienteId">Cliente (opcional)</Label>
               <select
                 id="clienteId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 {...register("clienteId")}
               >
                 <option value="">Sem cliente vinculado</option>
@@ -465,11 +465,11 @@ export default function PaginaAgenda() {
               <Label>Horário disponível</Label>
               <div className="mt-1 flex min-h-11 flex-wrap items-center gap-1.5">
                 {servicoEscolhido === "" || dataEscolhida === "" ? (
-                  <p className="text-sm text-[#8B8D98]">
+                  <p className="text-sm text-tinta-fraca">
                     Escolha serviço e data para ver os horários.
                   </p>
                 ) : opcoesDeHorario.length === 0 ? (
-                  <p className="text-sm text-[#8B8D98]">
+                  <p className="text-sm text-tinta-fraca">
                     Sem horários livres nesse dia — veja os horários de funcionamento.
                   </p>
                 ) : (
@@ -482,8 +482,8 @@ export default function PaginaAgenda() {
                       }
                       className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                         horaEscolhida === hora
-                          ? "border-[#14162B] bg-[#14162B] text-white"
-                          : "border-[#14162B]/15 text-[#14162B] hover:border-[#14162B]"
+                          ? "border-tinta bg-tinta text-sobre-tinta"
+                          : "border-borda-forte text-tinta hover:border-tinta"
                       }`}
                     >
                       {horaCurta(hora)}
@@ -548,7 +548,7 @@ export default function PaginaAgenda() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+              className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
             >
               {isSubmitting ? "Salvando..." : "Salvar agendamento"}
             </Button>
@@ -574,7 +574,7 @@ export default function PaginaAgenda() {
           <Button variant="outline" className="h-9 rounded-full px-3" onClick={() => navegar(1)}>
             ›
           </Button>
-          <span className="ml-3 text-sm font-medium text-[#14162B] capitalize">
+          <span className="ml-3 text-sm font-medium text-tinta capitalize">
             {visao === "mes"
               ? deIso(dataRef).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
               : visao === "semana"
@@ -582,15 +582,15 @@ export default function PaginaAgenda() {
                 : formatarDataLonga(dataRef)}
           </span>
         </div>
-        <div className="flex rounded-full border border-[#14162B]/10 p-0.5">
+        <div className="flex rounded-full border border-borda p-0.5">
           {(["dia", "semana", "mes"] as const).map((opcao) => (
             <button
               key={opcao}
               onClick={() => setVisao(opcao)}
               className={`rounded-full px-4 py-1.5 text-sm capitalize transition-colors ${
                 visao === opcao
-                  ? "bg-[#14162B] font-semibold text-white"
-                  : "text-[#6B7280] hover:text-[#14162B]"
+                  ? "bg-tinta font-semibold text-sobre-tinta"
+                  : "text-tinta-suave hover:text-tinta"
               }`}
             >
               {opcao === "mes" ? "mês" : opcao}
@@ -602,7 +602,7 @@ export default function PaginaAgenda() {
       {visao === "dia" && (
         <div className="mt-4 space-y-2">
           {porDia(dataRef).length === 0 ? (
-            <div className="rounded-2xl border border-[#14162B]/8 px-4 py-10 text-center text-sm text-[#6B7280]">
+            <div className="rounded-2xl border border-borda px-4 py-10 text-center text-sm text-tinta-suave">
               Nenhum agendamento neste dia.
             </div>
           ) : (
@@ -614,14 +614,14 @@ export default function PaginaAgenda() {
       {visao === "semana" && (
         <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-7">
           {diasDaSemana.map((dia) => (
-            <div key={dia} className="min-h-32 rounded-2xl border border-[#14162B]/8 p-2">
+            <div key={dia} className="min-h-32 rounded-2xl border border-borda p-2">
               <button
                 onClick={() => {
                   setDataRef(dia);
                   setVisao("dia");
                 }}
                 className={`w-full rounded-lg px-1 py-1 text-center text-xs font-semibold ${
-                  dia === hojeIso() ? "bg-[#14162B] text-white" : "text-[#6B7280]"
+                  dia === hojeIso() ? "bg-tinta text-sobre-tinta" : "text-tinta-suave"
                 }`}
               >
                 {DIAS_SEMANA_CURTOS[deIso(dia).getDay()]} {formatarDataCurta(dia)}
@@ -636,8 +636,8 @@ export default function PaginaAgenda() {
                     }}
                     className={`block w-full rounded-lg px-1.5 py-1 text-left text-[11px] leading-tight ${
                       a.status === "Cancelado" || a.status === "NaoCompareceu"
-                        ? "bg-[#F7F7F9] text-[#8B8D98] line-through"
-                        : "bg-[#14162B]/5 text-[#14162B]"
+                        ? "bg-sutil text-tinta-fraca line-through"
+                        : "bg-sutil text-tinta"
                     }`}
                   >
                     <span className="font-semibold">{horaCurta(a.horaInicio ?? "")}</span>{" "}
@@ -651,8 +651,8 @@ export default function PaginaAgenda() {
       )}
 
       {visao === "mes" && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-[#14162B]/8">
-          <div className="grid grid-cols-7 bg-[#F7F7F9] text-center text-xs text-[#8B8D98] uppercase">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-borda">
+          <div className="grid grid-cols-7 bg-sutil text-center text-xs text-tinta-fraca uppercase">
             {DIAS_SEMANA_CURTOS.map((dia) => (
               <div key={dia} className="py-2">
                 {dia}
@@ -672,21 +672,21 @@ export default function PaginaAgenda() {
                     setDataRef(dia);
                     setVisao("dia");
                   }}
-                  className={`h-20 border-t border-r border-[#14162B]/6 p-1.5 text-left align-top transition-colors hover:bg-[#F7F7F9] ${
+                  className={`h-20 border-t border-r border-borda p-1.5 text-left align-top transition-colors hover:bg-sutil ${
                     doMes ? "" : "opacity-40"
                   }`}
                 >
                   <span
                     className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
                       dia === hojeIso()
-                        ? "bg-[#14162B] font-semibold text-white"
-                        : "text-[#14162B]"
+                        ? "bg-tinta font-semibold text-sobre-tinta"
+                        : "text-tinta"
                     }`}
                   >
                     {deIso(dia).getDate()}
                   </span>
                   {quantidade > 0 && (
-                    <span className="mt-1 block rounded-full bg-[#E8536B]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#E8536B]">
+                    <span className="mt-1 block rounded-full bg-marca-fundo px-1.5 py-0.5 text-[10px] font-semibold text-marca">
                       {quantidade} agend.
                     </span>
                   )}

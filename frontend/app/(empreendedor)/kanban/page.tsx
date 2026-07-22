@@ -152,33 +152,33 @@ export default function PaginaKanban() {
             ? `Nesta etapa há ${tempo}`
             : `Nesta etapa há ${tempo} (limite de ${ordem.slaHoras}h)`
         }
-        className={`cursor-grab rounded-xl border border-l-4 border-[#14162B]/8 bg-white p-3 text-sm shadow-sm ${
+        className={`cursor-grab rounded-xl border border-l-4 border-borda bg-superficie p-3 text-sm shadow-sm ${
           BORDA_SLA[sla]
         } ${isDragging ? "z-50 opacity-80 shadow-lg" : ""}`}
       >
         <div className="flex items-center justify-between gap-2">
-          <span className="font-semibold text-[#14162B]">#{ordem.numero}</span>
+          <span className="font-semibold text-tinta">#{ordem.numero}</span>
           {ordem.prioridade === "Alta" && (
-            <span className="rounded-full bg-[#E8536B]/10 px-2 py-0.5 text-[10px] font-semibold text-[#E8536B] uppercase">
+            <span className="rounded-full bg-marca-fundo px-2 py-0.5 text-[10px] font-semibold text-marca uppercase">
               alta
             </span>
           )}
         </div>
-        <p className="mt-1 font-medium text-[#14162B]">{ordem.clienteNome}</p>
-        <p className="text-xs text-[#6B7280]">{ordem.servicoNome}</p>
+        <p className="mt-1 font-medium text-tinta">{ordem.clienteNome}</p>
+        <p className="text-xs text-tinta-suave">{ordem.servicoNome}</p>
         {(ordem.aparelhoMarca || ordem.aparelhoModelo) && (
-          <p className="text-xs text-[#8B8D98]">
+          <p className="text-xs text-tinta-fraca">
             {[ordem.aparelhoMarca, ordem.aparelhoModelo].filter(Boolean).join(" ")}
           </p>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-[#8B8D98]">
+        <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] text-tinta-fraca">
           {/* Só avisa quando importa: card no prazo não vira ruído. */}
           {(sla === "atencao" || sla === "estourado") && (
             <span
               className={`rounded-full px-1.5 py-0.5 font-semibold ${
                 sla === "estourado"
-                  ? "bg-[#E8536B]/10 text-[#E8536B]"
-                  : "bg-amber-100 text-amber-700"
+                  ? "bg-marca-fundo text-marca"
+                  : "bg-alerta-fundo text-alerta"
               }`}
             >
               {ROTULO_SLA[sla]} · {tempo}
@@ -187,22 +187,22 @@ export default function PaginaKanban() {
           {ordem.prazoEstimado && <span>prazo {formatarDataCurta(ordem.prazoEstimado)}</span>}
           {ordem.responsavelTecnicoNome && <span>· {ordem.responsavelTecnicoNome}</span>}
           {ordem.statusAprovacao === "Aprovado" && (
-            <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700">
+            <span className="rounded-full bg-ok-fundo px-1.5 py-0.5 font-semibold text-ok">
               orçamento ok
             </span>
           )}
           {ordem.statusAprovacao === "Recusado" && (
-            <span className="rounded-full bg-[#E8536B]/10 px-1.5 py-0.5 font-semibold text-[#E8536B]">
+            <span className="rounded-full bg-marca-fundo px-1.5 py-0.5 font-semibold text-marca">
               recusado
             </span>
           )}
           {ordem.statusPagamento === "Pago" && (
-            <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 font-semibold text-emerald-700">
+            <span className="rounded-full bg-ok-fundo px-1.5 py-0.5 font-semibold text-ok">
               pago
             </span>
           )}
           {ordem.statusPagamento === "Parcial" && (
-            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-700">
+            <span className="rounded-full bg-alerta-fundo px-1.5 py-0.5 font-semibold text-alerta">
               parcial
             </span>
           )}
@@ -215,7 +215,7 @@ export default function PaginaKanban() {
           onChange={(e) =>
             executarMovimento(ordem.id!, e.target.value as EtapaOrdemServico)
           }
-          className="mt-2 h-7 w-full rounded-md border border-[#14162B]/10 bg-white px-1 text-xs text-[#6B7280]"
+          className="mt-2 h-7 w-full rounded-md border border-borda bg-superficie px-1 text-xs text-tinta-suave"
         >
           {ETAPAS_OS.map((e) => (
             <option key={e.valor} value={e.valor}>
@@ -241,12 +241,12 @@ export default function PaginaKanban() {
             ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
             : undefined
         }
-        className={`cursor-grab rounded-xl border border-dashed border-[#14162B]/15 bg-[#F7F7F9] p-3 text-sm ${
+        className={`cursor-grab rounded-xl border border-dashed border-borda-forte bg-sutil p-3 text-sm ${
           isDragging ? "z-50 opacity-80 shadow-lg" : ""
         }`}
       >
-        <p className="font-medium text-[#14162B]">{agendamento.nomeContato}</p>
-        <p className="text-xs text-[#6B7280]">
+        <p className="font-medium text-tinta">{agendamento.nomeContato}</p>
+        <p className="text-xs text-tinta-suave">
           {formatarDataCurta(agendamento.data ?? "")} às{" "}
           {horaCurta(agendamento.horaInicio ?? "")} · {agendamento.servicoNome}
         </p>
@@ -274,12 +274,12 @@ export default function PaginaKanban() {
       <div
         ref={setNodeRef}
         className={`flex w-60 shrink-0 flex-col rounded-2xl border p-2 transition-colors ${
-          isOver ? "border-[#14162B] bg-[#14162B]/[0.03]" : "border-[#14162B]/8"
+          isOver ? "border-tinta bg-sutil" : "border-borda"
         }`}
       >
-        <p className="px-1 pb-2 text-xs font-semibold tracking-wide text-[#6B7280] uppercase">
+        <p className="px-1 pb-2 text-xs font-semibold tracking-wide text-tinta-suave uppercase">
           {rotulo}
-          <span className="ml-1 text-[#8B8D98]">({cartoes.length})</span>
+          <span className="ml-1 text-tinta-fraca">({cartoes.length})</span>
         </p>
         <div className="flex min-h-24 flex-col gap-2">{cartoes}</div>
       </div>
@@ -290,11 +290,11 @@ export default function PaginaKanban() {
     <div className="mx-auto w-full max-w-[96rem] px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             Kanban
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Fluxo da oficina</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Fluxo da oficina</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             Arraste os cards entre as etapas. Detalhes e edição ficam em{" "}
             <Link href="/ordens-servico" className="underline underline-offset-4">
               Ordens de serviço
@@ -302,7 +302,7 @@ export default function PaginaKanban() {
             .
           </p>
         </div>
-        <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={mostrarFinalizadas}
@@ -313,8 +313,8 @@ export default function PaginaKanban() {
       </div>
 
       {pendente && (
-        <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-[#E8536B]/30 bg-[#E8536B]/5 p-4">
-          <p className="text-sm text-[#14162B]">
+        <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-marca/40 bg-marca-fundo p-4">
+          <p className="text-sm text-tinta">
             Cancelar a OS #{ordens.find((o) => o.id === pendente.ordemId)?.numero}: qual o
             motivo?
           </p>
@@ -325,7 +325,7 @@ export default function PaginaKanban() {
             className="h-9 max-w-72"
           />
           <Button
-            className="h-9 rounded-full bg-[#14162B] px-4 text-white hover:bg-[#14162B]/90"
+            className="h-9 rounded-full bg-tinta px-4 text-sobre-tinta hover:bg-tinta/90"
             disabled={!motivo.trim()}
             onClick={() => executarMovimento(pendente.ordemId, pendente.paraEtapa, motivo)}
           >

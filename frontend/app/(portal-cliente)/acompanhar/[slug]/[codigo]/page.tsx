@@ -66,7 +66,7 @@ export default function PaginaAcompanharOs() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center text-sm text-[#6B7280]">
+      <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center text-sm text-tinta-suave">
         Carregando...
       </div>
     );
@@ -75,8 +75,8 @@ export default function PaginaAcompanharOs() {
   if (!os) {
     return (
       <div className="mx-auto w-full max-w-2xl px-6 py-16 text-center">
-        <h1 className="text-2xl font-bold text-[#14162B]">Ordem não encontrada</h1>
-        <p className="mt-2 text-sm text-[#6B7280]">
+        <h1 className="text-2xl font-bold text-tinta">Ordem não encontrada</h1>
+        <p className="mt-2 text-sm text-tinta-suave">
           Confira o link de acompanhamento com a assistência técnica.
         </p>
       </div>
@@ -90,26 +90,26 @@ export default function PaginaAcompanharOs() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 pb-16">
-      <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+      <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
         Acompanhamento
       </p>
-      <h1 className="mt-2 text-3xl font-bold text-[#14162B]">{os.nomeLoja}</h1>
-      <p className="mt-1 text-sm text-[#6B7280]">
+      <h1 className="mt-2 text-3xl font-bold text-tinta">{os.nomeLoja}</h1>
+      <p className="mt-1 text-sm text-tinta-suave">
         OS #{os.numero} · {os.servicoNome}
       </p>
 
       {/* Orçamento — só aparece depois de enviado pela loja */}
       {orcamento && (
-        <div className="mt-8 rounded-2xl border border-[#14162B]/8 p-6">
+        <div className="mt-8 rounded-2xl border border-borda p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-[#14162B]">Seu orçamento</h2>
+            <h2 className="text-lg font-semibold text-tinta">Seu orçamento</h2>
             {orcamento.status === "Aprovado" && (
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="rounded-full bg-ok-fundo px-3 py-1 text-xs font-semibold text-ok">
                 aprovado
               </span>
             )}
             {orcamento.status === "Recusado" && (
-              <span className="rounded-full bg-[#E8536B]/10 px-3 py-1 text-xs font-semibold text-[#E8536B]">
+              <span className="rounded-full bg-marca-fundo px-3 py-1 text-xs font-semibold text-marca">
                 recusado
               </span>
             )}
@@ -117,22 +117,22 @@ export default function PaginaAcompanharOs() {
 
           <dl className="mt-4 space-y-1.5 text-sm">
             <div className="flex justify-between">
-              <dt className="text-[#6B7280]">Mão de obra</dt>
-              <dd className="text-[#14162B]">{formatarBRL(orcamento.valorMaoDeObra ?? 0)}</dd>
+              <dt className="text-tinta-suave">Mão de obra</dt>
+              <dd className="text-tinta">{formatarBRL(orcamento.valorMaoDeObra ?? 0)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-[#6B7280]">Peças</dt>
-              <dd className="text-[#14162B]">{formatarBRL(orcamento.valorPecas ?? 0)}</dd>
+              <dt className="text-tinta-suave">Peças</dt>
+              <dd className="text-tinta">{formatarBRL(orcamento.valorPecas ?? 0)}</dd>
             </div>
             {(orcamento.desconto ?? 0) > 0 && (
               <div className="flex justify-between">
-                <dt className="text-[#6B7280]">Desconto</dt>
-                <dd className="text-[#14162B]">−{formatarBRL(orcamento.desconto ?? 0)}</dd>
+                <dt className="text-tinta-suave">Desconto</dt>
+                <dd className="text-tinta">−{formatarBRL(orcamento.desconto ?? 0)}</dd>
               </div>
             )}
-            <div className="flex justify-between border-t border-[#14162B]/6 pt-1.5 text-base">
-              <dt className="font-semibold text-[#14162B]">Total</dt>
-              <dd className="font-bold text-[#14162B]">{formatarBRL(orcamento.total ?? 0)}</dd>
+            <div className="flex justify-between border-t border-borda pt-1.5 text-base">
+              <dt className="font-semibold text-tinta">Total</dt>
+              <dd className="font-bold text-tinta">{formatarBRL(orcamento.total ?? 0)}</dd>
             </div>
           </dl>
 
@@ -143,13 +143,13 @@ export default function PaginaAcompanharOs() {
                   <Button
                     disabled={aprovar.isPending}
                     onClick={aoAprovar}
-                    className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                    className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
                   >
                     Aprovar orçamento
                   </Button>
                   <Button
                     variant="ghost"
-                    className="h-11 text-[#E8536B] hover:text-[#E8536B]"
+                    className="h-11 text-marca hover:text-marca"
                     onClick={() => setRecusando(true)}
                   >
                     Recusar
@@ -158,7 +158,7 @@ export default function PaginaAcompanharOs() {
               ) : (
                 <div className="flex flex-wrap items-end gap-2">
                   <div className="min-w-56 flex-1">
-                    <label htmlFor="motivo" className="text-sm text-[#6B7280]">
+                    <label htmlFor="motivo" className="text-sm text-tinta-suave">
                       Conte o motivo (opcional)
                     </label>
                     <Input
@@ -170,7 +170,7 @@ export default function PaginaAcompanharOs() {
                   </div>
                   <Button
                     variant="outline"
-                    className="h-11 rounded-full px-5 text-[#E8536B]"
+                    className="h-11 rounded-full px-5 text-marca"
                     disabled={recusar.isPending}
                     onClick={aoRecusar}
                   >
@@ -185,29 +185,29 @@ export default function PaginaAcompanharOs() {
           )}
 
           {orcamento.status === "Aprovado" && (
-            <p className="mt-4 text-sm text-emerald-700">
+            <p className="mt-4 text-sm text-ok">
               Obrigado! A loja já pode seguir com o reparo.
             </p>
           )}
           {orcamento.status === "Recusado" && (
-            <p className="mt-4 text-sm text-[#6B7280]">
+            <p className="mt-4 text-sm text-tinta-suave">
               Você recusou este orçamento. Fale com a loja se mudar de ideia.
             </p>
           )}
         </div>
       )}
 
-      <div className="mt-6 rounded-2xl border border-[#14162B]/8 p-6">
-        <p className="text-sm text-[#6B7280]">Situação atual</p>
+      <div className="mt-6 rounded-2xl border border-borda p-6">
+        <p className="text-sm text-tinta-suave">Situação atual</p>
         <p
           className={`mt-1 text-2xl font-bold ${
-            cancelada ? "text-[#8B8D98]" : "text-[#14162B]"
+            cancelada ? "text-tinta-fraca" : "text-tinta"
           }`}
         >
           {rotuloDaEtapa(os.etapa)}
         </p>
         {os.prazoEstimado && !cancelada && (
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <p className="mt-1 text-sm text-tinta-suave">
             Previsão de conclusão: {formatarDataLonga(os.prazoEstimado)}
           </p>
         )}
@@ -221,10 +221,10 @@ export default function PaginaAcompanharOs() {
                 <span
                   className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                     i < indiceAtual
-                      ? "bg-[#14162B] text-white"
+                      ? "bg-tinta text-sobre-tinta"
                       : i === indiceAtual
-                        ? "bg-[#E8536B] text-white"
-                        : "bg-[#F7F7F9] text-[#8B8D98]"
+                        ? "bg-marca text-sobre-tinta"
+                        : "bg-sutil text-tinta-fraca"
                   }`}
                 >
                   {i < indiceAtual ? "✓" : i + 1}
@@ -232,16 +232,16 @@ export default function PaginaAcompanharOs() {
                 <span
                   className={`flex-1 ${
                     i === indiceAtual
-                      ? "font-semibold text-[#14162B]"
+                      ? "font-semibold text-tinta"
                       : i < indiceAtual
-                        ? "text-[#6B7280]"
-                        : "text-[#8B8D98]"
+                        ? "text-tinta-suave"
+                        : "text-tinta-fraca"
                   }`}
                 >
                   {etapa.rotulo}
                 </span>
                 {alcancada && (
-                  <span className="shrink-0 text-xs text-[#8B8D98]">
+                  <span className="shrink-0 text-xs text-tinta-fraca">
                     {new Date(alcancada.alcancadaEm ?? "").toLocaleString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
@@ -256,7 +256,7 @@ export default function PaginaAcompanharOs() {
           </ol>
         )}
 
-        <p className="mt-6 text-xs text-[#8B8D98]">
+        <p className="mt-6 text-xs text-tinta-fraca">
           Atualizado em{" "}
           {new Date(os.atualizadoEm ?? "").toLocaleString("pt-BR", {
             day: "2-digit",
@@ -273,7 +273,7 @@ export default function PaginaAcompanharOs() {
       )}
 
       {os.jaAvaliada && (
-        <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <p className="mt-6 rounded-2xl border border-ok/40 bg-ok-fundo p-4 text-sm text-ok">
           Obrigado! Sua avaliação já foi registrada — ela ajuda a loja a melhorar.
         </p>
       )}

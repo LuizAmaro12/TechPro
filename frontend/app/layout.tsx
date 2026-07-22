@@ -28,9 +28,13 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      // O next-themes define a classe do tema antes da hidratação para não
+      // haver "flash" do tema claro; isso diverge do HTML do servidor de
+      // propósito.
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-[#14162B]">
+      <body className="min-h-full flex flex-col bg-superficie text-tinta">
         <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>

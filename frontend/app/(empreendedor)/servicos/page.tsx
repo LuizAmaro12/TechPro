@@ -160,18 +160,18 @@ export default function PaginaServicos() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             Catálogo
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Serviços</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Serviços</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             Os serviços que a sua assistência oferece — preço, duração,
             checklist padrão e peças normalmente utilizadas.
           </p>
         </div>
         <Button
           onClick={abrirCriacao}
-          className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Novo serviço
         </Button>
@@ -180,9 +180,9 @@ export default function PaginaServicos() {
       {formAberto && (
         <form
           onSubmit={handleSubmit(aoSalvar)}
-          className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6"
+          className="mt-8 rounded-2xl border border-borda bg-superficie p-6"
         >
-          <h2 className="text-lg font-semibold text-[#14162B]">
+          <h2 className="text-lg font-semibold text-tinta">
             {editandoId === null ? "Novo serviço" : "Editar serviço"}
           </h2>
 
@@ -279,7 +279,7 @@ export default function PaginaServicos() {
                   {errors.capacidadeSimultanea.message}
                 </p>
               )}
-              <p className="mt-1 text-xs text-[#8B8D98]">
+              <p className="mt-1 text-xs text-tinta-fraca">
                 Quantos atendimentos deste serviço a agenda aceita ao mesmo tempo.
               </p>
             </div>
@@ -299,23 +299,23 @@ export default function PaginaServicos() {
               {errors.slaHoras && (
                 <p className="mt-1 text-sm text-destructive">{errors.slaHoras.message}</p>
               )}
-              <p className="mt-1 text-xs text-[#8B8D98]">
+              <p className="mt-1 text-xs text-tinta-fraca">
                 Horas que a OS pode ficar parada em uma etapa antes do card do
                 Kanban alertar. Deixe vazio para não acompanhar prazo.
               </p>
             </div>
-            <label className="flex items-center gap-2 text-sm text-[#14162B]">
+            <label className="flex items-center gap-2 text-sm text-tinta">
               <input type="checkbox" {...register("exigeDiagnostico")} />
               Exige diagnóstico antes do orçamento
             </label>
-            <label className="flex items-center gap-2 text-sm text-[#14162B]">
+            <label className="flex items-center gap-2 text-sm text-tinta">
               <input type="checkbox" {...register("agendavelOnline")} />
               Disponível para agendamento online
             </label>
           </div>
 
           <fieldset className="mt-6">
-            <legend className="text-sm font-semibold text-[#14162B]">
+            <legend className="text-sm font-semibold text-tinta">
               Checklist padrão
             </legend>
             {checklist.fields.map((campo, indice) => (
@@ -351,13 +351,13 @@ export default function PaginaServicos() {
           </fieldset>
 
           <fieldset className="mt-6">
-            <legend className="text-sm font-semibold text-[#14162B]">
+            <legend className="text-sm font-semibold text-tinta">
               Peças normalmente utilizadas
             </legend>
             {pecasForm.fields.map((campo, indice) => (
               <div key={campo.id} className="mt-2 flex gap-2">
                 <select
-                  className="h-10 w-full rounded-md border border-input bg-white px-3 text-sm"
+                  className="h-10 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                   aria-invalid={!!errors.pecas?.[indice]?.pecaId}
                   {...register(`pecas.${indice}.pecaId`)}
                 >
@@ -405,7 +405,7 @@ export default function PaginaServicos() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+              className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
             >
               {isSubmitting ? "Salvando..." : "Salvar serviço"}
             </Button>
@@ -417,10 +417,10 @@ export default function PaginaServicos() {
       )}
 
       <div className="mt-8 flex items-center justify-between">
-        <p className="text-sm text-[#6B7280]">
+        <p className="text-sm text-tinta-suave">
           {servicos ? `${servicos.total} serviço(s)` : "Carregando..."}
         </p>
-        <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={mostrarInativos}
@@ -430,9 +430,9 @@ export default function PaginaServicos() {
         </label>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-[#14162B]/8">
+      <div className="mt-3 overflow-x-auto rounded-2xl border border-borda">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F7F7F9] text-xs text-[#8B8D98] uppercase tracking-wide">
+          <thead className="bg-sutil text-xs text-tinta-fraca uppercase tracking-wide">
             <tr>
               <th className="px-4 py-3">Serviço</th>
               <th className="px-4 py-3">Categoria</th>
@@ -444,23 +444,23 @@ export default function PaginaServicos() {
           </thead>
           <tbody>
             {(servicos?.itens ?? []).map((servico) => (
-              <tr key={servico.id} className="border-t border-[#14162B]/6">
-                <td className="px-4 py-3 font-medium text-[#14162B]">
+              <tr key={servico.id} className="border-t border-borda">
+                <td className="px-4 py-3 font-medium text-tinta">
                   {servico.nome}
                   {!servico.ativo && (
-                    <span className="ml-2 rounded-full bg-[#F7F7F9] px-2 py-0.5 text-xs text-[#8B8D98]">
+                    <span className="ml-2 rounded-full bg-sutil px-2 py-0.5 text-xs text-tinta-fraca">
                       desativado
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">{servico.categoria ?? "—"}</td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">{servico.categoria ?? "—"}</td>
+                <td className="px-4 py-3 text-tinta-suave">
                   {formatarBRL(servico.precoBase ?? 0)}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {servico.duracaoEstimadaMinutos} min
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {servico.agendavelOnline ? "Sim" : "Não"}
                 </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
@@ -474,7 +474,7 @@ export default function PaginaServicos() {
                   {servico.ativo && (
                     <Button
                       variant="ghost"
-                      className="h-8 px-3 text-[#E8536B] hover:text-[#E8536B]"
+                      className="h-8 px-3 text-marca hover:text-marca"
                       onClick={() => aoDesativar(servico.id)}
                     >
                       Desativar
@@ -485,7 +485,7 @@ export default function PaginaServicos() {
             ))}
             {servicos && (servicos.itens?.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-[#6B7280]">
+                <td colSpan={6} className="px-4 py-10 text-center text-tinta-suave">
                   Nenhum serviço cadastrado ainda. Clique em “Novo serviço” para
                   começar.
                 </td>

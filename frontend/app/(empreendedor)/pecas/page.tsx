@@ -162,18 +162,18 @@ export default function PaginaPecas() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
             Catálogo
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-[#14162B]">Peças</h1>
-          <p className="mt-1 text-sm text-[#6B7280]">
+          <h1 className="mt-2 text-3xl font-bold text-tinta">Peças</h1>
+          <p className="mt-1 text-sm text-tinta-suave">
             Cadastre as peças que a sua assistência usa nos reparos — custo,
             preço de venda, estoque e fornecedor.
           </p>
         </div>
         <Button
           onClick={abrirCriacao}
-          className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Nova peça
         </Button>
@@ -182,9 +182,9 @@ export default function PaginaPecas() {
       {formAberto && (
         <form
           onSubmit={handleSubmit(aoSalvar)}
-          className="mt-8 rounded-2xl border border-[#14162B]/8 bg-white p-6"
+          className="mt-8 rounded-2xl border border-borda bg-superficie p-6"
         >
-          <h2 className="text-lg font-semibold text-[#14162B]">
+          <h2 className="text-lg font-semibold text-tinta">
             {editandoId === null ? "Nova peça" : "Editar peça"}
           </h2>
 
@@ -273,7 +273,7 @@ export default function PaginaPecas() {
               <Label htmlFor="fornecedorId">Fornecedor (opcional)</Label>
               <select
                 id="fornecedorId"
-                className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+                className="mt-1 h-11 w-full rounded-md border border-input bg-superficie px-3 text-sm"
                 {...register("fornecedorId")}
               >
                 <option value="">Sem fornecedor</option>
@@ -307,7 +307,7 @@ export default function PaginaPecas() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+              className="h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
             >
               {isSubmitting ? "Salvando..." : "Salvar peça"}
             </Button>
@@ -321,10 +321,10 @@ export default function PaginaPecas() {
       <ListaDeCompra />
 
       <div className="mt-8 flex items-center justify-between">
-        <p className="text-sm text-[#6B7280]">
+        <p className="text-sm text-tinta-suave">
           {pecas ? `${pecas.total} peça(s)` : "Carregando..."}
         </p>
-        <label className="flex items-center gap-2 text-sm text-[#6B7280]">
+        <label className="flex items-center gap-2 text-sm text-tinta-suave">
           <input
             type="checkbox"
             checked={mostrarInativas}
@@ -334,9 +334,9 @@ export default function PaginaPecas() {
         </label>
       </div>
 
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-[#14162B]/8">
+      <div className="mt-3 overflow-x-auto rounded-2xl border border-borda">
         <table className="w-full text-left text-sm">
-          <thead className="bg-[#F7F7F9] text-xs text-[#8B8D98] uppercase tracking-wide">
+          <thead className="bg-sutil text-xs text-tinta-fraca uppercase tracking-wide">
             <tr>
               <th className="px-4 py-3">Peça</th>
               <th className="px-4 py-3">Custo</th>
@@ -348,34 +348,34 @@ export default function PaginaPecas() {
           </thead>
           <tbody>
             {(pecas?.itens ?? []).map((peca) => (
-              <tr key={peca.id} className="border-t border-[#14162B]/6">
-                <td className="px-4 py-3 font-medium text-[#14162B]">
+              <tr key={peca.id} className="border-t border-borda">
+                <td className="px-4 py-3 font-medium text-tinta">
                   {peca.nome}
                   {!peca.ativo && (
-                    <span className="ml-2 rounded-full bg-[#F7F7F9] px-2 py-0.5 text-xs text-[#8B8D98]">
+                    <span className="ml-2 rounded-full bg-sutil px-2 py-0.5 text-xs text-tinta-fraca">
                       desativada
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {formatarBRL(peca.custoUnitario ?? 0)}
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">
+                <td className="px-4 py-3 text-tinta-suave">
                   {formatarBRL(peca.precoVenda ?? 0)}
                 </td>
                 <td className="px-4 py-3">
                   <span
                     className={
                       peca.estoqueBaixo
-                        ? "font-semibold text-[#E8536B]"
-                        : "text-[#6B7280]"
+                        ? "font-semibold text-marca"
+                        : "text-tinta-suave"
                     }
                   >
                     {peca.quantidadeEmEstoque}
                     {peca.estoqueBaixo && " · baixo"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-[#6B7280]">{peca.fornecedor?.nome ?? "—"}</td>
+                <td className="px-4 py-3 text-tinta-suave">{peca.fornecedor?.nome ?? "—"}</td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <Button
                     variant="ghost"
@@ -398,7 +398,7 @@ export default function PaginaPecas() {
                   {peca.ativo && (
                     <Button
                       variant="ghost"
-                      className="h-8 px-3 text-[#E8536B] hover:text-[#E8536B]"
+                      className="h-8 px-3 text-marca hover:text-marca"
                       onClick={() => aoDesativar(peca.id)}
                     >
                       Desativar
@@ -409,7 +409,7 @@ export default function PaginaPecas() {
             ))}
             {pecas && (pecas.itens?.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-[#6B7280]">
+                <td colSpan={6} className="px-4 py-10 text-center text-tinta-suave">
                   Nenhuma peça cadastrada ainda. Clique em “Nova peça” para começar.
                 </td>
               </tr>

@@ -194,12 +194,12 @@ export default function PaginaBemVindo() {
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-10">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold tracking-[0.18em] text-[#E8536B] uppercase">
+        <p className="text-[11px] font-semibold tracking-[0.18em] text-marca uppercase">
           Vamos configurar sua loja
         </p>
         <button
           onClick={pular}
-          className="text-sm text-[#8B8D98] underline-offset-4 hover:text-[#14162B] hover:underline"
+          className="text-sm text-tinta-fraca underline-offset-4 hover:text-tinta hover:underline"
         >
           Pular por agora
         </button>
@@ -212,10 +212,10 @@ export default function PaginaBemVindo() {
             key={rotulo}
             className={`rounded-full px-3 py-1 text-xs ${
               i === passo
-                ? "bg-[#14162B] font-semibold text-white"
+                ? "bg-tinta font-semibold text-sobre-tinta"
                 : i < passo
-                  ? "bg-[#14162B]/10 text-[#14162B]"
-                  : "bg-[#F7F7F9] text-[#8B8D98]"
+                  ? "bg-sutil text-tinta"
+                  : "bg-sutil text-tinta-fraca"
             }`}
           >
             {i + 1}. {rotulo}
@@ -223,24 +223,24 @@ export default function PaginaBemVindo() {
         ))}
       </ol>
 
-      <div className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
+      <div className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
         {passo === 0 && (
           <div>
-            <h1 className="text-2xl font-bold text-[#14162B]">
+            <h1 className="text-2xl font-bold text-tinta">
               Olá! Vamos preparar a {nomeEmpresa ?? "sua loja"} 👋
             </h1>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <p className="mt-2 text-sm text-tinta-suave">
               Em poucos passos sua assistência fica pronta para receber
               agendamentos e abrir ordens de serviço. Comece confirmando o
               endereço público que seus clientes vão usar para agendar.
             </p>
             <div className="mt-4">
               <Label htmlFor="slug">Endereço público de agendamento</Label>
-              <div className="mt-1 flex items-center gap-1 text-sm text-[#6B7280]">
+              <div className="mt-1 flex items-center gap-1 text-sm text-tinta-suave">
                 <span className="whitespace-nowrap">/agendar/</span>
                 <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className="h-11" />
               </div>
-              <p className="mt-1 text-xs text-[#8B8D98]">
+              <p className="mt-1 text-xs text-tinta-fraca">
                 Letras minúsculas, números e hífens. Dá para mudar depois nas
                 configurações da agenda.
               </p>
@@ -249,7 +249,7 @@ export default function PaginaBemVindo() {
               <Button
                 onClick={avancarSlug}
                 disabled={processando || slug.trim().length < 3}
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 Continuar
               </Button>
@@ -259,8 +259,8 @@ export default function PaginaBemVindo() {
 
         {passo === 1 && (
           <div>
-            <h1 className="text-2xl font-bold text-[#14162B]">Horário de funcionamento</h1>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <h1 className="text-2xl font-bold text-tinta">Horário de funcionamento</h1>
+            <p className="mt-2 text-sm text-tinta-suave">
               Marque os dias abertos e o horário. Depois dá para ajustar cada dia
               (e intervalos) nas configurações da agenda.
             </p>
@@ -274,8 +274,8 @@ export default function PaginaBemVindo() {
                   }
                   className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
                     diasAbertos[i]
-                      ? "border-[#14162B] bg-[#14162B] text-white"
-                      : "border-[#14162B]/15 text-[#6B7280] hover:border-[#14162B]"
+                      ? "border-tinta bg-tinta text-sobre-tinta"
+                      : "border-borda-forte text-tinta-suave hover:border-tinta"
                   }`}
                 >
                   {dia.slice(0, 3)}
@@ -315,8 +315,8 @@ export default function PaginaBemVindo() {
 
         {passo === 2 && (
           <div>
-            <h1 className="text-2xl font-bold text-[#14162B]">Seus primeiros serviços</h1>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <h1 className="text-2xl font-bold text-tinta">Seus primeiros serviços</h1>
+            <p className="mt-2 text-sm text-tinta-suave">
               Escolha os serviços que sua loja faz — ajuste preço e duração à
               vontade. Você pode adicionar mais depois no catálogo.
             </p>
@@ -324,9 +324,9 @@ export default function PaginaBemVindo() {
               {servicos.map((s, i) => (
                 <div
                   key={s.nome}
-                  className="flex flex-wrap items-center gap-3 rounded-xl border border-[#14162B]/6 px-3 py-2"
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-borda px-3 py-2"
                 >
-                  <label className="flex flex-1 items-center gap-2 text-sm font-medium text-[#14162B]">
+                  <label className="flex flex-1 items-center gap-2 text-sm font-medium text-tinta">
                     <input
                       type="checkbox"
                       checked={s.marcado}
@@ -338,7 +338,7 @@ export default function PaginaBemVindo() {
                     />
                     {s.nome}
                   </label>
-                  <div className="flex items-center gap-1 text-sm text-[#6B7280]">
+                  <div className="flex items-center gap-1 text-sm text-tinta-suave">
                     R$
                     <Input
                       type="number"
@@ -382,8 +382,8 @@ export default function PaginaBemVindo() {
 
         {passo === 3 && (
           <div>
-            <h1 className="text-2xl font-bold text-[#14162B]">Peças (opcional)</h1>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <h1 className="text-2xl font-bold text-tinta">Peças (opcional)</h1>
+            <p className="mt-2 text-sm text-tinta-suave">
               Se você controla estoque de peças, marque as que usa. Pode pular e
               cadastrar depois — a quantidade começa em zero.
             </p>
@@ -391,7 +391,7 @@ export default function PaginaBemVindo() {
               {pecas.map((p, i) => (
                 <label
                   key={p.nome}
-                  className="flex items-center gap-3 rounded-xl border border-[#14162B]/6 px-3 py-2 text-sm text-[#14162B]"
+                  className="flex items-center gap-3 rounded-xl border border-borda px-3 py-2 text-sm text-tinta"
                 >
                   <input
                     type="checkbox"
@@ -403,7 +403,7 @@ export default function PaginaBemVindo() {
                     }
                   />
                   <span className="flex-1 font-medium">{p.nome}</span>
-                  <span className="text-xs text-[#8B8D98]">
+                  <span className="text-xs text-tinta-fraca">
                     custo R$ {p.custo} · venda R$ {p.venda}
                   </span>
                 </label>
@@ -420,13 +420,13 @@ export default function PaginaBemVindo() {
 
         {passo === 4 && (
           <div>
-            <h1 className="text-2xl font-bold text-[#14162B]">Tudo pronto! 🎉</h1>
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <h1 className="text-2xl font-bold text-tinta">Tudo pronto! 🎉</h1>
+            <p className="mt-2 text-sm text-tinta-suave">
               Sua loja já está configurada. Quer carregar um cliente e uma ordem
               de serviço de exemplo para explorar o Kanban e as telas sem
               precisar cadastrar nada? Dá para remover a qualquer momento.
             </p>
-            <label className="mt-4 flex items-center gap-2 text-sm text-[#14162B]">
+            <label className="mt-4 flex items-center gap-2 text-sm text-tinta">
               <input
                 type="checkbox"
                 checked={comExemplo}
@@ -438,7 +438,7 @@ export default function PaginaBemVindo() {
               <Button
                 onClick={finalizar}
                 disabled={processando}
-                className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+                className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
               >
                 {processando ? "Finalizando..." : "Ir para o painel"}
               </Button>
@@ -471,7 +471,7 @@ function PassoRodape({
       <Button
         onClick={onAvancar}
         disabled={processando || avancarDesabilitado}
-        className="h-11 rounded-full bg-[#14162B] px-8 text-white hover:bg-[#14162B]/90"
+        className="h-11 rounded-full bg-tinta px-8 text-sobre-tinta hover:bg-tinta/90"
       >
         {processando ? "Salvando..." : rotuloAvancar}
       </Button>

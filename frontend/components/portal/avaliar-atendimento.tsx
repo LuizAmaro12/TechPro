@@ -44,15 +44,15 @@ export function AvaliarAtendimento({
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#14162B]/8 bg-white p-6">
-      <h2 className="text-lg font-semibold text-[#14162B]">Como foi seu atendimento?</h2>
-      <p className="mt-1 text-sm text-[#6B7280]">
+    <section className="mt-6 rounded-2xl border border-borda bg-superficie p-6">
+      <h2 className="text-lg font-semibold text-tinta">Como foi seu atendimento?</h2>
+      <p className="mt-1 text-sm text-tinta-suave">
         Leva menos de um minuto e ajuda muito a loja a melhorar.
       </p>
 
       <form onSubmit={aoEnviar}>
         <fieldset className="mt-5">
-          <legend className="text-sm font-medium text-[#14162B]">
+          <legend className="text-sm font-medium text-tinta">
             Sua nota para o reparo
           </legend>
           <div className="mt-2 flex gap-1">
@@ -64,7 +64,7 @@ export function AvaliarAtendimento({
                 aria-pressed={nota === estrela}
                 onClick={() => setNota(estrela)}
                 className={`h-11 w-11 rounded-full text-2xl leading-none transition-colors ${
-                  estrela <= nota ? "text-[#E8536B]" : "text-[#14162B]/20 hover:text-[#14162B]/40"
+                  estrela <= nota ? "text-marca" : "text-tinta-fraca hover:text-tinta-suave"
                 }`}
               >
                 {estrela <= nota ? "★" : "☆"}
@@ -74,7 +74,7 @@ export function AvaliarAtendimento({
         </fieldset>
 
         <fieldset className="mt-5">
-          <legend className="text-sm font-medium text-[#14162B]">
+          <legend className="text-sm font-medium text-tinta">
             De 0 a 10, quanto recomendaria esta assistência?
           </legend>
           <div className="mt-2 flex flex-wrap gap-1">
@@ -87,8 +87,8 @@ export function AvaliarAtendimento({
                 onClick={() => setRecomendacao(n)}
                 className={`h-10 w-10 rounded-lg border text-sm font-semibold transition-colors ${
                   recomendacao === n
-                    ? "border-[#14162B] bg-[#14162B] text-white"
-                    : "border-[#14162B]/10 text-[#14162B] hover:border-[#14162B]/30"
+                    ? "border-tinta bg-tinta text-sobre-tinta"
+                    : "border-borda text-tinta hover:border-borda-forte"
                 }`}
               >
                 {n}
@@ -98,7 +98,7 @@ export function AvaliarAtendimento({
         </fieldset>
 
         <label className="mt-5 block">
-          <span className="text-sm font-medium text-[#14162B]">
+          <span className="text-sm font-medium text-tinta">
             Quer contar algo? (opcional)
           </span>
           <textarea
@@ -106,7 +106,7 @@ export function AvaliarAtendimento({
             onChange={(e) => setComentario(e.target.value)}
             rows={3}
             maxLength={1000}
-            className="mt-2 w-full rounded-xl border border-[#14162B]/10 p-3 text-sm text-[#14162B]"
+            className="mt-2 w-full rounded-xl border border-borda p-3 text-sm text-tinta"
             placeholder="O que funcionou bem ou o que poderia melhorar?"
           />
         </label>
@@ -114,7 +114,7 @@ export function AvaliarAtendimento({
         <Button
           type="submit"
           disabled={avaliar.isPending || nota === 0 || recomendacao === null}
-          className="mt-4 h-11 rounded-full bg-[#14162B] px-6 text-white hover:bg-[#14162B]/90"
+          className="mt-4 h-11 rounded-full bg-tinta px-6 text-sobre-tinta hover:bg-tinta/90"
         >
           Enviar avaliação
         </Button>
