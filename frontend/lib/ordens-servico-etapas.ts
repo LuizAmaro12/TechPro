@@ -60,6 +60,7 @@ export const ROTULOS_EVENTO_COMUNICACAO: Record<string, string> = {
   OrcamentoAprovado: "orçamento aprovado",
   OrcamentoRecusado: "orçamento recusado",
   ProntoParaRetirada: "pronto para retirada",
+  PedidoAvaliacao: "pedido de avaliação",
 };
 
 export const ROTULOS_STATUS_MENSAGEM: Record<string, string> = {

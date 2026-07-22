@@ -1484,6 +1484,35 @@ export interface ServicoResponsePaginaResponse {
   tamanhoPagina?: number;
 }
 
+export interface TemplateItem {
+  tipoEvento?: TipoEventoComunicacao;
+  /** @nullable */
+  assunto?: string | null;
+  /** @nullable */
+  corpo?: string | null;
+  personalizado?: boolean;
+  /** @nullable */
+  variaveisDisponiveis?: string[] | null;
+}
+
+export interface TemplateSalvarItem {
+  tipoEvento?: TipoEventoComunicacao;
+  /** @nullable */
+  assunto?: string | null;
+  /** @nullable */
+  corpo?: string | null;
+}
+
+export interface TemplatesRequest {
+  /** @nullable */
+  itens?: TemplateSalvarItem[] | null;
+}
+
+export interface TemplatesResponse {
+  /** @nullable */
+  itens?: TemplateItem[] | null;
+}
+
 export interface TrocarSenhaRequest {
   /** @nullable */
   senhaAtual?: string | null;
@@ -5558,6 +5587,197 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getPutApiConfiguracoesNotificacoesMutationOptions(options), queryClient);
     }
 
+export type getApiConfiguracoesTemplatesResponse200 = {
+  data: TemplatesResponse
+  status: 200
+}
+
+export type getApiConfiguracoesTemplatesResponseSuccess = (getApiConfiguracoesTemplatesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiConfiguracoesTemplatesResponse = (getApiConfiguracoesTemplatesResponseSuccess)
+
+export const getGetApiConfiguracoesTemplatesUrl = () => {
+
+
+
+
+  return `/api/configuracoes/templates`
+}
+
+export const getApiConfiguracoesTemplates = async ( options?: RequestInit): Promise<getApiConfiguracoesTemplatesResponse> => {
+
+  return apiFetch<getApiConfiguracoesTemplatesResponse>(getGetApiConfiguracoesTemplatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiConfiguracoesTemplatesQueryKey = () => {
+    return [
+    `/api/configuracoes/templates`
+    ] as const;
+    }
+
+
+export const getGetApiConfiguracoesTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiConfiguracoesTemplatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>> = ({ signal }) => getApiConfiguracoesTemplates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiConfiguracoesTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>>
+export type GetApiConfiguracoesTemplatesQueryError = unknown
+
+
+export function useGetApiConfiguracoesTemplates<TData = Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesTemplates<TData = Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiConfiguracoesTemplates<TData = Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiConfiguracoesTemplates<TData = Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiConfiguracoesTemplates>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiConfiguracoesTemplatesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiConfiguracoesTemplatesResponse200 = {
+  data: TemplatesResponse
+  status: 200
+}
+
+export type putApiConfiguracoesTemplatesResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type putApiConfiguracoesTemplatesResponseSuccess = (putApiConfiguracoesTemplatesResponse200) & {
+  headers: Headers;
+};
+export type putApiConfiguracoesTemplatesResponseError = (putApiConfiguracoesTemplatesResponse400) & {
+  headers: Headers;
+};
+
+export type putApiConfiguracoesTemplatesResponse = (putApiConfiguracoesTemplatesResponseSuccess | putApiConfiguracoesTemplatesResponseError)
+
+export const getPutApiConfiguracoesTemplatesUrl = () => {
+
+
+
+
+  return `/api/configuracoes/templates`
+}
+
+export const putApiConfiguracoesTemplates = async (templatesRequest?: TemplatesRequest, options?: RequestInit): Promise<putApiConfiguracoesTemplatesResponse> => {
+
+  return apiFetch<putApiConfiguracoesTemplatesResponse>(getPutApiConfiguracoesTemplatesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(templatesRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiConfiguracoesTemplatesMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>, TError,{data?: TemplatesRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>, TError,{data?: TemplatesRequest}, TContext> => {
+
+const mutationKey = ['putApiConfiguracoesTemplates'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>, {data?: TemplatesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiConfiguracoesTemplates(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiConfiguracoesTemplatesMutationResult = NonNullable<Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>>
+    export type PutApiConfiguracoesTemplatesMutationBody = TemplatesRequest | undefined
+    export type PutApiConfiguracoesTemplatesMutationError = ProblemDetails
+
+    export const usePutApiConfiguracoesTemplates = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>, TError,{data?: TemplatesRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiConfiguracoesTemplates>>,
+        TError,
+        {data?: TemplatesRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiConfiguracoesTemplatesMutationOptions(options), queryClient);
+    }
+
 export type putApiContaResponse204 = {
   data: void
   status: 204
@@ -7865,6 +8085,113 @@ export function useGetApiOrdensServicoOrdemIdMensagens<TData = Awaited<ReturnTyp
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiOrdensServicoOrdemIdMensagensQueryOptions(ordemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiClientesClienteIdMensagensResponse200 = {
+  data: MensagemEnviadaResponse[]
+  status: 200
+}
+
+export type getApiClientesClienteIdMensagensResponseSuccess = (getApiClientesClienteIdMensagensResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiClientesClienteIdMensagensResponse = (getApiClientesClienteIdMensagensResponseSuccess)
+
+export const getGetApiClientesClienteIdMensagensUrl = (clienteId: number,) => {
+
+
+
+
+  return `/api/clientes/${clienteId}/mensagens`
+}
+
+export const getApiClientesClienteIdMensagens = async (clienteId: number, options?: RequestInit): Promise<getApiClientesClienteIdMensagensResponse> => {
+
+  return apiFetch<getApiClientesClienteIdMensagensResponse>(getGetApiClientesClienteIdMensagensUrl(clienteId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiClientesClienteIdMensagensQueryKey = (clienteId: number,) => {
+    return [
+    `/api/clientes/${clienteId}/mensagens`
+    ] as const;
+    }
+
+
+export const getGetApiClientesClienteIdMensagensQueryOptions = <TData = Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError = unknown>(clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiClientesClienteIdMensagensQueryKey(clienteId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>> = ({ signal }) => getApiClientesClienteIdMensagens(clienteId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: clienteId !== null && clienteId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiClientesClienteIdMensagensQueryResult = NonNullable<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>>
+export type GetApiClientesClienteIdMensagensQueryError = unknown
+
+
+export function useGetApiClientesClienteIdMensagens<TData = Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError = unknown>(
+ clienteId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdMensagens<TData = Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>,
+          TError,
+          Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiClientesClienteIdMensagens<TData = Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiClientesClienteIdMensagens<TData = Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError = unknown>(
+ clienteId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiClientesClienteIdMensagens>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiClientesClienteIdMensagensQueryOptions(clienteId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

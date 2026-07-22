@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HistoricoMensagens } from "@/components/clientes/historico-mensagens";
 import { ImportarCsv } from "@/components/clientes/importar-csv";
 import { ResumoComparecimento } from "@/components/clientes/resumo-comparecimento";
 import { ApiError } from "@/lib/api-client/fetcher";
@@ -424,6 +425,8 @@ export default function PaginaClientes() {
           </form>
 
           {editandoId !== null && <ResumoComparecimento clienteId={editandoId} />}
+
+          {editandoId !== null && <HistoricoMensagens clienteId={editandoId} />}
 
           {editandoId !== null && (
             <div className="mt-8 border-t border-[#14162B]/8 pt-6">

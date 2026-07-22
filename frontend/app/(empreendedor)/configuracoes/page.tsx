@@ -1,5 +1,6 @@
 "use client";
 
+import { EditorTemplates } from "@/components/configuracoes/editor-templates";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -40,6 +41,7 @@ const EVENTOS = [
   "OrcamentoAprovado",
   "OrcamentoRecusado",
   "ProntoParaRetirada",
+  "PedidoAvaliacao",
 ];
 
 export default function PaginaConfiguracoes() {
@@ -73,6 +75,8 @@ export default function PaginaConfiguracoes() {
       ) : (
         <Carregando titulo="Notificações" />
       )}
+      <EditorTemplates />
+
       {me ? <SecaoConta key={me.id} nomeAtual={me.nome ?? ""} email={me.email ?? ""} /> : null}
     </div>
   );
