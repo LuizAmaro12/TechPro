@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/AuthProvider";
 
+// `papeis` ausente = visível para todos. Esconder não é segurança — o backend
+// é a fonte da verdade —, é não levar o usuário a um 403.
 const LINKS = [
   { href: "/dashboard", rotulo: "Visão geral" },
   { href: "/kanban", rotulo: "Kanban" },
@@ -13,10 +15,10 @@ const LINKS = [
   { href: "/agenda", rotulo: "Agenda" },
   { href: "/clientes", rotulo: "Clientes" },
   { href: "/avaliacoes", rotulo: "Avaliações" },
-  { href: "/financeiro", rotulo: "Financeiro" },
+  { href: "/financeiro", rotulo: "Financeiro", papeis: ["gestor"] },
   { href: "/servicos", rotulo: "Serviços" },
-  { href: "/pecas", rotulo: "Peças" },
-  { href: "/configuracoes", rotulo: "Configurações" },
+  { href: "/pecas", rotulo: "Peças", papeis: ["gestor", "tecnico"] },
+  { href: "/configuracoes", rotulo: "Configurações", papeis: ["gestor"] },
 ];
 
 /**
@@ -53,7 +55,9 @@ export default function EmpreendedorLayout({
         <div className="flex items-center gap-8">
           <span className="text-lg font-bold text-[#14162B]">TechPro</span>
           <nav className="flex items-center gap-1">
-            {LINKS.map((link) => (
+            {LINKS.filter(
+              (link) => !link.papeis || link.papeis.includes(usuario.papel ?? ""),
+            ).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

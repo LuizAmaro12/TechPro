@@ -252,6 +252,13 @@ export interface AparelhoResponse {
   ativo?: boolean;
 }
 
+export interface AtualizarMembroRequest {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  papel?: string | null;
+}
+
 export interface UsuarioResponse {
   id?: string;
   /** @nullable */
@@ -597,6 +604,9 @@ export interface EquipeMembroResponse {
   nome?: string | null;
   /** @nullable */
   email?: string | null;
+  /** @nullable */
+  papel?: string | null;
+  ativo?: boolean;
 }
 
 export interface FilaEsperaPublicaRequest {
@@ -998,6 +1008,17 @@ export interface MudancaEtapaRequest {
   motivo?: string | null;
 }
 
+export interface NovoMembroRequest {
+  /** @nullable */
+  nome?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  senha?: string | null;
+  /** @nullable */
+  papel?: string | null;
+}
+
 export interface NpsResponse {
   score?: number;
   promotores?: number;
@@ -1367,6 +1388,21 @@ export interface RegistrarRequest {
   senha?: string | null;
 }
 
+export interface RegistroAuditoriaResponse {
+  id?: number;
+  /** @nullable */
+  usuarioNome?: string | null;
+  /** @nullable */
+  acao?: string | null;
+  /** @nullable */
+  entidade?: string | null;
+  /** @nullable */
+  entidadeId?: string | null;
+  /** @nullable */
+  detalhe?: string | null;
+  criadoEm?: string;
+}
+
 export interface RentabilidadePorServicoResponse {
   servicoId?: number;
   /** @nullable */
@@ -1557,6 +1593,10 @@ fim?: string;
 status?: StatusAgendamento;
 };
 
+export type GetApiAuditoriaParams = {
+entidade?: string;
+};
+
 export type GetApiAvaliacoesParams = {
 apenasPendentes?: boolean;
 };
@@ -1567,6 +1607,10 @@ somenteVip?: boolean;
 incluirInativos?: boolean;
 pagina?: number;
 tamanhoPagina?: number;
+};
+
+export type GetApiEquipeParams = {
+incluirInativos?: boolean;
 };
 
 export type GetApiFilaEsperaParams = {
@@ -3866,6 +3910,120 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteApiClientesClienteIdAparelhosIdMutationOptions(options), queryClient);
     }
 
+export type getApiAuditoriaResponse200 = {
+  data: RegistroAuditoriaResponse[]
+  status: 200
+}
+
+export type getApiAuditoriaResponseSuccess = (getApiAuditoriaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAuditoriaResponse = (getApiAuditoriaResponseSuccess)
+
+export const getGetApiAuditoriaUrl = (params?: GetApiAuditoriaParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/auditoria?${stringifiedParams}` : `/api/auditoria`
+}
+
+export const getApiAuditoria = async (params?: GetApiAuditoriaParams, options?: RequestInit): Promise<getApiAuditoriaResponse> => {
+
+  return apiFetch<getApiAuditoriaResponse>(getGetApiAuditoriaUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAuditoriaQueryKey = (params?: GetApiAuditoriaParams,) => {
+    return [
+    `/api/auditoria`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiAuditoriaQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuditoria>>, TError = unknown>(params?: GetApiAuditoriaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuditoriaQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuditoria>>> = ({ signal }) => getApiAuditoria(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuditoriaQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuditoria>>>
+export type GetApiAuditoriaQueryError = unknown
+
+
+export function useGetApiAuditoria<TData = Awaited<ReturnType<typeof getApiAuditoria>>, TError = unknown>(
+ params: undefined |  GetApiAuditoriaParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuditoria>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuditoria>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuditoria<TData = Awaited<ReturnType<typeof getApiAuditoria>>, TError = unknown>(
+ params?: GetApiAuditoriaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuditoria>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuditoria>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuditoria<TData = Awaited<ReturnType<typeof getApiAuditoria>>, TError = unknown>(
+ params?: GetApiAuditoriaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuditoria<TData = Awaited<ReturnType<typeof getApiAuditoria>>, TError = unknown>(
+ params?: GetApiAuditoriaParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuditoria>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuditoriaQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export type postApiAuthRegistrarResponse201 = {
   data: AuthResponse
   status: 201
@@ -6065,17 +6223,24 @@ export type getApiEquipeResponseSuccess = (getApiEquipeResponse200) & {
 
 export type getApiEquipeResponse = (getApiEquipeResponseSuccess)
 
-export const getGetApiEquipeUrl = () => {
+export const getGetApiEquipeUrl = (params?: GetApiEquipeParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/equipe`
+  return stringifiedParams.length > 0 ? `/api/equipe?${stringifiedParams}` : `/api/equipe`
 }
 
-export const getApiEquipe = async ( options?: RequestInit): Promise<getApiEquipeResponse> => {
+export const getApiEquipe = async (params?: GetApiEquipeParams, options?: RequestInit): Promise<getApiEquipeResponse> => {
 
-  return apiFetch<getApiEquipeResponse>(getGetApiEquipeUrl(),
+  return apiFetch<getApiEquipeResponse>(getGetApiEquipeUrl(params),
   {
     ...options,
     method: 'GET'
@@ -6088,23 +6253,23 @@ export const getApiEquipe = async ( options?: RequestInit): Promise<getApiEquipe
 
 
 
-export const getGetApiEquipeQueryKey = () => {
+export const getGetApiEquipeQueryKey = (params?: GetApiEquipeParams,) => {
     return [
-    `/api/equipe`
+    `/api/equipe`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetApiEquipeQueryOptions = <TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+export const getGetApiEquipeQueryOptions = <TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(params?: GetApiEquipeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiEquipeQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetApiEquipeQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiEquipe>>> = ({ signal }) => getApiEquipe({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiEquipe>>> = ({ signal }) => getApiEquipe(params, { signal, ...requestOptions });
 
 
 
@@ -6118,7 +6283,7 @@ export type GetApiEquipeQueryError = unknown
 
 
 export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
+ params: undefined |  GetApiEquipeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiEquipe>>,
           TError,
@@ -6128,7 +6293,7 @@ export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
+ params?: GetApiEquipeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiEquipe>>,
           TError,
@@ -6138,16 +6303,16 @@ export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: GetApiEquipeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ params?: GetApiEquipeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiEquipe>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiEquipeQueryOptions(options)
+  const queryOptions = getGetApiEquipeQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -6159,6 +6324,269 @@ export function useGetApiEquipe<TData = Awaited<ReturnType<typeof getApiEquipe>>
 
 
 
+
+export type postApiEquipeResponse201 = {
+  data: EquipeMembroResponse
+  status: 201
+}
+
+export type postApiEquipeResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type postApiEquipeResponseSuccess = (postApiEquipeResponse201) & {
+  headers: Headers;
+};
+export type postApiEquipeResponseError = (postApiEquipeResponse400) & {
+  headers: Headers;
+};
+
+export type postApiEquipeResponse = (postApiEquipeResponseSuccess | postApiEquipeResponseError)
+
+export const getPostApiEquipeUrl = () => {
+
+
+
+
+  return `/api/equipe`
+}
+
+export const postApiEquipe = async (novoMembroRequest?: NovoMembroRequest, options?: RequestInit): Promise<postApiEquipeResponse> => {
+
+  return apiFetch<postApiEquipeResponse>(getPostApiEquipeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(novoMembroRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiEquipeMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiEquipe>>, TError,{data?: NovoMembroRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiEquipe>>, TError,{data?: NovoMembroRequest}, TContext> => {
+
+const mutationKey = ['postApiEquipe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiEquipe>>, {data?: NovoMembroRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiEquipe(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiEquipeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiEquipe>>>
+    export type PostApiEquipeMutationBody = NovoMembroRequest | undefined
+    export type PostApiEquipeMutationError = ProblemDetails
+
+    export const usePostApiEquipe = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiEquipe>>, TError,{data?: NovoMembroRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiEquipe>>,
+        TError,
+        {data?: NovoMembroRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiEquipeMutationOptions(options), queryClient);
+    }
+
+export type putApiEquipeIdResponse200 = {
+  data: EquipeMembroResponse
+  status: 200
+}
+
+export type putApiEquipeIdResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type putApiEquipeIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiEquipeIdResponseSuccess = (putApiEquipeIdResponse200) & {
+  headers: Headers;
+};
+export type putApiEquipeIdResponseError = (putApiEquipeIdResponse400 | putApiEquipeIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiEquipeIdResponse = (putApiEquipeIdResponseSuccess | putApiEquipeIdResponseError)
+
+export const getPutApiEquipeIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/equipe/${id}`
+}
+
+export const putApiEquipeId = async (id: string,
+    atualizarMembroRequest?: AtualizarMembroRequest, options?: RequestInit): Promise<putApiEquipeIdResponse> => {
+
+  return apiFetch<putApiEquipeIdResponse>(getPutApiEquipeIdUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(atualizarMembroRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiEquipeIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiEquipeId>>, TError,{id: string;data?: AtualizarMembroRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiEquipeId>>, TError,{id: string;data?: AtualizarMembroRequest}, TContext> => {
+
+const mutationKey = ['putApiEquipeId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiEquipeId>>, {id: string;data?: AtualizarMembroRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiEquipeId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiEquipeIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiEquipeId>>>
+    export type PutApiEquipeIdMutationBody = AtualizarMembroRequest | undefined
+    export type PutApiEquipeIdMutationError = ProblemDetails
+
+    export const usePutApiEquipeId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiEquipeId>>, TError,{id: string;data?: AtualizarMembroRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiEquipeId>>,
+        TError,
+        {id: string;data?: AtualizarMembroRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiEquipeIdMutationOptions(options), queryClient);
+    }
+
+export type deleteApiEquipeIdResponse200 = {
+  data: EquipeMembroResponse
+  status: 200
+}
+
+export type deleteApiEquipeIdResponse400 = {
+  data: ProblemDetails
+  status: 400
+}
+
+export type deleteApiEquipeIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type deleteApiEquipeIdResponseSuccess = (deleteApiEquipeIdResponse200) & {
+  headers: Headers;
+};
+export type deleteApiEquipeIdResponseError = (deleteApiEquipeIdResponse400 | deleteApiEquipeIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteApiEquipeIdResponse = (deleteApiEquipeIdResponseSuccess | deleteApiEquipeIdResponseError)
+
+export const getDeleteApiEquipeIdUrl = (id: string,) => {
+
+
+
+
+  return `/api/equipe/${id}`
+}
+
+export const deleteApiEquipeId = async (id: string, options?: RequestInit): Promise<deleteApiEquipeIdResponse> => {
+
+  return apiFetch<deleteApiEquipeIdResponse>(getDeleteApiEquipeIdUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteApiEquipeIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiEquipeId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiEquipeId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiEquipeId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiEquipeId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiEquipeId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiEquipeIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiEquipeId>>>
+
+    export type DeleteApiEquipeIdMutationError = ProblemDetails
+
+    export const useDeleteApiEquipeId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiEquipeId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiEquipeId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteApiEquipeIdMutationOptions(options), queryClient);
+    }
 
 export type getApiEstoqueListaCompraResponse200 = {
   data: ListaCompraResponse

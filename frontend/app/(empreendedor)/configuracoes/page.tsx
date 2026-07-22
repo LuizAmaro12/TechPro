@@ -1,6 +1,8 @@
 "use client";
 
 import { EditorTemplates } from "@/components/configuracoes/editor-templates";
+import { SecaoAuditoria } from "@/components/configuracoes/secao-auditoria";
+import { SecaoEquipe } from "@/components/configuracoes/secao-equipe";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -76,6 +78,10 @@ export default function PaginaConfiguracoes() {
         <Carregando titulo="Notificações" />
       )}
       <EditorTemplates />
+
+      <SecaoEquipe />
+
+      <SecaoAuditoria />
 
       {me ? <SecaoConta key={me.id} nomeAtual={me.nome ?? ""} email={me.email ?? ""} /> : null}
     </div>

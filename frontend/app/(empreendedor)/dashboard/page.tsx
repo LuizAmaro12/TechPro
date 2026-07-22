@@ -240,7 +240,10 @@ export default function PaginaDashboard() {
         ))}
       </section>
 
-      {/* --- Faturamento do mês + comparativo ------------------------------ */}
+      {/* --- Faturamento do mês + comparativo ------------------------------
+          Só para o gestor: faturamento é dado financeiro (matriz de permissões)
+          e o link levaria técnico/atendente a um 403. --- */}
+      {usuario?.papel === "gestor" && (
       <Link
         href="/financeiro"
         className="mt-6 block rounded-2xl border border-[#14162B]/8 bg-white p-6 transition-colors hover:border-[#14162B]/30"
@@ -267,6 +270,7 @@ export default function PaginaDashboard() {
           recebidos (caixa) — ver detalhes no Financeiro
         </p>
       </Link>
+      )}
     </div>
   );
 }
