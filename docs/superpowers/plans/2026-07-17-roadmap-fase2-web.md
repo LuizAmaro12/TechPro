@@ -43,8 +43,11 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   entrega e fechamento de loop ✅ (2026-07-21). Restam: conta vinculada
   família/empresa com UI completa; indicador de risco de inadimplência; quebra
   do resumo de satisfação por serviço (o dado já é gravado).
-- **Comunicação/config**: templates editáveis por evento; central de mensagens
-  unificada por cliente; equipe com funções e permissões + histórico de ações.
+- **Comunicação/config**: templates editáveis por evento ✅ e central de
+  mensagens unificada por cliente ✅ (2026-07-22). Restam: equipe com funções e
+  permissões + histórico de ações (o doc pede desenhar junto com
+  LGPD/auditoria). Resposta automática a FAQ segue dependente da API de
+  WhatsApp; campanhas/reativação dependem de consentimento de marketing.
 - **Portal do técnico (web responsivo)** — item web, mas de fluxo de campo;
   fica para depois dos itens acima.
 

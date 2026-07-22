@@ -85,6 +85,43 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Templates editáveis e central de mensagens — concluída em 2026-07-22
+
+11º item web da Fase 2 (bloco comunicação, módulo 9). Plano em
+`docs/superpowers/plans/2026-07-22-templates-e-central-mensagens.md`.
+
+- **`TemplatesPadrao` virou a única fonte dos textos.** Antes cada mensagem era
+  string fixa dentro do gatilho; agora o catálogo em forma de template é
+  renderizado tanto no envio quanto na tela de configuração. **O que a loja vê é
+  exatamente o que o cliente recebe** — a alternativa (catálogo para a tela +
+  strings inline para o envio) duplicaria o texto e derivaria com o tempo.
+- **Ausência = padrão** (mesmo padrão da matriz de preferências): sem registro,
+  vale o texto embutido. Zero seed, zero migração de dados; loja nova já nasce
+  com mensagens boas. Corpo vazio **remove** a personalização.
+- **Um template por evento**, não por evento × canal: o despacho já usa um
+  assunto (aplicado só no e-mail) e um corpo compartilhado — duplicar por canal
+  dobraria a tela sem ganho.
+- **Variáveis validadas na gravação**, com a lista do que é válido para aquele
+  evento no erro. Um `{valor}` digitado em "pronto para retirada" é 400 na
+  configuração, e **nunca** vira texto quebrado na mensagem do cliente.
+- **Central de mensagens por cliente** (`GET /api/clientes/{id}/mensagens`):
+  leitura pura de `mensagens_enviadas`, sem tabela nova. Mostra também as
+  **suprimidas** (sem consentimento) e **desativadas** (desligadas pela loja) —
+  é o que responde "por que meu cliente não recebeu?".
+- **Defeito corrigido nesta etapa**: a matriz de preferências no front listava 7
+  eventos fixos e **escondia o `PedidoAvaliacao`** criado na etapa anterior — a
+  loja não conseguia desligar o pedido de avaliação por canal. Corrigido e
+  coberto por e2e.
+- **RLS `ENABLE`+`FORCE`** na tabela nova → **24/24 tabelas de tenant**.
+- **Evidência**: 5 testes de integração → **168/168** (os 163 anteriores
+  seguiram verdes após a refatoração do despacho, o que confirma que nenhuma
+  mensagem mudou de comportamento); e2e **9/9**.
+- **Registrado como fora desta etapa**: **resposta automática a FAQ** (o próprio
+  doc a marca como dependente da API de WhatsApp escolhida); **campanhas e
+  reativação de inativos** (envio em massa exige consentimento de marketing
+  separado, que já está deferido); **equipe com funções e permissões** (o doc
+  pede desenhar junto com LGPD/auditoria, não como remendo).
+
 ### Avaliações e reputação — concluída em 2026-07-21
 
 10º item web da Fase 2 (módulo 10 do doc). Plano em
@@ -431,10 +468,10 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 23/23 tabelas cobertas
+### Isolamento entre empresas: 24/24 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 23** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 24** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `avaliacoes`, `bloqueios_agenda`, `clientes`,
 `fornecedores`,
@@ -444,7 +481,7 @@ Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
 `orcamentos`, `ordem_servico_comentarios`, `ordem_servico_historico_etapas`,
 `ordem_servico_pecas`, `ordem_servico_reatribuicoes`, `ordens_servico`,
 `pagamentos`, `pecas`, `preferencias_notificacao`,
-`servico_checklist_itens`, `servico_pecas`, `servicos`.
+`servico_checklist_itens`, `servico_pecas`, `servicos`, `templates_mensagem`.
 
 `usuarios` e `refresh_tokens` seguem fora por decisão documentada (plano de
 controle: são consultados antes de existir tenant). **Como não têm rede de
