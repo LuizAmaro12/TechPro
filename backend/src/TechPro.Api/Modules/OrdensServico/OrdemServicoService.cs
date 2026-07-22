@@ -271,6 +271,12 @@ public class OrdemServicoService(
             await comunicacao.ProtegerAsync(() => comunicacao.NotificarProntoParaRetiradaAsync(id));
         }
 
+        // Pedido de avaliação só após a entrega confirmada (doc, módulo 10).
+        if (request.ParaEtapa == EtapaOrdemServico.Entregue)
+        {
+            await comunicacao.ProtegerAsync(() => comunicacao.NotificarPedidoAvaliacaoAsync(id));
+        }
+
         return CatalogoResultado<OrdemServicoResponse>.Ok(await CarregarResponseAsync(id));
     }
 

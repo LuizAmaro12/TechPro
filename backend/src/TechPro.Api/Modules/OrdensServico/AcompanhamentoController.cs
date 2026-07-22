@@ -28,7 +28,9 @@ public class AcompanhamentoController(
     TechProDbContext db,
     TenantAmbiente tenantAmbiente,
     FinanceiroService financeiro,
-    IValidator<RespostaOrcamentoRequest> validadorResposta) : ControllerBase
+    Reputacao.AvaliacaoService avaliacoes,
+    IValidator<RespostaOrcamentoRequest> validadorResposta,
+    IValidator<Reputacao.Dtos.AvaliacaoRequest> validadorAvaliacao) : ControllerBase
 {
     [HttpGet("{codigo}")]
     [ProducesResponseType<AcompanhamentoResponse>(StatusCodes.Status200OK)]
@@ -53,6 +55,7 @@ public class AcompanhamentoController(
             .OrderBy(e => e.AlcancadaEm)
             .ToList();
 
+        var jaAvaliada = await avaliacoes.JaAvaliadaAsync(ordem.Id);
         return Ok(new AcompanhamentoResponse(
             _empresa!.Nome,
             ordem.Numero,
@@ -63,7 +66,36 @@ public class AcompanhamentoController(
             await financeiro.ObterOrcamentoPublicoAsync(ordem.Id),
             new LojaContatoResponse(
                 _empresa.Telefone, _empresa.Email, _empresa.Endereco, _empresa.Politicas),
-            linhaDoTempo));
+            linhaDoTempo,
+            // Só avalia depois de entregue e uma vez.
+            PodeAvaliar: ordem.Etapa == EtapaOrdemServico.Entregue && !jaAvaliada,
+            JaAvaliada: jaAvaliada));
+    }
+
+    /// <summary>Avaliação do cliente pelo link público (após a entrega).</summary>
+    [HttpPost("{codigo}/avaliacao")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Avaliar(
+        string slug, string codigo, Reputacao.Dtos.AvaliacaoRequest request)
+    {
+        var validacao = await validadorAvaliacao.ValidateAsync(request);
+        if (!validacao.IsValid)
+        {
+            return this.ProblemaDeValidacao(validacao);
+        }
+
+        var ordem = await ResolverOrdemAsync(slug, codigo);
+        if (ordem is null)
+        {
+            return NotFound();
+        }
+
+        var resultado = await avaliacoes.RegistrarAsync(ordem, request);
+        return resultado.Erro is not null
+            ? Problem(title: resultado.Erro, statusCode: StatusCodes.Status400BadRequest)
+            : Created($"/api/publico/{slug}/acompanhar/{codigo}", null);
     }
 
     /// <summary>Aprovação binária pelo cliente final (módulo 1, Fase 1) — com trilha.</summary>

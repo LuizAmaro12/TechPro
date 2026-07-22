@@ -182,4 +182,7 @@ public record AcompanhamentoResponse(
     DateTimeOffset AtualizadoEm,
     Financeiro.Dtos.OrcamentoPublicoResponse? Orcamento,
     Agendamentos.Dtos.LojaContatoResponse Contato,
-    List<EtapaAlcancadaResponse> LinhaDoTempo);
+    List<EtapaAlcancadaResponse> LinhaDoTempo,
+    /// <summary>OS entregue e ainda sem avaliação — o portal mostra o formulário.</summary>
+    bool PodeAvaliar,
+    bool JaAvaliada);

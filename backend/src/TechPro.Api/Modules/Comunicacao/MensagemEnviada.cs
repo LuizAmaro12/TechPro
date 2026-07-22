@@ -20,6 +20,7 @@ public enum TipoEventoComunicacao
     OrcamentoAprovado,
     OrcamentoRecusado,
     ProntoParaRetirada,
+    PedidoAvaliacao,
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

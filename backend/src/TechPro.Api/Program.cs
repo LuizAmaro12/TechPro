@@ -84,6 +84,7 @@ builder.Services.AddScoped<OrdemServicoService>();
 builder.Services.AddScoped<EstoqueService>();
 builder.Services.AddScoped<OrdemServicoPecaService>();
 builder.Services.AddScoped<OrdemServicoInteracaoService>();
+builder.Services.AddScoped<TechPro.Api.Modules.Reputacao.AvaliacaoService>();
 builder.Services.AddScoped<FinanceiroService>();
 builder.Services.AddScoped<FinanceiroRelatorioService>();
 builder.Services.AddScoped<DashboardService>();

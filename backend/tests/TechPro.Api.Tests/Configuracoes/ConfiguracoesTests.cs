@@ -103,8 +103,8 @@ public class ConfiguracoesTests(TechProApiFactory fabrica) : IClassFixture<TechP
         Assert.Equal(HttpStatusCode.OK, obter.StatusCode);
         var prefs = await obter.Content.ReadFromJsonAsync<PreferenciasNotificacaoResponse>();
 
-        // Matriz completa: 7 eventos × 2 canais, tudo ativo por padrão (sem seed).
-        Assert.Equal(14, prefs!.Itens.Count);
+        // Matriz completa: 8 eventos × 2 canais, tudo ativo por padrão (sem seed).
+        Assert.Equal(16, prefs!.Itens.Count);
         Assert.All(prefs.Itens, i => Assert.True(i.Ativo));
 
         // Desliga só o lembrete por e-mail.

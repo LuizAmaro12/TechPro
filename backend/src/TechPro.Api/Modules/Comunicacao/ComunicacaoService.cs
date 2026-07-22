@@ -166,6 +166,30 @@ public class ComunicacaoService(
             agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
     }
 
+    /// <summary>
+    /// Pedido de avaliação — disparado só no evento de entrega (doc: gatilho
+    /// após confirmação de entrega bem-sucedida, para não avaliar o contexto
+    /// errado). Link é o mesmo acompanhamento público, onde o cliente avalia.
+    /// </summary>
+    public async Task NotificarPedidoAvaliacaoAsync(Guid ordemId)
+    {
+        var os = await CarregarOsAsync(ordemId);
+        if (os is null)
+        {
+            return;
+        }
+
+        var loja = await NomeLojaAsync();
+        await DespacharAsync(
+            DestinatarioDaOs(os),
+            TipoEventoComunicacao.PedidoAvaliacao,
+            assunto: $"Como foi seu atendimento? — OS #{os.Numero} ({loja})",
+            corpo: $"Olá, {os.Cliente!.Nome}! Esperamos que o seu {DescricaoAparelho(os)}esteja "
+                 + $"funcionando bem. Sua opinião ajuda muito a {loja}: avalie o atendimento por "
+                 + $"aqui em 1 minuto. {LinkAcompanhamento(os, await SlugLojaAsync(), curto: true)}",
+            agendamentoId: null, ordemId: os.Id, clienteId: os.ClienteId);
+    }
+
     // --- Núcleo de despacho ---------------------------------------------------------
 
     private async Task DespacharAsync(

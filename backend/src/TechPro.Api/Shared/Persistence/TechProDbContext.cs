@@ -7,6 +7,7 @@ using TechPro.Api.Modules.Clientes;
 using TechPro.Api.Modules.Comunicacao;
 using TechPro.Api.Modules.Financeiro;
 using TechPro.Api.Modules.OrdensServico;
+using TechPro.Api.Modules.Reputacao;
 using TechPro.Api.Modules.ServicosEPecas;
 using TechPro.Api.Shared.Auth;
 using TechPro.Api.Shared.Tenancy;
@@ -35,6 +36,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<BloqueioAgenda> BloqueiosAgenda => Set<BloqueioAgenda>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
     public DbSet<EntradaFilaEspera> FilaEspera => Set<EntradaFilaEspera>();
+    public DbSet<Avaliacao> Avaliacoes => Set<Avaliacao>();
     public DbSet<OrdemServico> OrdensServico => Set<OrdemServico>();
     public DbSet<OrdemServicoHistoricoEtapa> HistoricosEtapaOrdemServico => Set<OrdemServicoHistoricoEtapa>();
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
@@ -233,6 +235,23 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
                 .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Avaliacao>(e =>
+        {
+            e.ToTable("avaliacoes");
+            e.Property(x => x.Comentario).HasMaxLength(1000);
+            e.Property(x => x.ResolucaoNota).HasMaxLength(1000);
+            e.HasIndex(x => x.TenantId);
+            // Uma avaliação por OS: o veredito daquele reparo.
+            e.HasIndex(x => x.OrdemServicoId).IsUnique();
+            e.HasOne(x => x.OrdemServico).WithMany().HasForeignKey(x => x.OrdemServicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Servico).WithMany().HasForeignKey(x => x.ServicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.Ignore(x => x.EhNegativa);
         });
 
         builder.Entity<EntradaFilaEspera>(e =>
