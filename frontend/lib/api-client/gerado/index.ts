@@ -92,6 +92,8 @@ export interface AcompanhamentoResponse {
   contato?: LojaContatoResponse;
   /** @nullable */
   linhaDoTempo?: EtapaAlcancadaResponse[] | null;
+  podeAvaliar?: boolean;
+  jaAvaliada?: boolean;
 }
 
 export interface AgendamentoExportado {
@@ -266,6 +268,35 @@ export interface AuthResponse {
   accessToken?: string | null;
   expiraEm?: string;
   usuario?: UsuarioResponse;
+}
+
+export interface AvaliacaoRequest {
+  nota?: number;
+  recomendacao?: number;
+  /** @nullable */
+  comentario?: string | null;
+}
+
+export interface AvaliacaoResponse {
+  id?: number;
+  ordemServicoNumero?: number;
+  /** @nullable */
+  clienteNome?: string | null;
+  /** @nullable */
+  servicoNome?: string | null;
+  /** @nullable */
+  tecnicoNome?: string | null;
+  nota?: number;
+  recomendacao?: number;
+  /** @nullable */
+  comentario?: string | null;
+  negativa?: boolean;
+  resolvida?: boolean;
+  /** @nullable */
+  resolucaoNota?: string | null;
+  /** @nullable */
+  resolvidaEm?: string | null;
+  criadoEm?: string;
 }
 
 export interface BloqueioRequest {
@@ -547,6 +578,11 @@ export interface DisponibilidadeResponse {
   duracaoMinutos?: number;
   /** @nullable */
   horariosLivres?: string[] | null;
+}
+
+export interface DistribuicaoEstrela {
+  estrelas?: number;
+  quantidade?: number;
 }
 
 export interface EmpresaResponse {
@@ -892,6 +928,7 @@ export const TipoEventoComunicacao = {
   OrcamentoAprovado: 'OrcamentoAprovado',
   OrcamentoRecusado: 'OrcamentoRecusado',
   ProntoParaRetirada: 'ProntoParaRetirada',
+  PedidoAvaliacao: 'PedidoAvaliacao',
 } as const;
 
 export type StatusMensagem = typeof StatusMensagem[keyof typeof StatusMensagem];
@@ -959,6 +996,13 @@ export interface MudancaEtapaRequest {
   paraEtapa?: EtapaOrdemServico;
   /** @nullable */
   motivo?: string | null;
+}
+
+export interface NpsResponse {
+  score?: number;
+  promotores?: number;
+  neutros?: number;
+  detratores?: number;
 }
 
 export interface PassosOnboarding {
@@ -1347,9 +1391,34 @@ export interface RentabilidadeResponse {
   porServico?: RentabilidadePorServicoResponse[] | null;
 }
 
+export interface ResolverAvaliacaoRequest {
+  /** @nullable */
+  nota?: string | null;
+}
+
 export interface RespostaOrcamentoRequest {
   /** @nullable */
   motivo?: string | null;
+}
+
+export interface SatisfacaoTecnicoResponse {
+  tecnicoId?: string;
+  /** @nullable */
+  tecnicoNome?: string | null;
+  total?: number;
+  mediaEstrelas?: number;
+  nps?: number;
+}
+
+export interface ResumoAvaliacoesResponse {
+  total?: number;
+  mediaEstrelas?: number;
+  /** @nullable */
+  distribuicao?: DistribuicaoEstrela[] | null;
+  nps?: NpsResponse;
+  pendenciasLoop?: number;
+  /** @nullable */
+  porTecnico?: SatisfacaoTecnicoResponse[] | null;
 }
 
 export interface ServicoPecaRequest {
@@ -1457,6 +1526,10 @@ export type GetApiAgendamentosParams = {
 inicio?: string;
 fim?: string;
 status?: StatusAgendamento;
+};
+
+export type GetApiAvaliacoesParams = {
+apenasPendentes?: boolean;
 };
 
 export type GetApiClientesParams = {
@@ -1652,6 +1725,98 @@ export function useGetApiPublicoSlugAcompanharCodigo<TData = Awaited<ReturnType<
 
 
 
+
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponse201 = {
+  data: void
+  status: 201
+}
+
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponseSuccess = (postApiPublicoSlugAcompanharCodigoAvaliacaoResponse201) & {
+  headers: Headers;
+};
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponseError = (postApiPublicoSlugAcompanharCodigoAvaliacaoResponse400 | postApiPublicoSlugAcompanharCodigoAvaliacaoResponse404) & {
+  headers: Headers;
+};
+
+export type postApiPublicoSlugAcompanharCodigoAvaliacaoResponse = (postApiPublicoSlugAcompanharCodigoAvaliacaoResponseSuccess | postApiPublicoSlugAcompanharCodigoAvaliacaoResponseError)
+
+export const getPostApiPublicoSlugAcompanharCodigoAvaliacaoUrl = (slug: string,
+    codigo: string,) => {
+
+
+
+
+  return `/api/publico/${slug}/acompanhar/${codigo}/avaliacao`
+}
+
+export const postApiPublicoSlugAcompanharCodigoAvaliacao = async (slug: string,
+    codigo: string,
+    avaliacaoRequest?: AvaliacaoRequest, options?: RequestInit): Promise<postApiPublicoSlugAcompanharCodigoAvaliacaoResponse> => {
+
+  return apiFetch<postApiPublicoSlugAcompanharCodigoAvaliacaoResponse>(getPostApiPublicoSlugAcompanharCodigoAvaliacaoUrl(slug,codigo),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(avaliacaoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiPublicoSlugAcompanharCodigoAvaliacaoMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>, TError,{slug: string;codigo: string;data?: AvaliacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>, TError,{slug: string;codigo: string;data?: AvaliacaoRequest}, TContext> => {
+
+const mutationKey = ['postApiPublicoSlugAcompanharCodigoAvaliacao'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>, {slug: string;codigo: string;data?: AvaliacaoRequest}> = (props) => {
+          const {slug,codigo,data} = props ?? {};
+
+          return  postApiPublicoSlugAcompanharCodigoAvaliacao(slug,codigo,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiPublicoSlugAcompanharCodigoAvaliacaoMutationResult = NonNullable<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>>
+    export type PostApiPublicoSlugAcompanharCodigoAvaliacaoMutationBody = AvaliacaoRequest | undefined
+    export type PostApiPublicoSlugAcompanharCodigoAvaliacaoMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiPublicoSlugAcompanharCodigoAvaliacao = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>, TError,{slug: string;codigo: string;data?: AvaliacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiPublicoSlugAcompanharCodigoAvaliacao>>,
+        TError,
+        {slug: string;codigo: string;data?: AvaliacaoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiPublicoSlugAcompanharCodigoAvaliacaoMutationOptions(options), queryClient);
+    }
 
 export type postApiPublicoSlugAcompanharCodigoOrcamentoAprovarResponse200 = {
   data: OrcamentoPublicoResponse
@@ -4129,6 +4294,317 @@ export function useGetApiAuthMe<TData = Awaited<ReturnType<typeof getApiAuthMe>>
 
 
 
+
+export type getApiAvaliacoesResponse200 = {
+  data: AvaliacaoResponse[]
+  status: 200
+}
+
+export type getApiAvaliacoesResponseSuccess = (getApiAvaliacoesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAvaliacoesResponse = (getApiAvaliacoesResponseSuccess)
+
+export const getGetApiAvaliacoesUrl = (params?: GetApiAvaliacoesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/avaliacoes?${stringifiedParams}` : `/api/avaliacoes`
+}
+
+export const getApiAvaliacoes = async (params?: GetApiAvaliacoesParams, options?: RequestInit): Promise<getApiAvaliacoesResponse> => {
+
+  return apiFetch<getApiAvaliacoesResponse>(getGetApiAvaliacoesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAvaliacoesQueryKey = (params?: GetApiAvaliacoesParams,) => {
+    return [
+    `/api/avaliacoes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiAvaliacoesQueryOptions = <TData = Awaited<ReturnType<typeof getApiAvaliacoes>>, TError = unknown>(params?: GetApiAvaliacoesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAvaliacoesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAvaliacoes>>> = ({ signal }) => getApiAvaliacoes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAvaliacoesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAvaliacoes>>>
+export type GetApiAvaliacoesQueryError = unknown
+
+
+export function useGetApiAvaliacoes<TData = Awaited<ReturnType<typeof getApiAvaliacoes>>, TError = unknown>(
+ params: undefined |  GetApiAvaliacoesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvaliacoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvaliacoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvaliacoes<TData = Awaited<ReturnType<typeof getApiAvaliacoes>>, TError = unknown>(
+ params?: GetApiAvaliacoesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvaliacoes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvaliacoes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvaliacoes<TData = Awaited<ReturnType<typeof getApiAvaliacoes>>, TError = unknown>(
+ params?: GetApiAvaliacoesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAvaliacoes<TData = Awaited<ReturnType<typeof getApiAvaliacoes>>, TError = unknown>(
+ params?: GetApiAvaliacoesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoes>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAvaliacoesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type getApiAvaliacoesResumoResponse200 = {
+  data: ResumoAvaliacoesResponse
+  status: 200
+}
+
+export type getApiAvaliacoesResumoResponseSuccess = (getApiAvaliacoesResumoResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiAvaliacoesResumoResponse = (getApiAvaliacoesResumoResponseSuccess)
+
+export const getGetApiAvaliacoesResumoUrl = () => {
+
+
+
+
+  return `/api/avaliacoes/resumo`
+}
+
+export const getApiAvaliacoesResumo = async ( options?: RequestInit): Promise<getApiAvaliacoesResumoResponse> => {
+
+  return apiFetch<getApiAvaliacoesResumoResponse>(getGetApiAvaliacoesResumoUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiAvaliacoesResumoQueryKey = () => {
+    return [
+    `/api/avaliacoes/resumo`
+    ] as const;
+    }
+
+
+export const getGetApiAvaliacoesResumoQueryOptions = <TData = Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAvaliacoesResumoQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>> = ({ signal }) => getApiAvaliacoesResumo({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAvaliacoesResumoQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>>
+export type GetApiAvaliacoesResumoQueryError = unknown
+
+
+export function useGetApiAvaliacoesResumo<TData = Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvaliacoesResumo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvaliacoesResumo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvaliacoesResumo<TData = Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvaliacoesResumo>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvaliacoesResumo>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvaliacoesResumo<TData = Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAvaliacoesResumo<TData = Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvaliacoesResumo>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAvaliacoesResumoQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type postApiAvaliacoesIdResolverResponse200 = {
+  data: AvaliacaoResponse
+  status: 200
+}
+
+export type postApiAvaliacoesIdResolverResponse400 = {
+  data: ValidationProblemDetails
+  status: 400
+}
+
+export type postApiAvaliacoesIdResolverResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type postApiAvaliacoesIdResolverResponseSuccess = (postApiAvaliacoesIdResolverResponse200) & {
+  headers: Headers;
+};
+export type postApiAvaliacoesIdResolverResponseError = (postApiAvaliacoesIdResolverResponse400 | postApiAvaliacoesIdResolverResponse404) & {
+  headers: Headers;
+};
+
+export type postApiAvaliacoesIdResolverResponse = (postApiAvaliacoesIdResolverResponseSuccess | postApiAvaliacoesIdResolverResponseError)
+
+export const getPostApiAvaliacoesIdResolverUrl = (id: number,) => {
+
+
+
+
+  return `/api/avaliacoes/${id}/resolver`
+}
+
+export const postApiAvaliacoesIdResolver = async (id: number,
+    resolverAvaliacaoRequest?: ResolverAvaliacaoRequest, options?: RequestInit): Promise<postApiAvaliacoesIdResolverResponse> => {
+
+  return apiFetch<postApiAvaliacoesIdResolverResponse>(getPostApiAvaliacoesIdResolverUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(resolverAvaliacaoRequest)
+  }
+);}
+
+
+
+
+
+export const getPostApiAvaliacoesIdResolverMutationOptions = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>, TError,{id: number;data?: ResolverAvaliacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>, TError,{id: number;data?: ResolverAvaliacaoRequest}, TContext> => {
+
+const mutationKey = ['postApiAvaliacoesIdResolver'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>, {id: number;data?: ResolverAvaliacaoRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiAvaliacoesIdResolver(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAvaliacoesIdResolverMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>>
+    export type PostApiAvaliacoesIdResolverMutationBody = ResolverAvaliacaoRequest | undefined
+    export type PostApiAvaliacoesIdResolverMutationError = ValidationProblemDetails | ProblemDetails
+
+    export const usePostApiAvaliacoesIdResolver = <TError = ValidationProblemDetails | ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>, TError,{id: number;data?: ResolverAvaliacaoRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAvaliacoesIdResolver>>,
+        TError,
+        {id: number;data?: ResolverAvaliacaoRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAvaliacoesIdResolverMutationOptions(options), queryClient);
+    }
 
 export type postApiClientesImportarResponse200 = {
   data: ImportacaoClientesResponse

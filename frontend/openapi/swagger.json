@@ -52,6 +52,75 @@
         }
       }
     },
+    "/api/publico/{slug}/acompanhar/{codigo}/avaliacao": {
+      "post": {
+        "tags": [
+          "Acompanhamento"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvaliacaoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvaliacaoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvaliacaoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/publico/{slug}/acompanhar/{codigo}/orcamento/aprovar": {
       "post": {
         "tags": [
@@ -1281,6 +1350,126 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avaliacoes": {
+      "get": {
+        "tags": [
+          "Avaliacoes"
+        ],
+        "parameters": [
+          {
+            "name": "apenasPendentes",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AvaliacaoResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avaliacoes/resumo": {
+      "get": {
+        "tags": [
+          "Avaliacoes"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumoAvaliacoesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/avaliacoes/{id}/resolver": {
+      "post": {
+        "tags": [
+          "Avaliacoes"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolverAvaliacaoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolverAvaliacaoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolverAvaliacaoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvaliacaoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
                 }
               }
             }
@@ -4517,6 +4706,12 @@
               "$ref": "#/components/schemas/EtapaAlcancadaResponse"
             },
             "nullable": true
+          },
+          "podeAvaliar": {
+            "type": "boolean"
+          },
+          "jaAvaliada": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -4847,6 +5042,81 @@
           },
           "usuario": {
             "$ref": "#/components/schemas/UsuarioResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvaliacaoRequest": {
+        "type": "object",
+        "properties": {
+          "nota": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recomendacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvaliacaoResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ordemServicoNumero": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clienteNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "servicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "tecnicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "nota": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recomendacao": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comentario": {
+            "type": "string",
+            "nullable": true
+          },
+          "negativa": {
+            "type": "boolean"
+          },
+          "resolvida": {
+            "type": "boolean"
+          },
+          "resolucaoNota": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvidaEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -5390,6 +5660,20 @@
               "format": "time"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DistribuicaoEstrela": {
+        "type": "object",
+        "properties": {
+          "estrelas": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantidade": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -6244,6 +6528,28 @@
           "motivo": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NpsResponse": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "promotores": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "neutros": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detratores": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -7393,11 +7699,56 @@
         },
         "additionalProperties": false
       },
+      "ResolverAvaliacaoRequest": {
+        "type": "object",
+        "properties": {
+          "nota": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RespostaOrcamentoRequest": {
         "type": "object",
         "properties": {
           "motivo": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResumoAvaliacoesResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mediaEstrelas": {
+            "type": "number",
+            "format": "double"
+          },
+          "distribuicao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistribuicaoEstrela"
+            },
+            "nullable": true
+          },
+          "nps": {
+            "$ref": "#/components/schemas/NpsResponse"
+          },
+          "pendenciasLoop": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "porTecnico": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SatisfacaoTecnicoResponse"
+            },
             "nullable": true
           }
         },
@@ -7429,6 +7780,32 @@
           },
           "status": {
             "$ref": "#/components/schemas/StatusPagamentoOrdemServico"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SatisfacaoTecnicoResponse": {
+        "type": "object",
+        "properties": {
+          "tecnicoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tecnicoNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mediaEstrelas": {
+            "type": "number",
+            "format": "double"
+          },
+          "nps": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -7706,7 +8083,8 @@
           "OrcamentoDisponivel",
           "OrcamentoAprovado",
           "OrcamentoRecusado",
-          "ProntoParaRetirada"
+          "ProntoParaRetirada",
+          "PedidoAvaliacao"
         ],
         "type": "string"
       },
@@ -7886,6 +8264,9 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Avaliacoes"
     },
     {
       "name": "Clientes"

@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/ordens-servico", rotulo: "Ordens" },
   { href: "/agenda", rotulo: "Agenda" },
   { href: "/clientes", rotulo: "Clientes" },
+  { href: "/avaliacoes", rotulo: "Avaliações" },
   { href: "/financeiro", rotulo: "Financeiro" },
   { href: "/servicos", rotulo: "Serviços" },
   { href: "/pecas", rotulo: "Peças" },

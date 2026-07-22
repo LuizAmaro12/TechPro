@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AvaliarAtendimento } from "@/components/portal/avaliar-atendimento";
 import { ContatoDaLoja } from "@/components/portal/contato-da-loja";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -266,6 +267,16 @@ export default function PaginaAcompanharOs() {
           . Dúvidas? Fale direto com a loja.
         </p>
       </div>
+
+      {os.podeAvaliar && (
+        <AvaliarAtendimento slug={slug} codigo={codigo} aoAvaliar={invalidar} />
+      )}
+
+      {os.jaAvaliada && (
+        <p className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          Obrigado! Sua avaliação já foi registrada — ela ajuda a loja a melhorar.
+        </p>
+      )}
 
       <ContatoDaLoja contato={os.contato} />
     </div>
