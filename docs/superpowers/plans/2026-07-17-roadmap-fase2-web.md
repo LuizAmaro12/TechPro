@@ -49,6 +49,10 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   WhatsApp; campanhas/reativação dependem de consentimento de marketing.
 - **Portal do técnico (web responsivo)** — item web, mas de fluxo de campo;
   fica para depois dos itens acima.
+- **Landing page pública** — `frontend/app/page.tsx` hoje só redireciona para o
+  dashboard. O design já está especificado em `docs/UI_UX-referencia.md`
+  (glow gradiente atrás de mockups, headline bicolor, cards ✗/✓, tag por seção,
+  CTA único). É a porta de entrada comercial do produto e continua pendente.
 
 ### Web, mas dependem de infra externa (só quando a conta existir)
 

@@ -60,3 +60,54 @@
 - **Card ✗/✓** encaixa diretamente na seção de problema já escrita no branding ("WhatsApp, papel e planilha" ✗ vs. "fluxo digital rastreável" ✓).
 - **Tag pequena colorida antes de cada headline de seção** é barata de implementar e dá o mesmo ritmo editorial da página de referência — vale adotar como padrão para todas as seções da landing page da TechPro.
 - **Um único CTA repetido**, reforçando o que já foi observado na v1 deste guia: reconsiderar o CTA duplo (principal + secundário) que a seção 18 do documento de branding ainda sugere.
+---
+
+## 7. Como isso virou código (2026-07-22)
+
+Esta seção registra o que do guia já está implementado no produto, para o guia
+não virar um documento aspiracional desligado da base.
+
+### Tokens semânticos em vez de hex fixo
+
+A paleta da seção 1 estava **fixa nas classes** (`text-[#14162B]`, `bg-white`,
+`bg-[#F7F7F9]`…). Isso deixava o guia respeitado, mas impedia qualquer tema
+alternativo. Agora existe uma camada semântica em `frontend/app/globals.css`:
+
+| Token | Papel | Claro | Escuro |
+|---|---|---|---|
+| `tinta` | Texto de título / superfícies fortes | `#14162B` | `#F2F3F7` |
+| `tinta-suave` | Texto de corpo | `#6B7280` | `#A9ADBD` |
+| `tinta-fraca` | Texto auxiliar | `#8B8D98` | `#7C8194` |
+| `sobre-tinta` | Texto **sobre** `bg-tinta` | branco | navy escuro |
+| `superficie` | Fundo de card / página | branco | `#171826` |
+| `sutil` | Fundo alternado de seção | `#F7F7F9` | `#1F2130` |
+| `borda` / `borda-forte` | Divisórias | navy 8% / 30% | branco 10% / 28% |
+| `marca` / `marca-fundo` | Rosa de destaque | `#E8536B` | `#FF7288` |
+| `ok`, `alerta` | Estados de sucesso/atenção | verde/âmbar claros | versões para fundo escuro |
+
+**Regra**: componente novo usa token, nunca hex. O guia continua sendo a fonte
+dos valores; os tokens são como eles chegam na tela.
+
+### Tema escuro
+
+Não é inversão automática: o escuro é **navy profundo** (mantém o matiz azulado
+da marca, seção 1) e o rosa é levemente clareado, porque o `#E8536B` original
+perde legibilidade sobre navy. A superfície é mais clara que o fundo — a
+profundidade vem do contraste entre elas, como no tema claro (seção 3).
+
+Alternador em três estados (claro / sistema / escuro), com **"sistema" como
+padrão**. Disponível no cabeçalho do app, no portal público, na tela de login e
+na aba "Aparência" das configurações.
+
+### O que do guia ainda NÃO está implementado
+
+O guia foi escrito para uma **landing page**, que ainda não existe
+(`frontend/app/page.tsx` apenas redireciona). Continuam pendentes, e são o
+conteúdo natural dessa página quando ela for construída:
+
+- **Glow gradiente atrás de mockups** (seção 6) — a técnica de maior impacto.
+- **Headline bicolor** (navy + gradiente).
+- **Cards ✗/✓** de comparação.
+- **Tag colorida antes de cada headline de seção** — este já é usado nas telas
+  internas do produto (ex.: "CONFIGURAÇÕES", "REPUTAÇÃO").
+- **CTA único repetido**.

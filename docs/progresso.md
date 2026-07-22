@@ -85,6 +85,70 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Configurações em abas e tema claro/escuro — concluída em 2026-07-22
+
+13º item web da Fase 2. Pedido direto do usuário: "o módulo de configurações
+está ficando extenso, ajuste-o em abas com transições suaves" + "um tema escuro
+com toggle (light/system/dark) convincente e de fácil acesso".
+
+**Configurações em abas**
+
+- A tela tinha crescido para **6 seções empilhadas** (~890 linhas somando os
+  componentes). Agora são abas: **Loja · Mensagens · Equipe · Histórico ·
+  Aparência · Minha conta**.
+- **Agrupamento crítico**: "Notificações" (matriz evento × canal) e "Textos das
+  mensagens" viraram **uma aba só** — são a mesma pergunta ("o que o cliente
+  recebe e por qual canal") e estavam separadas sem motivo.
+- **Estado na URL** (`?aba=`): recarregar, voltar no histórico ou mandar o link
+  cai na mesma aba. Numa tela de configuração isso importa.
+- **Só a aba ativa é montada**: cada seção faz requisições próprias; montar
+  todas dispararia chamadas que o usuário não pediu — e algumas dariam 403 para
+  papéis sem acesso.
+- **Acessibilidade**: `role="tablist"/"tab"/"tabpanel"`, `aria-selected`,
+  navegação por setas e foco gerenciado.
+- **Transições**: indicador que desliza entre as abas (`layoutId` do motion) e
+  troca de conteúdo com fade curto (180ms).
+
+**Lacuna corrigida (introduzida na etapa anterior)**: com "Configurações"
+escondida para não-gestores, **técnico e atendente ficaram sem como trocar a
+própria senha**. Agora a página é acessível a todos e são as **abas** que
+filtram por papel — não-gestor vê apenas "Aparência" e "Minha conta".
+
+**Tema claro/escuro/sistema**
+
+- **Tokenização da paleta**: o guia estético define as cores em hex e elas
+  estavam **fixas nas classes** (`text-[#14162B]`, `bg-white`…), o que torna um
+  tema escuro impossível. Foram criados tokens semânticos (`tinta`,
+  `tinta-suave`, `superficie`, `sutil`, `borda`, `marca`, `ok`, `alerta`,
+  `sobre-tinta`) em `globals.css` e feita uma varredura: **983 substituições em
+  32 arquivos**, restando **zero** cores fixas. O componente passa a pedir
+  "tinta", não "#14162B".
+- **`sobre-tinta`** resolve o caso que quebraria no escuro: botões `bg-tinta`
+  usavam `text-white`, e no escuro a tinta fica clara — o texto sumiria.
+- **Escuro é navy profundo**, não preto puro, para manter o matiz azulado da
+  marca; o rosa é levemente clareado (`#ff7288`) porque o original perde
+  legibilidade sobre navy.
+- **Toggle segmentado de 3 estados** em vez de botão que cicla: com três
+  opções, ciclar obriga a adivinhar a ordem e a clicar duas vezes para voltar.
+  Padrão é **"Sistema"**, para respeitar a preferência do SO sem o usuário
+  mexer em nada.
+- **Fácil acesso**: cabeçalho do app, cabeçalho do portal público **e** tela de
+  login (quem chega no tema "errado" troca antes de entrar) — além da aba
+  "Aparência".
+- **Sem `setState` em efeito** (regra de lint do projeto): o "já hidratou?" usa
+  `useSyncExternalStore` com snapshot de servidor `false` e de cliente `true`.
+
+**Melhoria de arquitetura de informação**: o cabeçalho passou a ter 10 links +
+toggle + Sair e **transbordava** (o "Sair" era cortado). "Configurações" saiu da
+navegação principal — não é seção de conteúdo como Kanban ou Ordens, é ajuste do
+app — e virou **ícone de engrenagem** nas ações da direita, com estado ativo e
+`aria-label`.
+
+- **Evidência**: e2e **16/16** (6 abas, aba padrão, agrupamento de mensagens,
+  URL sincronizada, recarregar mantém a aba, navegação por teclado, tema
+  aplicado/persistido, fundo muda de fato, toggle nas três superfícies, técnico
+  vê só 2 abas). Sem mudança de backend — **177/177** intactos.
+
 ### Equipe, permissões e histórico de ações — concluída em 2026-07-22
 
 12º item web da Fase 2 (módulo 13 avançado + módulo 14). Plano em
