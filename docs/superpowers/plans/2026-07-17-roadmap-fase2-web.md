@@ -39,9 +39,10 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   comparecimento ✅ + sinalização por indisponibilidade de peça ✅ (concluídos
   em 2026-07-20) + fila de espera ✅ (2026-07-21). **Bloco de agendamento
   concluído.**
-- **Clientes/reputação**: importação CSV ✅ (2026-07-21). Restam: conta
-  vinculada família/empresa com UI completa; avaliações (nota/comentário, NPS,
-  pedido após entrega, fechamento de loop); indicador de risco de inadimplência.
+- **Clientes/reputação**: importação CSV ✅ e avaliações/NPS com pedido após
+  entrega e fechamento de loop ✅ (2026-07-21). Restam: conta vinculada
+  família/empresa com UI completa; indicador de risco de inadimplência; quebra
+  do resumo de satisfação por serviço (o dado já é gravado).
 - **Comunicação/config**: templates editáveis por evento; central de mensagens
   unificada por cliente; equipe com funções e permissões + histórico de ações.
 - **Portal do técnico (web responsivo)** — item web, mas de fluxo de campo;

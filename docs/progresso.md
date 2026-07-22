@@ -85,6 +85,47 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Avaliações e reputação — concluída em 2026-07-21
+
+10º item web da Fase 2 (módulo 10 do doc). Plano em
+`docs/superpowers/plans/2026-07-21-avaliacoes-reputacao.md`.
+
+**Decisões do usuário (AskUserQuestion)**: escala **dupla** (estrelas 1–5 para a
+experiência + recomendação 0–10 para NPS) e escopo **núcleo + fechamento de loop
++ por técnico**. O doc lista "nota e comentário … NPS" sem fixar a escala — como
+é foundational e difícil de trocar depois, foi decidido em conjunto em vez de
+assumido.
+
+- **Módulo próprio `Reputacao`**: a avaliação referencia a OS mas é domínio
+  distinto (reputação gerenciada), com resumo/NPS/loop próprios.
+- **Uma avaliação por OS** (índice único em `ordem_servico_id`) — é o veredito
+  daquele reparo, não uma pesquisa recorrente.
+- **Gatilho só após a entrega** (exigência explícita do doc, para não avaliar o
+  contexto errado): novo evento `PedidoAvaliacao` sai no `Entregue`, reusando o
+  `ComunicacaoService` — respeita o consentimento LGPD **e** a matriz de
+  preferências (a loja pode desligar o pedido por canal; a matriz passou de 7×2
+  para 8×2, o que quebrou — corretamente — um teste de Configurações que foi
+  atualizado).
+- **Envio pelo link público existente** (slug + código opaco): o cliente avalia
+  sem login, na mesma página em que acompanha. O `GET` do acompanhamento passa a
+  expor `podeAvaliar`/`jaAvaliada`.
+- **Snapshot de serviço e técnico** no momento da avaliação: a satisfação por
+  técnico usa quem estava responsável na entrega (a reatribuição tem trilha, mas
+  a avaliação congela o responsável).
+- **"Negativa" = `nota <= 2` OU `recomendação <= 6`** (detrator): qualquer sinal
+  forte de insatisfação abre o loop. Resolver exige a **nota de tratamento** —
+  sem ela não há "reputação gerenciada". Positiva não pode ser "resolvida".
+- **NPS clássico**: promotores 9–10, neutros 7–8, detratores 0–6;
+  `score = %promotores − %detratores`. Agregação em memória (Sqlite dos testes
+  não agrega decimais no servidor — padrão já usado no Financeiro).
+- **RLS `ENABLE`+`FORCE`** na tabela nova → **23/23 tabelas de tenant**.
+- **Evidência**: 6 testes de integração → **163/163**; e2e **12/12** (gatilho na
+  entrega, formulário só após entrega, uma por OS, média/NPS/por técnico na
+  tela, pendência anunciada, loop fechado e persistido).
+- **Registrado como fora desta etapa**: quebra do resumo **por serviço** (o dado
+  já é gravado — `ServicoId` — falta só a agregação na tela); campanhas,
+  reativação e templates editáveis são outro item do roadmap.
+
 ### Importação de clientes por CSV — concluída em 2026-07-21
 
 9º item web da Fase 2 (início do bloco clientes/reputação). Plano em
@@ -390,12 +431,13 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 22/22 tabelas cobertas
+### Isolamento entre empresas: 23/23 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 22** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 23** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
-`agendamentos`, `aparelhos`, `bloqueios_agenda`, `clientes`, `fornecedores`,
+`agendamentos`, `aparelhos`, `avaliacoes`, `bloqueios_agenda`, `clientes`,
+`fornecedores`,
 `fila_espera`, `horarios_funcionamento`, `mensagens_enviadas`,
 `movimentacoes_estoque`,
 `orcamento_eventos`,
