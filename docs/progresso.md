@@ -7,6 +7,17 @@
 
 ## Status geral
 
+**Fase 2 web — escopo funcional concluído em 2026-07-23.** Todos os 14 módulos
+funcionais do recorte web foram entregues (do 1º item, linha do tempo da OS, ao
+14º e último, portal do técnico), cada um com testes de integração, RLS
+verificado no Postgres real e evidência e2e no navegador. Fecha-se com uma
+**rodada de consolidação/endurecimento** (registrada em "Consolidação de fim da
+Fase 2 web") — sem falhas estruturais. O que resta do web é **feature avançada
+não-essencial**, **refinamento de UI sobre dado já existente** ou **dependente
+de infra externa** (R2, WhatsApp, Resend) — inventário em
+`docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile permanece a
+última etapa e não foi iniciado.**
+
 **Fundação do MVP concluída em 2026-07-05.** O critério de pronto da primeira
 fase técnica foi atingido e verificado de ponta a ponta em navegador real:
 
@@ -708,6 +719,54 @@ não cobre foram rodados de verdade:
 O `progresso.md` listava "publicar o repositório no GitHub" como pendente. O
 repositório **já existe** em `origin` (GitHub) — o que falta é dar push nos
 commits locais (o branch está à frente). Item corrigido nos próximos passos.
+
+---
+
+## Consolidação de fim da Fase 2 web (2026-07-23)
+
+Feita ao fechar o escopo funcional da Fase 2, cumprindo a diretriz de
+estabilizar/validar/consolidar **antes** de qualquer trabalho mobile. É a
+verificação de que os 14 módulos, somados, não introduziram regressão
+estrutural. **Nenhuma falha estrutural encontrada.**
+
+### Verificações executadas
+
+| Dimensão | Resultado |
+|---|---|
+| **Isolamento (RLS)** | Checagem **negativa** no Postgres real: das tabelas com `tenant_id`, as únicas sem `ENABLE`+`FORCE` são `usuarios` e `refresh_tokens` (exceções documentadas). **26/26** tabelas de tenant forçadas. |
+| **Invariante `db.Users`** | Os **11** acessos a `usuarios` (cresceram de 5 para 11 com equipe/auditoria/checklist/avaliações) filtram por `TenantId` explicitamente — auditado um a um. |
+| **Injeção SQL** | 100% EF Core LINQ em runtime; o único `.Sql(` é o `RlsHelper` (migration-only, nome de tabela literal do próprio código, nunca input do usuário). |
+| **XSS** | Nenhum `dangerouslySetInnerHTML` no front. |
+| **Autorização** | Políticas nomeadas (`Gestao`/`Atendimento`/`Bancada`) aplicadas; endpoints públicos (`PublicoController`, `AcompanhamentoController`) resolvem tenant por slug e são rate-limited. |
+| **Débito marcado** | Nenhum `TODO`/`FIXME`/`HACK` no código. |
+| **Suíte (Release)** | **183/183** verdes em `--configuration Release`. |
+| **Build de produção (front)** | `npm run build` OK — todas as rotas, incluindo `/bancada`. |
+
+### Achados registrados (não são falhas; são notas conscientes para decidir)
+
+1. **Financeiro no detalhe da OS é endpoint compartilhado.** `GET
+   /api/ordens-servico/{id}` devolve `Orcamento` e `Pagamentos` a **qualquer
+   papel autenticado**. O custo de peça (`CustoUnitarioNoUso`) é **permitido** ao
+   técnico pela matriz (a bancada vê custo de peça), então não é vazamento. O
+   ponto fino é o **histórico de pagamentos**: a UI do técnico (`/bancada`) não o
+   exibe, mas uma chamada direta à API o traria. Tratar isso é **permissão em
+   nível de campo/objeto**, que o usuário deferiu conscientemente ("a matriz é
+   por área"). Risco baixo (técnico é funcionário da própria loja, não ator
+   externo). **Recomendação**: se um dia interessar, filtrar `Pagamentos` do
+   detalhe conforme a política — mas exige decidir a regra e toca o contrato
+   usado também pela UI do gestor.
+2. **Reatribuição de técnico não tem política de papel.** É consistente com a
+   matriz: "OS/Kanban" é ✓ para os três papéis, e reatribuir é operação de OS.
+   Sem ação.
+
+### Fora do escopo web (registrado, não esquecido)
+
+- **Dependente de infra externa** (o usuário provisiona): fotos/anexos/QR → R2;
+  FAQ automático → API de WhatsApp; envio real de notificações → Evolution +
+  Resend (hoje em modo `log`).
+- **Operação do usuário**: rotacionar a chave Resend que passou pelo chat;
+  provisionar Render/Vercel/R2; adicionar filtro de auth real se o dashboard do
+  Hangfire for exposto em produção.
 
 ---
 
