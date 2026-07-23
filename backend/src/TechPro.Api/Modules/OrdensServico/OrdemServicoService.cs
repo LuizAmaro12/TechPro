@@ -103,7 +103,8 @@ public class OrdemServicoService(
             await financeiro.ObterOrcamentoAsync(id),
             await financeiro.ObterResumoPagamentosAsync(id),
             await interacoes.CarregarComentariosAsync(id),
-            await interacoes.CarregarReatribuicoesAsync(id));
+            await interacoes.CarregarReatribuicoesAsync(id),
+            await interacoes.CarregarChecklistAsync(id));
     }
 
     public async Task<CatalogoResultado<OrdemServicoResponse>> CriarAsync(
@@ -162,6 +163,7 @@ public class OrdemServicoService(
         };
         db.OrdensServico.Add(ordem);
         RegistrarHistorico(ordem, deEtapa: null, ordem.Etapa, usuarioId, motivo: null);
+        await MaterializarChecklistAsync(ordem);
         await db.SaveChangesAsync();
         await comunicacao.ProtegerAsync(() => comunicacao.NotificarOrdemServicoCriadaAsync(ordem.Id));
 
@@ -202,6 +204,7 @@ public class OrdemServicoService(
         };
         db.OrdensServico.Add(ordem);
         RegistrarHistorico(ordem, deEtapa: null, ordem.Etapa, usuarioId, motivo: null);
+        await MaterializarChecklistAsync(ordem);
         await db.SaveChangesAsync();
         await comunicacao.ProtegerAsync(() => comunicacao.NotificarOrdemServicoCriadaAsync(ordem.Id));
         return ordem;
@@ -293,12 +296,14 @@ public class OrdemServicoService(
         var queryHistorico = db.HistoricosEtapaOrdemServico.AsQueryable();
         var queryPecas = db.OrdensServicoPecas.AsQueryable();
         var queryComentarios = db.OrdensServicoComentarios.AsQueryable();
+        var queryChecklist = db.ItensChecklistOrdemServico.AsQueryable();
         if (since is { } marca)
         {
             queryOrdens = queryOrdens.Where(o => o.UpdatedAt > marca);
             queryHistorico = queryHistorico.Where(h => h.UpdatedAt > marca);
             queryPecas = queryPecas.Where(p => p.UpdatedAt > marca);
             queryComentarios = queryComentarios.Where(c => c.UpdatedAt > marca);
+            queryChecklist = queryChecklist.Where(i => i.UpdatedAt > marca);
         }
 
         var ordens = (await queryOrdens.ToListAsync())
@@ -313,6 +318,9 @@ public class OrdemServicoService(
         var comentarios = (await queryComentarios.ToListAsync())
             .OrderBy(c => c.UpdatedAt)
             .ToList();
+        var checklist = (await queryChecklist.ToListAsync())
+            .OrderBy(i => i.UpdatedAt)
+            .ToList();
 
         return new OrdensServicoSyncResponse(
             ordens.Select(o => new OrdemServicoSyncItem(ParaResponse(o), o.DeletedAt)).ToList(),
@@ -326,6 +334,10 @@ public class OrdemServicoService(
             comentarios.Select(c => new ComentarioSyncItem(
                 c.Id, c.OrdemServicoId, c.Texto, c.AutorUsuarioId,
                 c.CriadoEm, c.UpdatedAt, c.DeletedAt)).ToList(),
+            checklist.Select(i => new ChecklistSyncItem(
+                i.Id, i.OrdemServicoId, i.Ordem, i.Descricao, i.Concluido,
+                i.ConcluidoPorUsuarioId, i.ConcluidoEm,
+                i.CriadoEm, i.UpdatedAt, i.DeletedAt)).ToList(),
             agora);
     }
 
@@ -360,6 +372,31 @@ public class OrdemServicoService(
 
     private async Task<int> ProximoNumeroAsync() =>
         (await db.OrdensServico.MaxAsync(o => (int?)o.Numero) ?? 0) + 1;
+
+    /// <summary>
+    /// Copia o checklist padrão do serviço para a OS recém-criada (snapshot da
+    /// descrição). Enfileira no contexto; o chamador salva junto com a OS.
+    /// </summary>
+    private async Task MaterializarChecklistAsync(OrdemServico ordem)
+    {
+        var padrao = await db.Set<ServicoChecklistItem>()
+            .Where(c => c.ServicoId == ordem.ServicoId)
+            .OrderBy(c => c.Ordem)
+            .ToListAsync();
+
+        foreach (var item in padrao)
+        {
+            db.ItensChecklistOrdemServico.Add(new ItemChecklistOrdemServico
+            {
+                Id = Guid.NewGuid(),
+                TenantId = TenantId,
+                OrdemServicoId = ordem.Id,
+                Ordem = item.Ordem,
+                Descricao = item.Descricao,
+                CriadoEm = DateTimeOffset.UtcNow,
+            });
+        }
+    }
 
     private void RegistrarHistorico(
         OrdemServico ordem,

@@ -42,6 +42,7 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
     public DbSet<OrdemServicoPeca> OrdensServicoPecas => Set<OrdemServicoPeca>();
     public DbSet<MovimentacaoEstoque> MovimentacoesEstoque => Set<MovimentacaoEstoque>();
     public DbSet<OrdemServicoComentario> OrdensServicoComentarios => Set<OrdemServicoComentario>();
+    public DbSet<ItemChecklistOrdemServico> ItensChecklistOrdemServico => Set<ItemChecklistOrdemServico>();
     public DbSet<OrdemServicoReatribuicao> OrdensServicoReatribuicoes => Set<OrdemServicoReatribuicao>();
     public DbSet<Orcamento> Orcamentos => Set<Orcamento>();
     public DbSet<OrcamentoEvento> OrcamentoEventos => Set<OrcamentoEvento>();
@@ -365,6 +366,15 @@ public class TechProDbContext(DbContextOptions options, ITenantProvider tenantPr
             e.HasIndex(x => x.PecaId);
             e.HasOne(x => x.Peca).WithMany().HasForeignKey(x => x.PecaId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<ItemChecklistOrdemServico>(e =>
+        {
+            e.ToTable("itens_checklist_ordem_servico");
+            e.Property(x => x.Descricao).HasMaxLength(300);
+            e.HasIndex(x => x.OrdemServicoId);
+            e.HasIndex(x => x.UpdatedAt);
+            e.HasOne<OrdemServico>().WithMany().HasForeignKey(x => x.OrdemServicoId);
         });
 
         builder.Entity<OrdemServicoComentario>(e =>

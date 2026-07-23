@@ -153,6 +153,51 @@ public class OrdemServicoInteracaoService(TechProDbContext db, ITenantProvider t
             r.CriadoEm)).ToList();
     }
 
+    // --- Checklist técnico (portal do técnico) -------------------------------------
+
+    public async Task<List<ItemChecklistResponse>?> ListarChecklistAsync(Guid ordemId)
+    {
+        if (!await OrdemExisteAsync(ordemId))
+        {
+            return null;
+        }
+
+        return await CarregarChecklistAsync(ordemId);
+    }
+
+    /// <summary>Marca/desmarca um item, gravando quem concluiu e quando.</summary>
+    public async Task<CatalogoResultado<ItemChecklistResponse>?> MarcarChecklistAsync(
+        Guid ordemId, Guid itemId, bool concluido, Guid? usuarioId)
+    {
+        var item = await db.ItensChecklistOrdemServico.FirstOrDefaultAsync(i =>
+            i.Id == itemId && i.OrdemServicoId == ordemId && i.DeletedAt == null);
+        if (item is null)
+        {
+            return null;
+        }
+
+        item.Concluido = concluido;
+        // Desmarcar limpa a autoria: o estado sempre reflete a última marcação.
+        item.ConcluidoEm = concluido ? DateTimeOffset.UtcNow : null;
+        item.ConcluidoPorUsuarioId = concluido ? usuarioId : null;
+        await db.SaveChangesAsync();
+
+        var nomes = await ResolverNomesAsync([item.ConcluidoPorUsuarioId]);
+        return CatalogoResultado<ItemChecklistResponse>.Ok(ParaResponse(item, nomes));
+    }
+
+    internal async Task<List<ItemChecklistResponse>> CarregarChecklistAsync(Guid ordemId)
+    {
+        var itens = (await db.ItensChecklistOrdemServico
+                .Where(i => i.OrdemServicoId == ordemId && i.DeletedAt == null)
+                .ToListAsync())
+            .OrderBy(i => i.Ordem)
+            .ToList();
+
+        var nomes = await ResolverNomesAsync(itens.Select(i => i.ConcluidoPorUsuarioId));
+        return itens.Select(i => ParaResponse(i, nomes)).ToList();
+    }
+
     // --- Auxiliares ----------------------------------------------------------------
 
     private Task<bool> OrdemExisteAsync(Guid ordemId) =>
@@ -178,4 +223,9 @@ public class OrdemServicoInteracaoService(TechProDbContext db, ITenantProvider t
     private static ComentarioResponse ParaResponse(
         OrdemServicoComentario c, Dictionary<Guid, string> nomes) =>
         new(c.Id, c.Texto, c.AutorUsuarioId, Nome(nomes, c.AutorUsuarioId), c.CriadoEm);
+
+    private static ItemChecklistResponse ParaResponse(
+        ItemChecklistOrdemServico i, Dictionary<Guid, string> nomes) =>
+        new(i.Id, i.Ordem, i.Descricao, i.Concluido,
+            Nome(nomes, i.ConcluidoPorUsuarioId), i.ConcluidoEm);
 }

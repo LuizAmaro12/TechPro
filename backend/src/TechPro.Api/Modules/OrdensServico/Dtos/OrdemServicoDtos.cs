@@ -74,7 +74,8 @@ public record OrdemServicoDetalheResponse(
     Financeiro.Dtos.OrcamentoResponse? Orcamento,
     Financeiro.Dtos.ResumoPagamentosResponse? Pagamentos,
     List<ComentarioResponse> Comentarios,
-    List<ReatribuicaoResponse> Reatribuicoes);
+    List<ReatribuicaoResponse> Reatribuicoes,
+    List<ItemChecklistResponse> Checklist);
 
 // --- Comentários internos e reatribuição (Fase 2) -----------------------------
 
@@ -100,6 +101,18 @@ public record ReatribuicaoResponse(
     string Motivo,
     string? PorNome,
     DateTimeOffset CriadoEm);
+
+// --- Checklist técnico da OS (portal do técnico, módulo 4) ---------------------
+
+public record MarcarChecklistRequest(bool Concluido);
+
+public record ItemChecklistResponse(
+    Guid Id,
+    int Ordem,
+    string Descricao,
+    bool Concluido,
+    string? ConcluidoPorNome,
+    DateTimeOffset? ConcluidoEm);
 
 // --- Peças utilizadas (baixa automática, módulo 7) -----------------------------
 
@@ -156,11 +169,25 @@ public record ComentarioSyncItem(
     DateTimeOffset UpdatedAt,
     DateTimeOffset? DeletedAt);
 
+/// <summary>Item do checklist no delta — trabalho de bancada, escopo offline.</summary>
+public record ChecklistSyncItem(
+    Guid Id,
+    Guid OrdemServicoId,
+    int Ordem,
+    string Descricao,
+    bool Concluido,
+    Guid? ConcluidoPorUsuarioId,
+    DateTimeOffset? ConcluidoEm,
+    DateTimeOffset CriadoEm,
+    DateTimeOffset UpdatedAt,
+    DateTimeOffset? DeletedAt);
+
 public record OrdensServicoSyncResponse(
     List<OrdemServicoSyncItem> Ordens,
     List<HistoricoSyncItem> Historico,
     List<PecaUsadaSyncItem> PecasUtilizadas,
     List<ComentarioSyncItem> Comentarios,
+    List<ChecklistSyncItem> Checklist,
     DateTimeOffset Agora);
 
 // --- Equipe (responsável técnico) ---------------------------------------------

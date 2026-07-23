@@ -182,6 +182,26 @@ public class OrdensServicoController(
 
     // --- Comentários internos (Fase 2) -----------------------------------------
 
+    // --- Checklist técnico (portal do técnico, módulo 4) ------------------------
+
+    [HttpGet("{id:guid}/checklist")]
+    [ProducesResponseType<List<ItemChecklistResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ListarChecklist(Guid id) =>
+        await interacoes.ListarChecklistAsync(id) is { } lista ? Ok(lista) : NotFound();
+
+    /// <summary>Marcar/desmarcar item é trabalho de bancada (gestor ou técnico).</summary>
+    [HttpPut("{id:guid}/checklist/{itemId:guid}")]
+    [Authorize(Policy = Politicas.Bancada)]
+    [ProducesResponseType<ItemChecklistResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> MarcarChecklist(
+        Guid id, Guid itemId, MarcarChecklistRequest request)
+    {
+        var resultado = await interacoes.MarcarChecklistAsync(id, itemId, request.Concluido, UsuarioId);
+        return resultado is null ? NotFound() : Ok(resultado.Valor);
+    }
+
     [HttpGet("{id:guid}/comentarios")]
     [ProducesResponseType<List<ComentarioResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
