@@ -3912,6 +3912,117 @@
         }
       }
     },
+    "/api/ordens-servico/{id}/checklist": {
+      "get": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemChecklistResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ordens-servico/{id}/checklist/{itemId}": {
+      "put": {
+        "tags": [
+          "OrdensServico"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarcarChecklistRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarcarChecklistRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarcarChecklistRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemChecklistResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ordens-servico/{id}/comentarios": {
       "get": {
         "tags": [
@@ -5509,6 +5620,54 @@
         },
         "additionalProperties": false
       },
+      "ChecklistSyncItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ordemServicoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ordem": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "concluido": {
+            "type": "boolean"
+          },
+          "concluidoPorUsuarioId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "concluidoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ClienteDetalheResponse": {
         "type": "object",
         "properties": {
@@ -6501,6 +6660,36 @@
         },
         "additionalProperties": false
       },
+      "ItemChecklistResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ordem": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true
+          },
+          "concluido": {
+            "type": "boolean"
+          },
+          "concluidoPorNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "concluidoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ItemListaCompraResponse": {
         "type": "object",
         "properties": {
@@ -6682,6 +6871,15 @@
           "politicas": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarcarChecklistRequest": {
+        "type": "object",
+        "properties": {
+          "concluido": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -7158,6 +7356,13 @@
               "$ref": "#/components/schemas/ReatribuicaoResponse"
             },
             "nullable": true
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemChecklistResponse"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -7393,6 +7598,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ComentarioSyncItem"
+            },
+            "nullable": true
+          },
+          "checklist": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChecklistSyncItem"
             },
             "nullable": true
           },

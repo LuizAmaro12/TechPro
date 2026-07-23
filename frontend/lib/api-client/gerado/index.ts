@@ -344,6 +344,23 @@ export interface CancelamentoRequest {
   motivo?: string | null;
 }
 
+export interface ChecklistSyncItem {
+  id?: string;
+  ordemServicoId?: string;
+  ordem?: number;
+  /** @nullable */
+  descricao?: string | null;
+  concluido?: boolean;
+  /** @nullable */
+  concluidoPorUsuarioId?: string | null;
+  /** @nullable */
+  concluidoEm?: string | null;
+  criadoEm?: string;
+  updatedAt?: string;
+  /** @nullable */
+  deletedAt?: string | null;
+}
+
 export interface VinculoResponse {
   id?: number;
   /** @nullable */
@@ -850,6 +867,18 @@ export interface ImportarClientesRequest {
   conteudoCsv?: string | null;
 }
 
+export interface ItemChecklistResponse {
+  id?: string;
+  ordem?: number;
+  /** @nullable */
+  descricao?: string | null;
+  concluido?: boolean;
+  /** @nullable */
+  concluidoPorNome?: string | null;
+  /** @nullable */
+  concluidoEm?: string | null;
+}
+
 export interface ListaCompraResponse {
   /** @nullable */
   grupos?: GrupoListaCompraResponse[] | null;
@@ -913,6 +942,10 @@ export interface LojaResponse {
   endereco?: string | null;
   /** @nullable */
   politicas?: string | null;
+}
+
+export interface MarcarChecklistRequest {
+  concluido?: boolean;
 }
 
 export interface MeResponse {
@@ -1238,6 +1271,8 @@ export interface OrdemServicoDetalheResponse {
   comentarios?: ComentarioResponse[] | null;
   /** @nullable */
   reatribuicoes?: ReatribuicaoResponse[] | null;
+  /** @nullable */
+  checklist?: ItemChecklistResponse[] | null;
 }
 
 export interface OrdemServicoRequest {
@@ -1288,6 +1323,8 @@ export interface OrdensServicoSyncResponse {
   pecasUtilizadas?: PecaUsadaSyncItem[] | null;
   /** @nullable */
   comentarios?: ComentarioSyncItem[] | null;
+  /** @nullable */
+  checklist?: ChecklistSyncItem[] | null;
   agora?: string;
 }
 
@@ -9958,6 +9995,207 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiOrdensServicoIdPecasPecaUsadaIdMutationOptions(options), queryClient);
+    }
+
+export type getApiOrdensServicoIdChecklistResponse200 = {
+  data: ItemChecklistResponse[]
+  status: 200
+}
+
+export type getApiOrdensServicoIdChecklistResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type getApiOrdensServicoIdChecklistResponseSuccess = (getApiOrdensServicoIdChecklistResponse200) & {
+  headers: Headers;
+};
+export type getApiOrdensServicoIdChecklistResponseError = (getApiOrdensServicoIdChecklistResponse404) & {
+  headers: Headers;
+};
+
+export type getApiOrdensServicoIdChecklistResponse = (getApiOrdensServicoIdChecklistResponseSuccess | getApiOrdensServicoIdChecklistResponseError)
+
+export const getGetApiOrdensServicoIdChecklistUrl = (id: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${id}/checklist`
+}
+
+export const getApiOrdensServicoIdChecklist = async (id: string, options?: RequestInit): Promise<getApiOrdensServicoIdChecklistResponse> => {
+
+  return apiFetch<getApiOrdensServicoIdChecklistResponse>(getGetApiOrdensServicoIdChecklistUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetApiOrdensServicoIdChecklistQueryKey = (id: string,) => {
+    return [
+    `/api/ordens-servico/${id}/checklist`
+    ] as const;
+    }
+
+
+export const getGetApiOrdensServicoIdChecklistQueryOptions = <TData = Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOrdensServicoIdChecklistQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>> = ({ signal }) => getApiOrdensServicoIdChecklist(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOrdensServicoIdChecklistQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>>
+export type GetApiOrdensServicoIdChecklistQueryError = ProblemDetails
+
+
+export function useGetApiOrdensServicoIdChecklist<TData = Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError = ProblemDetails>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoIdChecklist<TData = Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOrdensServicoIdChecklist<TData = Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOrdensServicoIdChecklist<TData = Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError = ProblemDetails>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOrdensServicoIdChecklist>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOrdensServicoIdChecklistQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export type putApiOrdensServicoIdChecklistItemIdResponse200 = {
+  data: ItemChecklistResponse
+  status: 200
+}
+
+export type putApiOrdensServicoIdChecklistItemIdResponse404 = {
+  data: ProblemDetails
+  status: 404
+}
+
+export type putApiOrdensServicoIdChecklistItemIdResponseSuccess = (putApiOrdensServicoIdChecklistItemIdResponse200) & {
+  headers: Headers;
+};
+export type putApiOrdensServicoIdChecklistItemIdResponseError = (putApiOrdensServicoIdChecklistItemIdResponse404) & {
+  headers: Headers;
+};
+
+export type putApiOrdensServicoIdChecklistItemIdResponse = (putApiOrdensServicoIdChecklistItemIdResponseSuccess | putApiOrdensServicoIdChecklistItemIdResponseError)
+
+export const getPutApiOrdensServicoIdChecklistItemIdUrl = (id: string,
+    itemId: string,) => {
+
+
+
+
+  return `/api/ordens-servico/${id}/checklist/${itemId}`
+}
+
+export const putApiOrdensServicoIdChecklistItemId = async (id: string,
+    itemId: string,
+    marcarChecklistRequest?: MarcarChecklistRequest, options?: RequestInit): Promise<putApiOrdensServicoIdChecklistItemIdResponse> => {
+
+  return apiFetch<putApiOrdensServicoIdChecklistItemIdResponse>(getPutApiOrdensServicoIdChecklistItemIdUrl(id,itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(marcarChecklistRequest)
+  }
+);}
+
+
+
+
+
+export const getPutApiOrdensServicoIdChecklistItemIdMutationOptions = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>, TError,{id: string;itemId: string;data?: MarcarChecklistRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>, TError,{id: string;itemId: string;data?: MarcarChecklistRequest}, TContext> => {
+
+const mutationKey = ['putApiOrdensServicoIdChecklistItemId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>, {id: string;itemId: string;data?: MarcarChecklistRequest}> = (props) => {
+          const {id,itemId,data} = props ?? {};
+
+          return  putApiOrdensServicoIdChecklistItemId(id,itemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiOrdensServicoIdChecklistItemIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>>
+    export type PutApiOrdensServicoIdChecklistItemIdMutationBody = MarcarChecklistRequest | undefined
+    export type PutApiOrdensServicoIdChecklistItemIdMutationError = ProblemDetails
+
+    export const usePutApiOrdensServicoIdChecklistItemId = <TError = ProblemDetails,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>, TError,{id: string;itemId: string;data?: MarcarChecklistRequest}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiOrdensServicoIdChecklistItemId>>,
+        TError,
+        {id: string;itemId: string;data?: MarcarChecklistRequest},
+        TContext
+      > => {
+      return useMutation(getPutApiOrdensServicoIdChecklistItemIdMutationOptions(options), queryClient);
     }
 
 export type getApiOrdensServicoIdComentariosResponse200 = {

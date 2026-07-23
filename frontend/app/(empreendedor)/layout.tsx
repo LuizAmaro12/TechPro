@@ -11,6 +11,8 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 // é a fonte da verdade —, é não levar o usuário a um 403.
 const LINKS = [
   { href: "/dashboard", rotulo: "Visão geral" },
+  // Portal do técnico: quem trabalha na bancada (o atendente não).
+  { href: "/bancada", rotulo: "Bancada", papeis: ["gestor", "tecnico"] },
   { href: "/kanban", rotulo: "Kanban" },
   { href: "/ordens-servico", rotulo: "Ordens" },
   { href: "/agenda", rotulo: "Agenda" },
