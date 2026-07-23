@@ -85,6 +85,60 @@ O roadmap web da Fase 2 (separando o que é web do que é mobile/externo) está 
 `docs/superpowers/plans/2026-07-17-roadmap-fase2-web.md`. **Mobile (app nativo)
 permanece a última etapa do projeto — não iniciado.**
 
+### Portal do técnico (web responsivo) — concluída em 2026-07-22
+
+14º item web da Fase 2 (módulo 4). **Último módulo funcional web.** Plano em
+`docs/superpowers/plans/2026-07-22-portal-do-tecnico.md`.
+
+**Escopo**: web **responsivo, mobile-first** — nunca app nativo. O doc é
+explícito na "Cautela" do módulo 4 (*"uma versão web responsiva resolve o mesmo
+problema com fração do esforço"*). Isto **não** inicia o mobile; é uma tela web
+otimizada para o celular na bancada.
+
+**Por que agora**: até a etapa de equipe o papel `tecnico` não existia na
+prática; hoje ele entra com permissões reais mas caía nas telas de desktop do
+gestor. O portal dá propósito ao papel.
+
+**Decisões do usuário (AskUserQuestion)** — deixaram a etapa enxuta, **sem
+mudança de regra no backend**:
+
+- **Etapas livres, como hoje** (o técnico move para qualquer etapa; trade-off
+  consciente aceito em favor da simplicidade).
+- **A bancada filtra, o resto continua**: a tela mostra só as OS do técnico
+  logado (via `?responsavelId=`, que a API já aceita); Kanban e Ordens seguem
+  mostrando a loja inteira. Restrição de foco, **não de segurança** — sem
+  permissão por objeto, sem tocar `/sync`.
+- **Não é a home**: todos seguem no dashboard; a bancada é mais um item de menu.
+
+**A única lacuna de dados: checklist técnico por OS.** O doc lista "marcar
+checklist técnico" como essencial e só existia o *template* do serviço.
+
+- **`ItemChecklistOrdemServico`** no **escopo offline** (UUID + `/sync`) — é
+  trabalho de campo, tratado assim desde o primeiro migration (mesmo padrão de
+  OS, histórico, peças usadas e comentários).
+- **Materializado do template na criação da OS** (ambos os caminhos), com a
+  descrição em **snapshot**: o serviço pode editar o checklist depois, a OS
+  mantém o que tinha. OS anteriores ficam sem checklist (limite consciente:
+  going-forward; backfill em tabela FORCE-RLS é a armadilha conhecida).
+- Marcar grava quem/quando; desmarcar limpa a autoria. Marcar é da política
+  **Bancada** (gestor ou técnico) — atendente barrado (teste 403).
+
+**Front `/bancada`, mobile-first**: lista em uma coluna, ordenada por prioridade
+e prazo, com o SLA (cor do card); detalhe enxuto com mover etapa, checklist,
+peça usada (baixa automática) e comentário — **sem** orçamento, pagamento ou
+margem. "Bancada" na nav de gestor e técnico.
+
+- **Fora desta etapa (registrado, depende de infra externa)**: **anexar foto da
+  câmera** (essencial no doc) depende do **Cloudflare R2**, ainda não
+  provisionado — único item essencial do módulo que fica de fora, e só por
+  dependência externa. Registro de tempo por etapa e atribuição por
+  especialidade são **Fase 3** no próprio doc.
+- **RLS `ENABLE`+`FORCE`** na tabela nova → **26/26 tabelas de tenant**.
+- **Evidência**: 6 testes de integração → **183/183** (os 177 anteriores
+  intactos); e2e **7/7 em viewport de celular** (só as OS do técnico, checklist
+  marcado persiste com autoria, peça deu baixa, etapa avançou, comentário,
+  bancada sem financeiro).
+
 ### Configurações em abas e tema claro/escuro — concluída em 2026-07-22
 
 13º item web da Fase 2. Pedido direto do usuário: "o módulo de configurações
@@ -590,10 +644,10 @@ Varredura das 5 classes clássicas. **4 já estavam seguras; 1 lacuna corrigida.
 Feita ao fechar a Fase 1, antes de qualquer deploy. **Nenhuma falha encontrada**
 — os resultados abaixo são a verificação, não uma promessa.
 
-### Isolamento entre empresas: 25/25 tabelas cobertas
+### Isolamento entre empresas: 26/26 tabelas cobertas
 
 Conferido no Postgres real (`pg_class` + `pg_policy`) contra as entidades
-`ITenantEntity` do código: **todas as 25** tabelas de tenant têm
+`ITenantEntity` do código: **todas as 26** tabelas de tenant têm
 `relrowsecurity = t`, `relforcerowsecurity = t` e política ativa —
 `agendamentos`, `aparelhos`, `avaliacoes`, `bloqueios_agenda`, `clientes`,
 `fornecedores`,

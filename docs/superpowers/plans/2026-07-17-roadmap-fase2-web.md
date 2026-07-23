@@ -47,8 +47,10 @@ nesta ordenação — priorizamos primeiro o que não toca o fluxo de campo.
   mensagens unificada por cliente ✅ (2026-07-22). Equipe com funções e permissões +
   histórico de ações ✅ (2026-07-22). **Bloco de comunicação/config concluído.** Resposta automática a FAQ segue dependente da API de
   WhatsApp; campanhas/reativação dependem de consentimento de marketing.
-- **Portal do técnico (web responsivo)** — item web, mas de fluxo de campo;
-  fica para depois dos itens acima.
+- **Portal do técnico (web responsivo)** ✅ (2026-07-22): rota `/bancada`
+  mobile-first com lista do técnico, mover etapa, checklist técnico por OS,
+  peça usada e comentário. Anexo de foto fica de fora (depende do R2).
+  **Último módulo funcional web concluído.**
 - **Landing page pública** — `frontend/app/page.tsx` hoje só redireciona para o
   dashboard. O design já está especificado em `docs/UI_UX-referencia.md`
   (glow gradiente atrás de mockups, headline bicolor, cards ✗/✓, tag por seção,
